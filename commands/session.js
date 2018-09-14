@@ -1,12 +1,18 @@
+import moment from 'moment';
+import { prefix } from '../settings.json';
+
 const pc = /3pseat[a-zA-Z0-9]{5}/;
 const ps4 = /[a-zA-Z0-9]{12}/;
 const sw = /\d{2}-\d{4}-\d{4}-\d{4}/;
+
+let sessions = [];
+let counter = 0;
 
 export default class Session {
   constructor() {
     this.config = {
       enabled: true,
-      aliases: ['ses', 's'],
+      aliases: ['ses', 's', 'sessions'],
       permissionLevel: 0,
       guildOnly: true,
       cooldown: 5,
@@ -14,28 +20,95 @@ export default class Session {
 
     this.help = {
       name: 'session',
-      description: 'List all of my commands or info about a specific command.',
-      usage: 'session [command name]',
+      description: 'Lists all current sessions or adds one. Sessions expire after 4 hours.',
+      usage: 'session | session [session id] [description]',
     };
   }
 
+  listSessions(channel) {
+    const sessionMessage = [];
+      
+    sessions.map(s => {
+      sessionMessage.push(`(${Math.floor(moment.duration(moment().diff(s.date)).asMinutes())}m ago by ${s.creator}) [${s.platform}]: ${s.sessionId}${s.description}`);
+    });
+
+    if (!sessionMessage.length) {
+      sessionMessage.push('There are no active sessions! Feel free to create one yourself! ' + prefix);
+    }
+
+    channel.send(sessionMessage, { split: true });
+  }
+
   run(client, message, params) {
-    const foundPC = pc.test(message.content);
-    const foundPS4 = ps4.test(message.content);
-    const foundSwitch = sw.test(message.content);
+    if (!params.length) {
+      this.listSessions(message.channel);
+      return;
+    }
+
+    const joinedParams = params.join(' ');
+    const foundPC = pc.exec(joinedParams);
+    const foundPS4 = ps4.exec(joinedParams);
+    const foundSwitch = sw.exec(joinedParams);
+
+    if (!foundPC && !foundPS4 && !foundSwitch) {
+      message.channel.send('Couldn\'t find any sessions, nya...');
+      return;
+    }
+
+    let session = {
+      id: counter,
+      creator: message.author.username,
+      date: moment(),
+    };
 
     if (foundPC) {
-      message.channel.send('Found PC lobby');
+      session.sessionId = foundPC[0];
+      session.description = foundPC.input.slice(foundPC[0].length + foundPC.index);
+      session.platform = 'PC';
+
+      message.channel.send(`Added PC session ${session.sessionId}! ${prefix}`);
+
+      sessions.push(session);
+
+      setTimeout(() => {
+        sessions = sessions.filter(item => item.id !== session.id);
+      }, 14400000); // auto clear after 4 hours
+
+      counter++;
       return;
     }
 
     if (foundSwitch) {
-      message.channel.send('Found Switch lobby');
+      session.sessionId = foundSwitch[0];
+      session.description = foundSwitch.input.slice(foundSwitch[0].length + foundSwitch.index);
+      session.platform = 'Switch';
+
+      message.channel.send(`Added Switch session ${session.sessionId}! ${prefix}`);
+
+      sessions.push(session);
+
+      setTimeout(() => {
+        sessions = sessions.filter(item => item.id !== session.id);
+      }, 14400000); // auto clear after 4 hours
+
+      counter++;
       return;
     }
 
     if (foundPS4 && !foundPC) {
-      message.channel.send('Found PS4 lobby');
+      session.sessionId = foundPS4[0];
+      session.description = foundPS4.input.slice(foundPS4[0].length + foundPS4.index);
+      session.platform = 'PS4';
+
+      message.channel.send(`Added PS4 session ${session.sessionId}! ${prefix}`);
+
+      sessions.push(session);
+
+      setTimeout(() => {
+        sessions = sessions.filter(item => item.id !== session.id);
+      }, 14400000); // auto clear after 4 hours
+
+      counter++;
       return;
     }
   }

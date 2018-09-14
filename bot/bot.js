@@ -37,11 +37,10 @@ export default class CFGBot {
         this.log.error(error);
       }
 
-      this.log(`Loading ${files.length} commands`);
-      this.log(files);
+      this.log(`Loading ${files.length} commands: ${files}`);
 
       files.filter(n => n.endsWith('.js')).forEach((f) => {
-        this.log(`loading ${f}`);
+        // this.log(`loading ${f}`);
 
         const command = require(`../commands/${f}`);
         const c = new command.default();
@@ -74,7 +73,7 @@ export default class CFGBot {
       return; // don't respond to yourself
     }
 
-    const commandName = message.content.split(/ +/)[1]; // .slice(this.settings.prefix.length);
+    const commandName = message.content.split(/ +/)[1].toLowerCase(); // .slice(this.settings.prefix.length);
     const params = message.content.split(/ +/).slice(2); // .slice(1);
 
     const command = this.commands.get(commandName) || this.aliases.get(commandName);
