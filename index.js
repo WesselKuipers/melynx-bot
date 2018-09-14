@@ -1,4 +1,5 @@
 import MelynxBot from './bot/bot';
+import http from 'http';
 
 let options;
 try {
@@ -13,3 +14,9 @@ try {
 
 const bot = new MelynxBot(options);
 bot.run();
+
+http.createServer((req, res) => {
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.write('Hello World!');
+  res.end();
+}).listen(process.env.PORT || 3000);
