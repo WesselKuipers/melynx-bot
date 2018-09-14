@@ -8,7 +8,6 @@ import es6 from 'es6-promise';
 es6.polyfill();
 
 const regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
-const cooldowns = new Discord.Collection();
 
 export default class CFGBot {
   constructor(settings) {

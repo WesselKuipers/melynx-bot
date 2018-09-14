@@ -30,14 +30,14 @@ export default class Help {
     }
 
     let data = [];
-    data.push(`Name: ${command.help.name}`);
+    data.push(`**Name:** ${command.help.name}`);
 
     if (command.config.aliases) {
-      data.push(`Aliases: ${command.config.aliases.join(', ')}`);
+      data.push(`**Aliases:** ${command.config.aliases.join(', ')}`);
     }
 
-    data.push(`Description: ${command.help.description}`);
-    data.push(`Usage: ${command.help.usage}`);  
+    data.push(`**Description:** ${command.help.description}`);
+    data.push(`**Usage:** ${command.help.usage}`);  
     
     message.channel.send(data, {split: true});
   }
