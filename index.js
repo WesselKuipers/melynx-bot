@@ -19,7 +19,7 @@ if (!process.env.TOKEN || !process.env.PREFIX) {
 const options = {
   prefix: process.env.PREFIX,
   token: process.env.TOKEN,
-  disabledEvents: JSON.parse(process.env.DISABLEDEVENTS),
+  disabledEvents: JSON.parse(process.env.DISABLEDEVENTS || '[]'),
 };
 
 const bot = new MelynxBot(options);
