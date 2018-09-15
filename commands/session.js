@@ -68,6 +68,11 @@ export default class Session {
 
       message.channel.send(`Added PC session ${session.sessionId}! ${prefix}`);
 
+      if (sessions.some(s => s.sessionId === session.sessionId)) {
+        message.channel.send('A lobby with this ID already exists!');
+        return;
+      }
+
       sessions.push(session);
 
       setTimeout(() => {
@@ -85,6 +90,11 @@ export default class Session {
 
       message.channel.send(`Added Switch session ${session.sessionId}! ${prefix}`);
 
+      if (sessions.some(s => s.sessionId === session.sessionId)) {
+        message.channel.send('A lobby with this ID already exists!');
+        return;
+      }
+
       sessions.push(session);
 
       setTimeout(() => {
@@ -101,6 +111,11 @@ export default class Session {
       session.platform = 'PS4';
 
       message.channel.send(`Added PS4 session ${session.sessionId}! ${prefix}`);
+
+      if (sessions.some(s => s.sessionId === session.sessionId)) {
+        message.channel.send('A lobby with this ID already exists!');
+        return;
+      }
 
       sessions.push(session);
 
