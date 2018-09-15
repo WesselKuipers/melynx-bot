@@ -65,13 +65,13 @@ export default class Session {
       session.sessionId = foundPC[0];
       session.description = foundPC.input.slice(foundPC[0].length + foundPC.index);
       session.platform = 'PC';
-
-      message.channel.send(`Added PC session ${session.sessionId}! ${prefix}`);
-
+      
       if (sessions.some(s => s.sessionId === session.sessionId)) {
         message.channel.send('A lobby with this ID already exists!');
         return;
       }
+
+      message.channel.send(`Added PC session ${session.sessionId}! ${prefix}`);
 
       sessions.push(session);
 
@@ -88,12 +88,12 @@ export default class Session {
       session.description = foundSwitch.input.slice(foundSwitch[0].length + foundSwitch.index);
       session.platform = 'Switch';
 
-      message.channel.send(`Added Switch session ${session.sessionId}! ${prefix}`);
-
       if (sessions.some(s => s.sessionId === session.sessionId)) {
         message.channel.send('A lobby with this ID already exists!');
         return;
       }
+
+      message.channel.send(`Added Switch session ${session.sessionId}! ${prefix}`);
 
       sessions.push(session);
 
@@ -110,12 +110,12 @@ export default class Session {
       session.description = foundPS4.input.slice(foundPS4[0].length + foundPS4.index);
       session.platform = 'PS4';
 
-      message.channel.send(`Added PS4 session ${session.sessionId}! ${prefix}`);
-
       if (sessions.some(s => s.sessionId === session.sessionId)) {
         message.channel.send('A lobby with this ID already exists!');
         return;
       }
+
+      message.channel.send(`Added PS4 session ${session.sessionId}! ${prefix}`);
 
       sessions.push(session);
 
