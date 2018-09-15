@@ -1,10 +1,5 @@
 import moment from 'moment';
-let prefix;
-try {
-  require('../settings.json');
-} catch(e) {
-  prefix = process.env.PREFIX;
-}
+const prefix = process.env.PREFIX;
 
 const pc = /3pseat[a-zA-Z0-9]{5}/;
 const ps4 = /[a-zA-Z0-9]{12}/;

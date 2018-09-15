@@ -1,16 +1,26 @@
 import MelynxBot from './bot/bot';
 import http from 'http';
 
-let options;
 try {
-  options = require('./settings.json');
+  const options = require('./settings.json');
+  process.env.TOKEN = options.token;
+  process.env.PREFIX = options.prefix;
+  process.env.DISABLEDEVENTS = JSON.stringify(options.disabledEvents);
 } catch (e) { 
-  console.log('Could not find settings.json, loading from ENV instead.');
-  options = {
-    token: process.env.TOKEN,
-    prefix: process.env.PREFIX,
-  };
+  // eslint-disable-next-line no-console
+  console.log('Could not find settings.json, falling back to ENV');
 }
+
+if (!process.env.TOKEN || !process.env.PREFIX) {
+  // eslint-disable-next-line no-console
+  console.log('Missing TOKEN and PREFIX environment variables');
+}
+
+const options = {
+  prefix: process.env.PREFIX,
+  token: process.env.TOKEN,
+  disabledEvents: JSON.parse(process.env.DISABLEDEVENTS),
+};
 
 const bot = new MelynxBot(options);
 bot.run();
