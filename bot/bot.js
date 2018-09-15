@@ -73,6 +73,10 @@ export default class CFGBot {
       return; // don't respond to yourself
     }
 
+    if (message.content.startsWith(this.settings.prefix) && message.content.length === this.settings.prefix.length) {
+      return; // someone only said the prefix and nothing else
+    }
+
     const commandName = message.content.split(/ +/)[1].toLowerCase(); // .slice(this.settings.prefix.length);
     const params = message.content.split(/ +/).slice(2); // .slice(1);
 
