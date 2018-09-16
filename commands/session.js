@@ -28,7 +28,7 @@ export default class Session {
     const sessionMessage = [];
     const prefix = client.settings.get(channel.guild.id).prefix;
       
-    sessions.map(s => {
+    sessions.filter(s => s.guildId === channel.guild.id).map(s => {
       sessionMessage.push(`(${Math.floor(moment.duration(moment().diff(s.date)).asMinutes())}m ago by ${s.creator}) [${s.platform}]: ${s.sessionId}${s.description}`);
     });
 
@@ -60,7 +60,7 @@ export default class Session {
       const sessionId = params[1];
       const session = sessions.find(ses => ses.sessionId === sessionId);
 
-      if (!session) {
+      if (!session || session.guildId !== message.guild.id) {
         message.channel.send('A session with that ID does not exist, nya...');
         return;
       }
@@ -79,6 +79,7 @@ export default class Session {
       id: counter,
       creator: message.author.username,
       date: moment(),
+      guildId: message.guild.id,
     };
 
     if (foundPC) {
