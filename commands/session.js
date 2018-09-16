@@ -20,7 +20,7 @@ export default class Session {
     this.help = {
       name: 'session',
       description: 'Lists all current sessions or adds one. Sessions expire after 4 hours.',
-      usage: 'session | session [session id] [description]',
+      usage: 'session | session [session id] [description] | session [remove|r] [session id]',
     };
   }
 
@@ -62,9 +62,11 @@ export default class Session {
 
       if (!session) {
         message.channel.send('A session with that ID does not exist, nya...');
+        return;
       }
 
       this.removeSession(session.id);
+      message.channel.send(`Removed session ${session.sessionId}! ${prefix}`);
       return;
     }
 
