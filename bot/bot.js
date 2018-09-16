@@ -8,6 +8,15 @@ import es6 from 'es6-promise';
 es6.polyfill();
 
 const regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
+const playingLines = [
+  'stealing gems from hunters',
+  'with a hunter',
+  'smoking felvine',
+  'the hunting horn',
+  'with your palico',
+  'with the Meowstress',
+  'with the Mewstress',
+];
 
 export default class CFGBot {
   constructor(settings) {
@@ -24,6 +33,7 @@ export default class CFGBot {
 
     this.client.on('ready', () => {
       this.log(`Connected to ${this.client.users.size} users on ${this.client.guilds.size} servers.`);
+      this.client.user.setPresence({status: 'online', game: {name: playingLines[Math.floor(Math.random() * playingLines.length)], type: 'PLAYING' }});
     });
 
     this.client.on('error', error => this.error(error));
