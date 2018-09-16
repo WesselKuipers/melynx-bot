@@ -1,5 +1,4 @@
 import moment from 'moment';
-const prefix = process.env.PREFIX;
 
 const pc = /\b3pseat[a-zA-Z0-9]{5}\b/;
 const ps4 = /\b[a-zA-Z0-9]{12}\b/;
@@ -25,8 +24,9 @@ export default class Session {
     };
   }
 
-  listSessions(channel) {
+  listSessions(client, channel) {
     const sessionMessage = [];
+    const prefix = client.settings.get(channel.guild.id).prefix;
       
     sessions.map(s => {
       sessionMessage.push(`(${Math.floor(moment.duration(moment().diff(s.date)).asMinutes())}m ago by ${s.creator}) [${s.platform}]: ${s.sessionId}${s.description}`);
@@ -39,9 +39,13 @@ export default class Session {
     channel.send(sessionMessage, { split: true });
   }
 
+  removeSession(id) {
+    sessions = sessions.filter(item => item.id !== id);
+  }
+
   run(client, message, params) {
     if (!params.length) {
-      this.listSessions(message.channel);
+      this.listSessions(client, message.channel);
       return;
     }
 
@@ -49,6 +53,20 @@ export default class Session {
     const foundPC = pc.exec(joinedParams);
     const foundPS4 = ps4.exec(joinedParams);
     const foundSwitch = sw.exec(joinedParams);
+    
+    const prefix = client.settings.get(message.guild.id).prefix;
+
+    if (params[0] === 'r' || params[0] === 'remove') {
+      const sessionId = params[1];
+      const session = sessions.find(ses => ses.sessionId === sessionId);
+
+      if (!session) {
+        message.channel.send('A session with that ID does not exist, nya...');
+      }
+
+      this.removeSession(session.id);
+      return;
+    }
 
     if (!foundPC && !foundPS4 && !foundSwitch) {
       message.channel.send('Couldn\'t find any sessions, nya...');
@@ -65,66 +83,35 @@ export default class Session {
       session.sessionId = foundPC[0];
       session.description = foundPC.input.slice(foundPC[0].length + foundPC.index);
       session.platform = 'PC';
-      
-      if (sessions.some(s => s.sessionId === session.sessionId)) {
-        message.channel.send('A lobby with this ID already exists!');
-        return;
-      }
-
-      message.channel.send(`Added PC session ${session.sessionId}! ${prefix}`);
-
-      sessions.push(session);
-
-      setTimeout(() => {
-        sessions = sessions.filter(item => item.id !== session.id);
-      }, 14400000); // auto clear after 4 hours
-
-      counter++;
-      return;
     }
 
     if (foundSwitch) {
       session.sessionId = foundSwitch[0];
       session.description = foundSwitch.input.slice(foundSwitch[0].length + foundSwitch.index);
       session.platform = 'Switch';
-
-      if (sessions.some(s => s.sessionId === session.sessionId)) {
-        message.channel.send('A lobby with this ID already exists!');
-        return;
-      }
-
-      message.channel.send(`Added Switch session ${session.sessionId}! ${prefix}`);
-
-      sessions.push(session);
-
-      setTimeout(() => {
-        sessions = sessions.filter(item => item.id !== session.id);
-      }, 14400000); // auto clear after 4 hours
-
-      counter++;
-      return;
     }
 
     if (foundPS4 && !foundPC) {
       session.sessionId = foundPS4[0];
       session.description = foundPS4.input.slice(foundPS4[0].length + foundPS4.index);
       session.platform = 'PS4';
+    }
 
-      if (sessions.some(s => s.sessionId === session.sessionId)) {
-        message.channel.send('A lobby with this ID already exists!');
-        return;
-      }
-
-      message.channel.send(`Added PS4 session ${session.sessionId}! ${prefix}`);
-
-      sessions.push(session);
-
-      setTimeout(() => {
-        sessions = sessions.filter(item => item.id !== session.id);
-      }, 14400000); // auto clear after 4 hours
-
-      counter++;
+    if (sessions.some(s => s.sessionId === session.sessionId)) {
+      message.channel.send('A lobby with this ID already exists!');
       return;
     }
+
+    message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);
+
+    const timer = setTimeout(() => {
+      this.removeSession(session.id);
+    }, 14400000); // auto clear after 4 hours
+
+    session.timer = timer;
+
+    sessions.push(session);
+
+    counter++;
   }
 }
