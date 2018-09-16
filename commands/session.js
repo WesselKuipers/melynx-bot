@@ -1,9 +1,9 @@
 import moment from 'moment';
 const prefix = process.env.PREFIX;
 
-const pc = /3pseat[a-zA-Z0-9]{5}/;
-const ps4 = /[a-zA-Z0-9]{12}/;
-const sw = /\d{2}-\d{4}-\d{4}-\d{4}/;
+const pc = /\b3pseat[a-zA-Z0-9]{5}\b/;
+const ps4 = /\b[a-zA-Z0-9]{12}\b/;
+const sw = /\b\d{2}-\d{4}-\d{4}-\d{4}\b/;
 
 let sessions = [];
 let counter = 0;

@@ -17,7 +17,7 @@ export default class Help {
 
   run(client, message, params) {
     if (!params.length) {
-      const commands = [...client.commands.keys()];
+      const commands = [...client.commands.filter(command => !command.config.ownerOnly).keys()];
       message.channel.send(`Available commands: ${commands.join(', ')}`);
       return;
     }
@@ -25,7 +25,7 @@ export default class Help {
     const commandName = params[0];
     const command = client.commands.get(commandName) || client.aliases.get(commandName);
 
-    if (!command) {
+    if (!command || command.ownerOnly) {
       message.channel.send(`Command ${commandName} does not exist, nya!`);
     }
 

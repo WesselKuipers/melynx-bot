@@ -4,6 +4,7 @@ import fs from 'fs';
 import moment from 'moment';
 
 import es6 from 'es6-promise';
+import Enmap from 'enmap';
 
 es6.polyfill();
 
@@ -24,6 +25,19 @@ export default class CFGBot {
     this.client = new Discord.Client(settings);
     this.commands = new Discord.Collection();
     this.aliases = new Discord.Collection();
+
+    this.client.settings = new Enmap({
+      name: 'settings',
+      fetchAll: false,
+      autoFetch: true,
+      cloneLevel: 'deep',
+    });
+
+    this.defaultSettings = {
+      prefix: settings.prefix,
+      modRole: 'Moderator',
+      adminRole: 'Administrator',
+    };
     
     this.loadCommands();
   }
@@ -34,6 +48,11 @@ export default class CFGBot {
     this.client.on('ready', () => {
       this.log(`Connected to ${this.client.users.size} users on ${this.client.guilds.size} servers.`);
       this.client.user.setPresence({status: 'online', game: {name: playingLines[Math.floor(Math.random() * playingLines.length)], type: 'PLAYING' }});
+    });
+
+    this.client.on('guildDelete', guild => {
+      // When the bot leaves or is kicked, delete settings to prevent stale entries.
+      this.client.settings.delete(guild.id);
     });
 
     this.client.on('error', error => this.error(error));
@@ -50,10 +69,13 @@ export default class CFGBot {
       this.log(`Loading ${files.length} commands: ${files}`);
 
       files.filter(n => n.endsWith('.js')).forEach((f) => {
-        // this.log(`loading ${f}`);
-
         const command = require(`../commands/${f}`);
         const c = new command.default();
+
+        // If command has an init method, run it
+        if (c.init) {
+          c.init(this.client);
+        }
 
         // Assign the main command name to commands, as well as all of its aliases
         this.commands.set(c.help.name, c);
@@ -75,7 +97,11 @@ export default class CFGBot {
   }
 
   message(message) {
-    if (!message.content.startsWith(this.settings.prefix)) {
+    // We can use ensure() to actually grab the default value for settings,
+    // if the key doesn't already exist. 
+    const guildConf = this.client.settings.ensure(message.guild.id, this.defaultSettings);
+
+    if (!message.content.startsWith(guildConf.prefix)) {
       return; // doesn't start with prefix, don't care what the message is
     }
 
@@ -83,7 +109,7 @@ export default class CFGBot {
       return; // don't respond to yourself
     }
 
-    if (message.content.startsWith(this.settings.prefix) && message.content.length === this.settings.prefix.length) {
+    if (message.content.startsWith(guildConf.prefix) && message.content.length === guildConf.prefix.length) {
       return; // someone only said the prefix and nothing else
     }
 
@@ -95,6 +121,10 @@ export default class CFGBot {
 
     if (command.config.guildOnly && message.channel.type !== 'text' ) {
       return; 
+    }
+
+    if (command.config.ownerOnly && message.author.id !== '86708235888783360') {
+      return;
     }
 
     command.run(this.client, message, params);
