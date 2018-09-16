@@ -100,7 +100,7 @@ export default class Session {
       session.platform = 'PS4';
     }
 
-    if (sessions.some(s => s.sessionId === session.sessionId)) {
+    if (sessions.some(s => s.sessionId === session.sessionId && s.guildId === message.guild.id)) {
       message.channel.send('A lobby with this ID already exists!');
       return;
     }
