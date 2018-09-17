@@ -4,7 +4,7 @@ import fs from 'fs';
 import moment from 'moment';
 
 import es6 from 'es6-promise';
-import Enmap from 'enmap';
+import Sequelize from 'sequelize';
 
 es6.polyfill();
 
@@ -22,18 +22,21 @@ const playingLines = [
 export default class CFGBot {
   constructor(settings) {
     this.settings = settings;
+
     this.client = new Discord.Client(settings);
     this.commands = new Discord.Collection();
     this.aliases = new Discord.Collection();
 
-    this.client.settings = new Enmap({
-      name: 'settings',
-      fetchAll: false,
-      autoFetch: true,
-      cloneLevel: 'deep',
+    const db = new Sequelize(settings.databaseUrl);
+    const guildSettings = db.define('settings', {
+      guildId: { type: Sequelize.STRING, unique: true, primaryKey: true },
+      settings: Sequelize.JSON,
     });
 
-    this.defaultSettings = {
+    this.client.db = db;
+    this.client.settings = guildSettings;
+
+    this.client.defaultSettings = {
       prefix: settings.prefix,
       modRole: 'Moderator',
       adminRole: 'Administrator',
@@ -48,6 +51,7 @@ export default class CFGBot {
     this.client.on('ready', () => {
       this.log(`Connected to ${this.client.users.size} users on ${this.client.guilds.size} servers.`);
       this.client.user.setPresence({status: 'online', game: {name: playingLines[Math.floor(Math.random() * playingLines.length)], type: 'PLAYING' }});
+      this.client.settings.sync();
     });
 
     this.client.on('guildDelete', guild => {
@@ -74,6 +78,7 @@ export default class CFGBot {
 
         // If command has an init method, run it
         if (c.init) {
+          this.log('Running init of ' + c.help.name);
           c.init(this.client);
         }
 
@@ -96,17 +101,22 @@ export default class CFGBot {
     this.client.commands = this.commands;
   }
 
-  message(message) {
-    // We can use ensure() to actually grab the default value for settings,
-    // if the key doesn't already exist. 
-    const guildConf = this.client.settings.ensure(message.guild.id, this.defaultSettings);
+  async message(message) {
+    if (message.author === this.client.user) {
+      return; // don't respond to yourself
+    }
+
+    let guildConfEntry = await this.client.settings.findById(message.guild.id);
+
+    if (!guildConfEntry) {
+      guildConfEntry = await this.client.settings.create({ guildId: message.guild.id, settings: this.client.defaultSettings});
+      this.log('Initialized config for guild ' + message.guild.id);
+    }
+
+    const guildConf = guildConfEntry.get('settings');
 
     if (!message.content.startsWith(guildConf.prefix)) {
       return; // doesn't start with prefix, don't care what the message is
-    }
-
-    if (message.author === this.client.user) {
-      return; // don't respond to yourself
     }
 
     if (message.content.startsWith(guildConf.prefix) && message.content.length === guildConf.prefix.length) {
@@ -127,7 +137,7 @@ export default class CFGBot {
       return;
     }
 
-    command.run(this.client, message, params);
+    command.run(this.client, message, guildConf, params);
   }
   
 

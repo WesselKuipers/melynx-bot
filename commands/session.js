@@ -24,9 +24,9 @@ export default class Session {
     };
   }
 
-  listSessions(client, channel) {
+  async listSessions(conf, channel) {
     const sessionMessage = [];
-    const prefix = client.settings.get(channel.guild.id).prefix;
+    const { prefix } = conf;
       
     sessions.filter(s => s.guildId === channel.guild.id).map(s => {
       sessionMessage.push(`(${Math.floor(moment.duration(moment().diff(s.date)).asMinutes())}m ago by ${s.creator}) [${s.platform}]: ${s.sessionId}${s.description}`);
@@ -43,9 +43,13 @@ export default class Session {
     sessions = sessions.filter(item => item.id !== id);
   }
 
-  run(client, message, params) {
+  init(client) {
+    client.defaultSettings.sessionTimeout = 14400000; // 4 hours
+  }
+
+  run(client, message, conf, params) {
     if (!params.length) {
-      this.listSessions(client, message.channel);
+      this.listSessions(conf, message.channel);
       return;
     }
 
@@ -54,7 +58,7 @@ export default class Session {
     const foundPS4 = ps4.exec(joinedParams);
     const foundSwitch = sw.exec(joinedParams);
     
-    const prefix = client.settings.get(message.guild.id).prefix;
+    const { prefix, sessionTimeout } = conf;
 
     if (params[0] === 'r' || params[0] === 'remove') {
       const sessionId = params[1];
@@ -109,7 +113,7 @@ export default class Session {
 
     const timer = setTimeout(() => {
       this.removeSession(session.id);
-    }, 14400000); // auto clear after 4 hours
+    }, sessionTimeout); // auto clear after (default) 4 hours
 
     session.timer = timer;
 

@@ -1,5 +1,6 @@
 {
     "token": "[YOUR BOT TOKEN]",
     "prefix": "<:melynx:489560806447513630>",
-    "disabledEvents": ["TYPING_START", "VOICE_STATE_UPDATE"]
+    "disabledEvents": ["TYPING_START", "VOICE_STATE_UPDATE"],
+    "databaseUrl": "postgresql://user:secret@localhost/dbname"
 }

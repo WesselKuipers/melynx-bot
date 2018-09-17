@@ -16,14 +16,16 @@ export default class SetConf {
     };
   }
 
-  run(client, message, params) {
+  async run(client, message, conf, params) {
     const [prop, ...value] = params;
 
-    if(!client.settings.has(message.guild.id, prop)) {
+    if(!conf.hasOwnProperty(prop)) {
       return message.reply('This key is not in the configuration.');
     }
 
-    client.settings.set(message.guild.id, value.join(' '), prop);
-    message.channel.send(`Guild configuration item ${prop} has been changed to:\n\`${value.join(' ')}\``);
+    const update = await client.settings.update({settings: {...conf, [prop]: value.join(' ')} }, { where: { guildId: message.guild.id } });
+    if (update > 0) {
+      message.channel.send(`Guild configuration item ${prop} has been changed to:\n\`${value.join(' ')}\``);
+    }
   }
 }
