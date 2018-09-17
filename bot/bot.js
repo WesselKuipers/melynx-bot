@@ -27,7 +27,7 @@ export default class CFGBot {
     this.commands = new Discord.Collection();
     this.aliases = new Discord.Collection();
 
-    const db = new Sequelize(settings.databaseUrl);
+    const db = new Sequelize(settings.databaseUrl, { logging: false });
     const guildSettings = db.define('settings', {
       guildId: { type: Sequelize.STRING, unique: true, primaryKey: true },
       settings: Sequelize.JSON,
