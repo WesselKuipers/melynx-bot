@@ -99,6 +99,7 @@ export default class CFGBot {
     });
 
     this.client.commands = this.commands;
+    this.client.aliases = this.aliases;
   }
 
   async message(message) {
