@@ -70,7 +70,7 @@ export default class Session {
       }
 
       this.removeSession(session.id);
-      message.channel.send(`Removed session ${session.sessionId}! ${prefix}`);
+      message.channel.send(`Remeowved session ${session.sessionId}! ${prefix}`);
       return;
     }
 
@@ -120,6 +120,7 @@ export default class Session {
 
     // see: http://www.asciitable.com/
     session.description = session.description.replace(/[^\x20-\x9A]|[<@>]/g, '').slice(0, 100);
+
     sessions.push(session);
 
     counter++;
