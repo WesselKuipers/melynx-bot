@@ -112,11 +112,14 @@ export default class Session {
     message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);
 
     const timer = setTimeout(() => {
+      client.log(`Session ${session.sessionId} expired`);
       this.removeSession(session.id);
     }, sessionTimeout); // auto clear after (default) 4 hours
 
     session.timer = timer;
 
+    // see: http://www.asciitable.com/
+    session.description = session.description.replace(/[^\x20-\x9A]|[<@>]/g, '').slice(0, 100);
     sessions.push(session);
 
     counter++;

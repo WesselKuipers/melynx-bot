@@ -35,6 +35,7 @@ export default class CFGBot {
 
     this.client.db = db;
     this.client.settings = guildSettings;
+    this.client.log = this.log;
 
     this.client.defaultSettings = {
       prefix: settings.prefix,
