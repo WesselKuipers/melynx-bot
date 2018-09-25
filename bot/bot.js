@@ -139,7 +139,7 @@ export default class CFGBot {
       return;
     }
 
-    command.run(this.client, message, guildConf, params);
+    await command.run(this.client, message, guildConf, params);
   }
   
 

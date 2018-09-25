@@ -19,7 +19,7 @@ export default class Session {
 
     this.help = {
       name: 'session',
-      description: 'Lists all current sessions or adds one. Sessions expire after 4 hours.',
+      description: 'Lists all current sessions or adds one. Sessions expire after 8 hours.',
       usage: 'session | session [session id] [description] | session [remove|r] [session id]',
     };
   }
@@ -43,8 +43,40 @@ export default class Session {
     sessions = sessions.filter(item => item.id !== id);
   }
 
+  async handleExpiredSession(client, message, prefix, sessionTimeout, session) {
+    const expireMessage = `Session ${session.sessionId} expired!`;
+    this.removeSession(session.id);
+    clearTimeout(message.timer);
+    client.log(expireMessage);
+    
+    const sentMessage = await message.channel.send(`${expireMessage} React within 5 minutes ♻ to refresh this session!`);
+    const reaction = await sentMessage.react('♻');
+    
+    sentMessage.awaitReactions((reaction) => reaction.emoji.name === '♻', { max: 2, time: 5 * 60 * 1000, error: ['time'] })
+      .then(async () => {
+        const refreshMessage = `Refreshed session ${session.sessionId}! ${prefix}`;
+        message.channel.send(refreshMessage);
+
+        const timer = setTimeout(() => this.handleExpiredSession(client, message, prefix, sessionTimeout, session), sessionTimeout);
+        session.timer = timer;
+
+        if (sessions.some(s => s.sessionId === session.sessionId)) {
+          return;
+        }
+
+        sessions.push(session);
+        counter++;
+
+        client.log(refreshMessage);
+      })
+      .catch(async () => {
+        await sentMessage.edit(expireMessage);
+        await reaction.remove();
+      });
+  }
+
   init(client) {
-    client.defaultSettings.sessionTimeout = 14400000; // 4 hours
+    client.defaultSettings.sessionTimeout = 28800000; // 8 hours
   }
 
   run(client, message, conf, params) {
@@ -70,6 +102,7 @@ export default class Session {
       }
 
       this.removeSession(session.id);
+      clearTimeout(session.timer);
       message.channel.send(`Remeowved session ${session.sessionId}! ${prefix}`);
       return;
     }
@@ -111,11 +144,7 @@ export default class Session {
 
     message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);
 
-    const timer = setTimeout(() => {
-      client.log(`Session ${session.sessionId} expired`);
-      this.removeSession(session.id);
-    }, sessionTimeout); // auto clear after (default) 4 hours
-
+    const timer = setTimeout(() => this.handleExpiredSession(client, message, prefix, sessionTimeout, session), sessionTimeout); // auto clear after (default) 8 hours
     session.timer = timer;
 
     // see: http://www.asciitable.com/
