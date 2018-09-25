@@ -46,7 +46,7 @@ export default class Session {
   async handleExpiredSession(client, message, prefix, sessionTimeout, session) {
     const expireMessage = `Session ${session.sessionId} expired!`;
     this.removeSession(session.id);
-    clearTimeout(message.timer);
+    clearTimeout(session.timer);
     client.log(expireMessage);
     
     const sentMessage = await message.channel.send(`${expireMessage} React within 5 minutes ♻ to refresh this session!`);
