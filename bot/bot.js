@@ -115,7 +115,7 @@ export default class CFGBot {
       this.log('Initialized config for guild ' + message.guild.id);
     }
 
-    const guildConf = guildConfEntry.get('settings');
+    const guildConf = { ...this.defaultSettings, ...guildConfEntry.get('settings') };
 
     if (!message.content.startsWith(guildConf.prefix)) {
       return; // doesn't start with prefix, don't care what the message is

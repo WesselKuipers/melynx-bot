@@ -43,7 +43,7 @@ export default class Session {
     sessions = sessions.filter(item => item.id !== id);
   }
 
-  async handleExpiredSession(client, message, prefix, sessionTimeout, session) {
+  async handleExpiredSession(client, message, prefix, sessionTimeout, sessionRefreshTimeout, session) {
     const expireMessage = `Session ${session.sessionId} expired!`;
     this.removeSession(session.id);
     clearTimeout(session.timer);
@@ -52,13 +52,11 @@ export default class Session {
     const sentMessage = await message.channel.send(`${expireMessage} React within 5 minutes ♻ to refresh this session!`);
     const reaction = await sentMessage.react('♻');
     const removeReactions = () => {
-      sentMessage.edit(expireMessage)
-        .then(() => {
-          reaction.remove();
-        });
+      sentMessage.edit(expireMessage);
+      reaction.remove();
     };
     
-    sentMessage.awaitReactions((reaction, user) => (reaction.emoji.name === '♻' && user.id !== client.user.id), { max: 1, time: 5 * 60 * 1000 })
+    sentMessage.awaitReactions((reaction, user) => (reaction.emoji.name === '♻' && user.id !== client.user.id), { max: 1, time: sessionRefreshTimeout })
       .then((collected) => {
         const reactions = collected.first();
 
@@ -75,7 +73,7 @@ export default class Session {
         const refreshMessage = `Refreshed session ${session.sessionId}! ${prefix}`;
         message.channel.send(refreshMessage);
 
-        const timer = setTimeout(() => this.handleExpiredSession(client, message, prefix, sessionTimeout, session), sessionTimeout);
+        const timer = setTimeout(() => this.handleExpiredSession(client, message, prefix, sessionTimeout, sessionRefreshTimeout, session), sessionTimeout);
         session.timer = timer;
 
         sessions.push(session);
@@ -91,6 +89,7 @@ export default class Session {
 
   init(client) {
     client.defaultSettings.sessionTimeout = 28800000; // 8 hours
+    client.defaultSettings.sessionRefreshTimeout = 5 * 60 * 1000; // 5 minutes
   }
 
   run(client, message, conf, params) {
@@ -104,7 +103,7 @@ export default class Session {
     const foundPS4 = ps4.exec(joinedParams);
     const foundSwitch = sw.exec(joinedParams);
     
-    const { prefix, sessionTimeout } = conf;
+    const { prefix, sessionTimeout, sessionRefreshTimeout } = { ...client.defaultSettings, ...conf };
 
     if (params[0] === 'r' || params[0] === 'remove') {
       const sessionId = params[1];
@@ -158,7 +157,7 @@ export default class Session {
 
     message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);
 
-    const timer = setTimeout(() => this.handleExpiredSession(client, message, prefix, sessionTimeout, session), sessionTimeout); // auto clear after (default) 8 hours
+    const timer = setTimeout(() => this.handleExpiredSession(client, message, prefix, sessionTimeout, sessionRefreshTimeout, session), sessionTimeout); // auto clear after (default) 8 hours
     session.timer = timer;
 
     // see: http://www.asciitable.com/
