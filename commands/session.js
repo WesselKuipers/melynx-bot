@@ -51,27 +51,41 @@ export default class Session {
     
     const sentMessage = await message.channel.send(`${expireMessage} React within 5 minutes ♻ to refresh this session!`);
     const reaction = await sentMessage.react('♻');
+    const removeReactions = () => {
+      sentMessage.edit(expireMessage)
+        .then(() => {
+          reaction.remove();
+        });
+    };
     
-    sentMessage.awaitReactions((reaction) => reaction.emoji.name === '♻', { max: 2, time: 5 * 60 * 1000, error: ['time'] })
-      .then(async () => {
+    sentMessage.awaitReactions((reaction, user) => (reaction.emoji.name === '♻' && user.id !== client.user.id), { max: 1, time: 5 * 60 * 1000 })
+      .then((collected) => {
+        const reactions = collected.first();
+
+        if (sessions.some(s => s.sessionId === session.sessionId)) {
+          removeReactions();
+          return;
+        }
+
+        if (reactions.count === 0 || (reactions.count === 1 && reactions.first().me)) {
+          removeReactions();
+          return;
+        }
+
         const refreshMessage = `Refreshed session ${session.sessionId}! ${prefix}`;
         message.channel.send(refreshMessage);
 
         const timer = setTimeout(() => this.handleExpiredSession(client, message, prefix, sessionTimeout, session), sessionTimeout);
         session.timer = timer;
 
-        if (sessions.some(s => s.sessionId === session.sessionId)) {
-          return;
-        }
-
         sessions.push(session);
         counter++;
 
         client.log(refreshMessage);
+        removeReactions();
       })
-      .catch(async () => {
-        await sentMessage.edit(expireMessage);
-        await reaction.remove();
+      .catch(() => {
+        removeReactions();
       });
   }
 
