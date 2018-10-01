@@ -53,7 +53,7 @@ export default class Session {
       const { prefix, sessionTimeout, sessionRefreshTimeout } = {...client.defaultSettings, ...((await client.settings.findById(session.guildId)).settings)};
       const channel = client.channels.get(session.channelId);
       
-      this.log('Restoring session: ' + session.sessionId);
+      client.log('Restoring session: ' + session.sessionId);
       let posted = session.date.getTime();
       let now = new Date().getTime();
       let remaining = posted - now + Number(sessionTimeout);
