@@ -52,8 +52,14 @@ export default class Session {
     sessions = await SessionDb.findAll().map(async (session) => {
       const { prefix, sessionTimeout, sessionRefreshTimeout } = {...client.defaultSettings, ...((await client.settings.findById(session.guildId)).settings)};
       const channel = client.channels.get(session.channelId);
+      
+      console.log('Restoring session: ' + session.sessionId);
+      let posted = session.date.getTime();
+      let now = new Date().getTime();
+      let remaining = posted - now + Number(sessionTimeout);
+      console.log(remaining);
 
-      session.timer = setTimeout(() => this.handleExpiredSession(client, channel, prefix, sessionTimeout, sessionRefreshTimeout, session), session.date - new Date() + sessionTimeout);
+      session.timer = setTimeout(() => this.handleExpiredSession(client, channel, prefix, sessionTimeout, sessionRefreshTimeout, session), remaining);
       return session;
     });
   }
