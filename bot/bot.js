@@ -42,8 +42,6 @@ export default class CFGBot {
       modRole: 'Moderator',
       adminRole: 'Administrator',
     };
-    
-    this.loadCommands();
   }
 
   run() {
@@ -51,6 +49,8 @@ export default class CFGBot {
 
     this.client.on('ready', () => {
       this.log(`Connected to ${this.client.users.size} users on ${this.client.guilds.size} servers.`);
+      this.loadCommands();
+      
       this.client.user.setPresence({status: 'online', game: {name: playingLines[Math.floor(Math.random() * playingLines.length)], type: 'PLAYING' }});
       this.client.settings.sync();
     });
@@ -73,14 +73,14 @@ export default class CFGBot {
 
       this.log(`Loading ${files.length} commands: ${files}`);
 
-      files.filter(n => n.endsWith('.js')).forEach((f) => {
+      files.filter(n => n.endsWith('.js')).forEach(async (f) => {
         const command = require(`../commands/${f}`);
         const c = new command.default();
 
         // If command has an init method, run it
         if (c.init) {
           this.log('Running init of ' + c.help.name);
-          c.init(this.client);
+          await c.init(this.client);
         }
 
         // Assign the main command name to commands, as well as all of its aliases

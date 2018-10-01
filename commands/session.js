@@ -1,11 +1,15 @@
+import Discord from 'discord.js';
 import moment from 'moment';
+import Sequelize from 'sequelize';
 
 const pc = /\b3pseat[a-zA-Z0-9]{5}\b/;
 const ps4 = /\b[a-zA-Z0-9]{12}\b/;
 const sw = /\b\d{2}-\d{4}-\d{4}-\d{4}\b/;
 
 let sessions = [];
-let counter = 0;
+
+/** @type {Sequelize.Model} */
+let SessionDb;
 
 export default class Session {
   constructor() {
@@ -24,10 +28,40 @@ export default class Session {
     };
   }
 
+  /**
+   * @param {Discord.Client} client 
+   */
+  async init(client) {
+    client.defaultSettings.sessionTimeout = 28800000; // 8 hours
+    client.defaultSettings.sessionRefreshTimeout = 5 * 60 * 1000; // 5 minutes
+
+    /** @type {Sequelize.Sequelize} */
+    const db = client.db;
+
+    SessionDb = db.define('session', {
+      id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+      guildId: { type: Sequelize.STRING, notNull: true },
+      creator: { type: Sequelize.STRING, notNull: true },
+      platform: { type: Sequelize.STRING, notNull: true, contains: ['Switch', 'PC', 'PS4'] },
+      description: Sequelize.STRING,
+      sessionId: { type: Sequelize.STRING, unique: true, notNull: true },
+      channelId: { type: Sequelize.STRING, notNull: true },
+    }, { createdAt: 'date' });
+
+    await SessionDb.sync();
+    sessions = await SessionDb.findAll().map(async (session) => {
+      const { prefix, sessionTimeout, sessionRefreshTimeout } = {...client.defaultSettings, ...((await client.settings.findById(session.guildId)).settings)};
+      const channel = client.channels.get(session.channelId);
+
+      session.timer = setTimeout(() => this.handleExpiredSession(client, channel, prefix, sessionTimeout, sessionRefreshTimeout, session), session.date - new Date());
+      return session;
+    });
+  }
+
   async listSessions(conf, channel) {
     const sessionMessage = [];
     const { prefix } = conf;
-      
+
     sessions.filter(s => s.guildId === channel.guild.id).map(s => {
       sessionMessage.push(`(${Math.floor(moment.duration(moment().diff(s.date)).asMinutes())}m ago by ${s.creator}) [${s.platform}]: ${s.sessionId}${s.description}`);
     });
@@ -41,15 +75,17 @@ export default class Session {
 
   removeSession(id) {
     sessions = sessions.filter(item => item.id !== id);
+    SessionDb.destroy({ where: { id }}).then(() => { return; });
   }
 
-  async handleExpiredSession(client, message, prefix, sessionTimeout, sessionRefreshTimeout, session) {
+  async handleExpiredSession(client, channel, prefix, sessionTimeout, sessionRefreshTimeout, session) {
     const expireMessage = `Session ${session.sessionId} expired!`;
+
     this.removeSession(session.id);
     clearTimeout(session.timer);
     client.log(expireMessage);
     
-    const sentMessage = await message.channel.send(`${expireMessage} React within 5 minutes ♻ to refresh this session!`);
+    const sentMessage = await channel.send(`${expireMessage} React within 5 minutes ♻ to refresh this session!`);
     const reaction = await sentMessage.react('♻');
     const removeReactions = () => {
       sentMessage.edit(expireMessage);
@@ -71,28 +107,29 @@ export default class Session {
         }
 
         const refreshMessage = `Refreshed session ${session.sessionId}! ${prefix}`;
-        message.channel.send(refreshMessage);
+        channel.send(refreshMessage);
 
-        const timer = setTimeout(() => this.handleExpiredSession(client, message, prefix, sessionTimeout, sessionRefreshTimeout, session), sessionTimeout);
-        session.timer = timer;
+        SessionDb.create({ 
+          guildId: session.guildId,
+          creator: session.creator,
+          channelId: channel.id,
+          platform: session.platform,
+          description: session.description,
+          sessionId: session.sessionId })
+          .then(dbSes => {
+            dbSes.timer = setTimeout(() => this.handleExpiredSession(client, channel, prefix, sessionTimeout, sessionRefreshTimeout, dbSes), sessionTimeout);
+            sessions.push(dbSes);
+            client.log(refreshMessage);
 
-        sessions.push(session);
-        counter++;
-
-        client.log(refreshMessage);
-        removeReactions();
+            removeReactions();
+          });
       })
       .catch(() => {
         removeReactions();
       });
   }
 
-  init(client) {
-    client.defaultSettings.sessionTimeout = 28800000; // 8 hours
-    client.defaultSettings.sessionRefreshTimeout = 5 * 60 * 1000; // 5 minutes
-  }
-
-  run(client, message, conf, params) {
+  async run(client, message, conf, params) {
     if (!params.length) {
       this.listSessions(conf, message.channel);
       return;
@@ -126,7 +163,6 @@ export default class Session {
     }
 
     let session = {
-      id: counter,
       creator: message.author.username,
       date: moment(),
       guildId: message.guild.id,
@@ -157,14 +193,19 @@ export default class Session {
 
     message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);
 
-    const timer = setTimeout(() => this.handleExpiredSession(client, message, prefix, sessionTimeout, sessionRefreshTimeout, session), sessionTimeout); // auto clear after (default) 8 hours
-    session.timer = timer;
-
     // see: http://www.asciitable.com/
     session.description = session.description.replace(/[^\x20-\x9A]|[<@>]/g, '').slice(0, 100);
+    let dbSes = await SessionDb.create({ 
+      guildId: session.guildId,
+      creator: session.creator,
+      channelId: message.channel.id,
+      platform: session.platform,
+      description: session.description,
+      sessionId: session.sessionId,
+    });
 
-    sessions.push(session);
+    dbSes.timer = setTimeout(() => this.handleExpiredSession(client, message.channel, prefix, sessionTimeout, sessionRefreshTimeout, dbSes), sessionTimeout); // auto clear after (default) 8 hours;
 
-    counter++;
+    sessions.push(dbSes);
   }
 }
