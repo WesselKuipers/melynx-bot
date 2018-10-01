@@ -53,7 +53,7 @@ export default class Session {
       const { prefix, sessionTimeout, sessionRefreshTimeout } = {...client.defaultSettings, ...((await client.settings.findById(session.guildId)).settings)};
       const channel = client.channels.get(session.channelId);
 
-      session.timer = setTimeout(() => this.handleExpiredSession(client, channel, prefix, sessionTimeout, sessionRefreshTimeout, session), session.date - new Date());
+      session.timer = setTimeout(() => this.handleExpiredSession(client, channel, prefix, sessionTimeout, sessionRefreshTimeout, session), session.date - new Date() + sessionTimeout);
       return session;
     });
   }
