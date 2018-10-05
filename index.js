@@ -1,5 +1,5 @@
 import MelynxBot from './bot/bot';
-import http from 'http';
+import express from 'express';
 
 try {
   const options = require('./settings.json');
@@ -27,8 +27,16 @@ const options = {
 const bot = new MelynxBot(options);
 bot.run();
 
-http.createServer((req, res) => {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.write('Hello World!');
-  res.end();
-}).listen(process.env.PORT || 3000);
+const app = express();
+app.get('/', (req, res) => {
+  return res.send('I\'m still alive, nya!');
+});
+
+app.get('/sessions/:guildId(\\d+)?', async (req, res) => {
+  const { guildId } = req.params;
+  const sessions = guildId ? await bot.client.db.models.session.findAll({where: { guildId }, raw: true}) : await bot.client.db.models.session.findAll({raw:true});
+
+  return res.send(sessions);
+});
+
+app.listen(process.env.PORT || 3000);
