@@ -18,7 +18,7 @@ export default class Help {
   run(client, message, conf, params) {
     if (!params.length) {
       const commands = [...client.commands.filter(command => !command.config.ownerOnly).keys()];
-      message.channel.send(`Available commands: ${commands.join(', ')}\nType ${conf.prefix} [command] for more info!`);
+      message.channel.send(`Available commands: ${commands.join(', ')}\nType ${conf.prefix} ${this.help.usage} for more info!`);
       return;
     }
 
