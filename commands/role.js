@@ -59,7 +59,7 @@ export default class Role {
       return;
     }
 
-    if (!message.author.id !== '86708235888783360') {
+    if (message.author.id !== '86708235888783360') {
       if (!message.member.roles.findAll(r => r.name === conf.modRole || r.name === conf.adminRole).length) {
         return;
       }
@@ -90,7 +90,7 @@ export default class Role {
       return;
     }
 
-    if (!message.author.id !== '86708235888783360') {
+    if (message.author.id !== '86708235888783360') {
       if (!message.member.roles.findAll(r => r.name === conf.modRole || r.name === conf.adminRole).length) {
         return;
       }
