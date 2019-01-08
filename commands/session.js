@@ -50,7 +50,7 @@ export default class Session {
 
     await SessionDb.sync();
     sessions = await SessionDb.findAll().map(async (session) => {
-      const { prefix, sessionTimeout, sessionRefreshTimeout } = {...client.defaultSettings, ...((await client.settings.findById(session.guildId)).settings)};
+      const { prefix, sessionTimeout, sessionRefreshTimeout } = {...client.defaultSettings, ...((await client.settings.findByPk(session.guildId)).settings)};
       const channel = client.channels.get(session.channelId);
       
       client.log('Restoring session: ' + session.sessionId);

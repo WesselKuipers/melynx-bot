@@ -108,7 +108,7 @@ export default class CFGBot {
       return; // don't respond to yourself
     }
 
-    let guildConfEntry = await this.client.settings.findById(message.guild.id);
+    let guildConfEntry = await this.client.settings.findByPk(message.guild.id);
 
     if (!guildConfEntry) {
       guildConfEntry = await this.client.settings.create({ guildId: message.guild.id, settings: this.client.defaultSettings});
