@@ -53,10 +53,16 @@ export default class Role {
   /**
    * @param {Discord.Message} message
    */
-  async addRole(message, params) {
+  async addRole(message, conf, params) {
     if (params.length !== 2) {
       message.channel.send('Invalid amount of parameters provided, nya!');
       return;
+    }
+
+    if (!message.author.id !== '86708235888783360') {
+      if (!message.member.roles.findAll(r => r.name === conf.modRole || r.name === conf.adminRole).length) {
+        return;
+      }
     }
 
     const roleName = params.splice(1).join(' ');
@@ -78,10 +84,16 @@ export default class Role {
   /**
    * @param {Discord.Message} message
    */
-  async removeRole(message, params) {
+  async removeRole(message, conf, params) {
     if (params.length < 2) {
       message.channel.send('Invalid amount of parameters provided, nya!');
       return;
+    }
+
+    if (!message.author.id !== '86708235888783360') {
+      if (!message.member.roles.findAll(r => r.name === conf.modRole || r.name === conf.adminRole).length) {
+        return;
+      }
     }
 
     const roleName = params.splice(1).join(' ');
@@ -112,7 +124,6 @@ export default class Role {
       message.member.addRole(role.id);
       message.reply(`added role ${role.name}, meow!`);
     }
-
   }
 
   /**
