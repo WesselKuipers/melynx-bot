@@ -73,6 +73,11 @@ export default class Role {
       return;
     }
 
+    if (!role.editable) {
+      message.channel.send('I\'m not allowed to assign this role!');
+      return;
+    }
+
     const result = await RoleDb.findCreateFind({where: {id: role.id, name: role.name, guildId: message.guild.id }});
     if (!result[1]) {
       message.channel.send(`Role ${role.name} already exists`);
@@ -143,10 +148,10 @@ export default class Role {
       await this.listRoles(message, conf);
       break;
     case 'add':
-      await this.addRole(message, params);
+      await this.addRole(message, conf, params);
       break;
     case 'remove':
-      await this.removeRole(message, params);
+      await this.removeRole(message, conf, params);
       break;
     default: 
       this.handleRoleJoin(message, params);
