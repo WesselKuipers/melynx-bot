@@ -3,7 +3,7 @@ import moment from 'moment';
 import Sequelize from 'sequelize';
 
 const pc = /\b3pseat[a-zA-Z0-9]{5}\b/;
-const ps4 = /\b[a-zA-Z0-9]{12}\b/;
+const ps4 = /\b[a-zA-Z0-9]{11,12}\b/;
 const sw = /\b\d{2}-\d{4}-\d{4}-\d{4}\b/;
 
 let sessions = [];
