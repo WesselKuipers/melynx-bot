@@ -1,3 +1,4 @@
+import axios from 'axios';
 import MelynxBot from './bot/bot';
 import cors from 'cors';
 import express from 'express';
@@ -35,8 +36,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, 'build')));
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+app.get('/', async (req, res) => {
+  const catFact = await axios.get('https://cat-fact.herokuapp.com/facts/random');
+  res.send(`<p style='font-family: sans-serif;'>${catFact.data.text}</p>`);
+  // res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 app.get('/api/sessions/:guildId(\\d+)?', cors(), async (req, res) => {
