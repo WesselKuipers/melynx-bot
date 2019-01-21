@@ -37,9 +37,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, 'build')));
 app.get('/', async (req, res) => {
-  const catFact = await axios.get('https://cat-fact.herokuapp.com/facts/random');
-  res.send(`<p style='font-family: sans-serif;'>${catFact.data.text}</p>`);
-  // res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  // const catFact = await axios.get('https://cat-fact.herokuapp.com/facts/random');
+  // res.send(`<p style='font-family: sans-serif;'>${catFact.data.text}</p>`);
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 app.get('/api/sessions/:guildId(\\d+)?', cors(), async (req, res) => {
