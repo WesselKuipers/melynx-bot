@@ -11,6 +11,8 @@ let sessions = [];
 /** @type {Sequelize.Model} */
 let SessionDb;
 
+const sessionChannelTimers = {};
+
 export default class Session {
   constructor() {
     this.config = {
@@ -34,6 +36,7 @@ export default class Session {
   async init(client) {
     client.defaultSettings.sessionTimeout = 28800000; // 8 hours
     client.defaultSettings.sessionRefreshTimeout = 5 * 60 * 1000; // 5 minutes
+    client.defaultSettings.sessionChannel = undefined;
 
     /** @type {Sequelize.Sequelize} */
     const db = client.db;
@@ -50,22 +53,32 @@ export default class Session {
 
     await SessionDb.sync();
     sessions = await SessionDb.findAll().map(async (session) => {
-      const { prefix, sessionTimeout, sessionRefreshTimeout } = {...client.defaultSettings, ...((await client.settings.findByPk(session.guildId)).settings)};
+      const conf = {...client.defaultSettings, ...((await client.settings.findByPk(session.guildId)).settings)};
+      const { prefix, sessionTimeout, sessionRefreshTimeout } = conf;
       const channel = client.channels.get(session.channelId);
       
       client.log('Restoring session: ' + session.sessionId);
-      let posted = session.date.getTime();
-      let now = new Date().getTime();
-      let remaining = posted - now + Number(sessionTimeout);
+      const posted = session.date.getTime();
+      const now = new Date().getTime();
+      const remaining = posted - now + Number(sessionTimeout);
 
       session.timer = setTimeout(() => this.handleExpiredSession(client, channel, prefix, sessionTimeout, sessionRefreshTimeout, session), remaining);
       return session;
     });
+
+    const guilds = await client.settings.findAll();
+    
+    guilds.map( ({ guildId, settings }) => {
+      if (settings.sessionChannel && !sessionChannelTimers[guildId]) {
+        const timer = setInterval(async () => await this.updateSessionMessage(client, settings), 5 * 60 * 1000);
+        sessionChannelTimers[guildId] = timer;
+      }
+    });
   }
 
-  async listSessions(conf, channel) {
-    const sessionMessage = [];
+  buildSessionMessage(conf, channel) {
     const { prefix } = conf;
+    const sessionMessage = [];
 
     sessions.filter(s => s.guildId === channel.guild.id).map(s => {
       sessionMessage.push(`(${Math.floor(moment.duration(moment().diff(s.date)).asMinutes())}m ago by ${s.creator}) [${s.platform}]: ${s.sessionId}${s.description}`);
@@ -75,6 +88,11 @@ export default class Session {
       sessionMessage.push('There are no active sessions! Feel free to create one yourself! ' + prefix);
     }
 
+    return sessionMessage;
+  }
+
+  async listSessions(conf, channel) {
+    const sessionMessage = this.buildSessionMessage(conf, channel);
     channel.send(sessionMessage, { split: true });
   }
 
@@ -134,11 +152,60 @@ export default class Session {
       });
   }
 
+  async createSessionMessage(client, conf, channel) {
+    const sessionChannelMessage = await channel.send(this.buildSessionMessage(conf, channel), {split: true});
+        await client.settings.update({ 
+          settings: { 
+            ...conf,
+            sessionChannelMessage: sessionChannelMessage.id 
+          }
+        }, { where: { guildId: channel.guild.id }});
+
+    return sessionChannelMessage;
+  }
+
+  /**
+   * 
+   * @param {Discord.Client} client 
+   * @param {Object} conf 
+   */
+  async updateSessionMessage(client, conf) {
+    if (conf.sessionChannel) {
+      /**
+       * @type {Discord.TextChannel}
+       */
+      const channel = client.channels.find(channel => channel.id === conf.sessionChannel.replace(/<|#|>/g, ''));
+
+      if (!conf.sessionChannelMessage) {
+        await this.createSessionMessage(client, conf, channel);
+      } else {
+        try {
+        const sessionChannelMessage = await channel.fetchMessage(conf.sessionChannelMessage);
+        sessionChannelMessage.edit(this.buildSessionMessage(conf, channel).join('\n'));
+        } catch (e) {
+          await this.createSessionMessage(client, conf, channel);
+        }
+      }
+    }
+  }
+
+  /**
+   * 
+   * @param {Discord.Client} client 
+   * @param {Discord.Message} message 
+   * @param {Object} conf 
+   * @param {string[]} params 
+   */
   async run(client, message, conf, params) {
+    if (conf.sessionChannel && !sessionChannelTimers[message.guild.id]) {
+      const timer = setInterval(async () => await this.updateSessionMessage(client, conf), 5 * 60 * 1000);
+      sessionChannelTimers[message.guild.id] = timer;
+    }
+
     if (!params.length) {
       this.listSessions(conf, message.channel);
       return;
-    }
+    }    
 
     const joinedParams = params.join(' ');
     const foundPC = pc.exec(joinedParams);
