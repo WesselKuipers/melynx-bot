@@ -103,6 +103,10 @@ export default class CFGBot {
     this.client.aliases = this.aliases;
   }
 
+  /**
+   * 
+   * @param {Discord.Message} message 
+   */
   async message(message) {
     if (message.author === this.client.user) {
       return; // don't respond to yourself
@@ -137,6 +141,14 @@ export default class CFGBot {
 
     if (command.config.ownerOnly && message.author.id !== '86708235888783360') {
       return;
+    }
+
+    if (command.config.permissionLevel > 0) {
+      const isAdmin = message.member.roles.some(roles => roles.name === guildConf.adminRole) || message.author.id === '86708235888783360';
+      const isMod = message.member.roles.some(roles => roles.name === guildConf.modRole || roles.name === guildConf.adminRole) || message.author.id === '86708235888783360';
+
+      if (command.config.permissionLevel === 1 && !isMod) { return; }
+      if (command.config.permissionLevel === 2 && !isAdmin) { return; }
     }
 
     await command.run(this.client, message, guildConf, params);
