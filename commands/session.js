@@ -46,7 +46,7 @@ export default class Session {
       id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
       guildId: { type: Sequelize.STRING, notNull: true },
       creator: { type: Sequelize.STRING, notNull: true },
-      platform: { type: Sequelize.STRING, notNull: true, contains: ['Switch', 'PC', 'PS4', 'Unknown'] },
+      platform: { type: Sequelize.STRING, notNull: true, contains: ['Switch', 'PC', 'PS4', 'XB1', 'Unknown'] },
       description: Sequelize.STRING,
       sessionId: { type: Sequelize.STRING, unique: true, notNull: true },
       channelId: { type: Sequelize.STRING, notNull: true },
@@ -243,7 +243,7 @@ export default class Session {
     if (foundMHW) {
       session.sessionId = foundMHW[0];
       session.description = foundMHW.input.slice(foundMHW[0].length + foundMHW.index);
-      session.platform = dotProp.get(conf, `channelSettings.${message.channel.id}.platform`) || (message.channel.name.toUpperCase().contains("PS4") && "PS4") || (message.channel.name.toUpperCase().contains("PC") && "PC")
+      session.platform = dotProp.get(conf, `channelSettings.${message.channel.id}.platform`) || (message.channel.name.toUpperCase().contains("PS4") && "PS4") || (message.channel.name.toUpperCase().contains("PC") && "PC") || (message.channel.name.toUpperCase().contains("XB1") && "XB1")
     }
 
     if (foundMHGU) {
