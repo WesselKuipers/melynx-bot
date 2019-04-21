@@ -1,3 +1,5 @@
+import dotProp from 'dot-prop';
+
 export default class SetConf {
   constructor() {
     this.config = {
@@ -20,17 +22,16 @@ export default class SetConf {
     const [prop, ...value] = params;
     const config = { ...client.defaultSettings, ...conf };
 
-    if(!config.hasOwnProperty(prop)) {
-      return message.reply('This key is not in the configuration.');
-    }
+    // replaces any mentions with regular IDs
+    const cleanedProp = prop.replace(/<[@|#|&](\d+)>/, '$1');
 
     const update = await client.settings.update({ 
       settings: { 
-        ...config,
-        [prop]: value.join(' ')},
+        ...dotProp.set(config, cleanedProp, value.join(' '))
+      },
     }, { where: { guildId: message.guild.id }});
     if (update > 0) {
-      message.channel.send(`Guild configuration item ${prop} has been changed to:\n\`${value.join(' ')}\``);
+      message.channel.send(`Guild configuration item ${cleanedProp} has been changed to:\n\`${value.join(' ')}\``);
     }
   }
 }

@@ -1,10 +1,10 @@
 import Discord from 'discord.js';
 import moment from 'moment';
 import Sequelize from 'sequelize';
+import dotProp from 'dot-prop';
 
-const pc = /\b3pseat[a-zA-Z0-9]{5}\b/;
-const ps4 = /\b[a-zA-Z0-9]{11,12}\b/;
-const sw = /\b\d{2}-\d{4}-\d{4}-\d{4}\b/;
+const mhwRegex = /\b[a-zA-Z0-9]{11,12}\b/;
+const mhguRegex = /\b\d{2}-\d{4}-\d{4}-\d{4}\b/;
 
 let sessions = [];
 
@@ -37,6 +37,7 @@ export default class Session {
     client.defaultSettings.sessionTimeout = 28800000; // 8 hours
     client.defaultSettings.sessionRefreshTimeout = 5 * 60 * 1000; // 5 minutes
     client.defaultSettings.sessionChannel = undefined;
+    client.defaultSettings.channelSettings = {};
 
     /** @type {Sequelize.Sequelize} */
     const db = client.db;
@@ -45,7 +46,7 @@ export default class Session {
       id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
       guildId: { type: Sequelize.STRING, notNull: true },
       creator: { type: Sequelize.STRING, notNull: true },
-      platform: { type: Sequelize.STRING, notNull: true, contains: ['Switch', 'PC', 'PS4'] },
+      platform: { type: Sequelize.STRING, notNull: true, contains: ['Switch', 'PC', 'PS4', 'Unknown'] },
       description: Sequelize.STRING,
       sessionId: { type: Sequelize.STRING, unique: true, notNull: true },
       channelId: { type: Sequelize.STRING, notNull: true },
@@ -208,9 +209,8 @@ export default class Session {
     }    
 
     const joinedParams = params.join(' ');
-    const foundPC = pc.exec(joinedParams);
-    const foundPS4 = ps4.exec(joinedParams);
-    const foundSwitch = sw.exec(joinedParams);
+    const foundMHW = mhwRegex.exec(joinedParams);
+    const foundMHGU = mhguRegex.exec(joinedParams);
     
     const { prefix, sessionTimeout, sessionRefreshTimeout } = { ...client.defaultSettings, ...conf };
 
@@ -229,7 +229,7 @@ export default class Session {
       return;
     }
 
-    if (!foundPC && !foundPS4 && !foundSwitch) {
+    if (!foundMHW && !foundMHGU) {
       message.channel.send('Couldn\'t find any sessions, nya...');
       return;
     }
@@ -240,27 +240,26 @@ export default class Session {
       guildId: message.guild.id,
     };
 
-    if (foundPC) {
-      session.sessionId = foundPC[0];
-      session.description = foundPC.input.slice(foundPC[0].length + foundPC.index);
-      session.platform = 'PC';
+    if (foundMHW) {
+      session.sessionId = foundMHW[0];
+      session.description = foundMHW.input.slice(foundMHW[0].length + foundMHW.index);
+      session.platform = dotProp.get(conf, `channelSettings.${message.channel.id}.platform`) || (message.channel.name.toUpperCase().contains("PS4") && "PS4") || (message.channel.name.toUpperCase().contains("PC") && "PC")
     }
 
-    if (foundSwitch) {
+    if (foundMHGU) {
       session.sessionId = foundSwitch[0];
       session.description = foundSwitch.input.slice(foundSwitch[0].length + foundSwitch.index);
       session.platform = 'Switch';
     }
 
-    if (foundPS4 && !foundPC) {
-      session.sessionId = foundPS4[0];
-      session.description = foundPS4.input.slice(foundPS4[0].length + foundPS4.index);
-      session.platform = 'PS4';
-    }
-
     if (sessions.some(s => s.sessionId === session.sessionId && s.guildId === message.guild.id)) {
       message.channel.send('A lobby with this ID already exists!');
       return;
+    }
+
+    if (!session.platform) {
+      message.channel.send('Could not determine the session\'s platform..');
+      session.platform = 'Unknown';
     }
 
     message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);

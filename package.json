@@ -9,6 +9,7 @@
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "discord.js": "^11.4.2",
+    "dot-prop": "^5.0.0",
     "es6-promise": "^4.2.5",
     "esm": "^3.0.82",
     "express": "^4.16.3",

@@ -3,7 +3,7 @@ export default class GetConf {
     this.config = {
       enabled: true,
       permissionLevel: 0,
-      aliases: [],
+      aliases: ['getconfig'],
       guildOnly: true,
       ownerOnly: true,
       cooldown: 5,
