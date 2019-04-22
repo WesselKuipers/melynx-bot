@@ -190,17 +190,20 @@ export default class Session {
       const channel = client.channels.find(channel => channel.id === conf.sessionChannel.replace(/<|#|>/g, ''));
 
       if (!channel) {
+        client.log(`Unable to find channel ${conf.sessionChannel}, removing it.`);
         await this.removeSessionChannel(client, conf);
         return;
       }
 
       if (!conf.sessionChannelMessage) {
+        client.log(`SessionChannelMessage was not set, creating a new one.`);
         await this.createSessionMessage(client, conf, channel);
       } else {
         try {
         const sessionChannelMessage = await channel.fetchMessage(conf.sessionChannelMessage);
         sessionChannelMessage.edit(this.buildSessionMessage(conf, channel).join('\n'));
         } catch (e) {
+          client.log(`Unable to fetch sessionChannelMessage ${conf.sessionChannelMessage}, creating a new one.`);
           await this.createSessionMessage(client, conf, channel);
         }
       }
