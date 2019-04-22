@@ -234,7 +234,7 @@ export default class Session {
       return;
     }
 
-    let session = {
+    const session = {
       creator: message.author.username,
       date: moment(),
       guildId: message.guild.id,
@@ -247,8 +247,8 @@ export default class Session {
     }
 
     if (foundMHGU) {
-      session.sessionId = foundSwitch[0];
-      session.description = foundSwitch.input.slice(foundSwitch[0].length + foundSwitch.index);
+      session.sessionId = foundMHGU[0];
+      session.description = foundMHGU.input.slice(foundMHGU[0].length + foundMHGU.index);
       session.platform = 'Switch';
     }
 
