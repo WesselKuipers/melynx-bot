@@ -73,6 +73,7 @@ export default class Session {
       if (settings.sessionChannel && !sessionChannelTimers[guildId]) {
         const timer = setInterval(async () => await this.updateSessionMessage(client, settings), 5 * 60 * 1000);
         sessionChannelTimers[guildId] = timer;
+        this.updateSessionMessage(client, settings);
       }
     });
   }
@@ -226,6 +227,7 @@ export default class Session {
       this.removeSession(session.id);
       clearTimeout(session.timer);
       message.channel.send(`Remeowved session ${session.sessionId}! ${prefix}`);
+      await this.updateSessionMessage(client, conf);
       return;
     }
 
@@ -278,5 +280,6 @@ export default class Session {
     dbSes.timer = setTimeout(() => this.handleExpiredSession(client, message.channel, prefix, sessionTimeout, sessionRefreshTimeout, dbSes), sessionTimeout); // auto clear after (default) 8 hours;
 
     sessions.push(dbSes);
+    await this.updateSessionMessage(client, conf);
   }
 }
