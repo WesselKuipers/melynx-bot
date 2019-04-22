@@ -54,7 +54,7 @@ export default class Session {
 
     await SessionDb.sync();
     sessions = await SessionDb.findAll().map(async (session) => {
-      const conf = {...client.defaultSettings, ...((await client.settings.findByPk(session.guildId)).settings)};
+      const conf = {...client.defaultSettings, ...((await client.settings.findByPk(session.guildId)).settings), guildId: session.guildId};
       const { prefix, sessionTimeout, sessionRefreshTimeout } = conf;
       const channel = client.channels.get(session.channelId);
       
@@ -166,6 +166,17 @@ export default class Session {
     return sessionChannelMessage;
   }
 
+  async removeSessionChannel(client, conf) {
+    client.log('Removing session channel on guild: ' + conf.guildId);
+    await client.settings.update({
+      settings: {
+        ...conf,
+        sessionChannel: '',
+        sessionChannelMessage: null,
+      }
+    }, { where: { guildId: conf.guildId }});
+  }
+
   /**
    * 
    * @param {Discord.Client} client 
@@ -177,6 +188,11 @@ export default class Session {
        * @type {Discord.TextChannel}
        */
       const channel = client.channels.find(channel => channel.id === conf.sessionChannel.replace(/<|#|>/g, ''));
+
+      if (!channel) {
+        await this.removeSessionChannel(client, conf);
+        return;
+      }
 
       if (!conf.sessionChannelMessage) {
         await this.createSessionMessage(client, conf, channel);
@@ -213,7 +229,7 @@ export default class Session {
     const foundMHW = mhwRegex.exec(joinedParams);
     const foundMHGU = mhguRegex.exec(joinedParams);
     
-    const { prefix, sessionTimeout, sessionRefreshTimeout } = { ...client.defaultSettings, ...conf };
+    const { prefix, sessionTimeout, sessionRefreshTimeout } = { ...client.defaultSettings, ...conf, guildId: message.guild.id };
 
     if (params[0] === 'r' || params[0] === 'remove') {
       const sessionId = params[1];
