@@ -19,7 +19,7 @@ export default class Role {
     this.help = {
       name: 'role',
       description: 'Allows you to join or leave mentionable roles.',
-      usage: 'role [role] (Joins or leaves a role)\nrole list (Lists all joinable roles)',
+      usage: '{prefix} role [role] (Joins or leaves a role)\n{prefix} role list (Lists all joinable roles)',
     };
   }
 

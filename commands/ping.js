@@ -11,7 +11,7 @@ export default class Ping {
     this.help = {
       name: 'ping',
       description: 'Pings the bot, will respond with `Pong! ([latency] ms)`',
-      usage: 'ping',
+      usage: '{prefix} ping',
     };
   }
 

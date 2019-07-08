@@ -11,14 +11,14 @@ export default class Help {
     this.help = {
       name: 'help',
       description: 'List all of my commands or info about a specific command.',
-      usage: 'help [command name]',
+      usage: '{prefix} help [command name]',
     };
   }
 
   run(client, message, conf, params) {
     if (!params.length) {
       const commands = [...client.commands.filter(command => !command.config.ownerOnly).keys()];
-      message.channel.send(`Available commands: ${commands.join(', ')}\nType ${conf.prefix} ${this.help.usage} for more info!`);
+      message.channel.send(`Available commands: ${commands.join(', ')}\nType ${this.help.usage} for more info!`);
       return;
     }
 
@@ -37,7 +37,7 @@ export default class Help {
     }
 
     data.push(`**Description:** ${command.help.description}`);
-    data.push(`**Usage:** ${command.help.usage}`);  
+    data.push(`**Usage:** ${command.help.usage.replace(/{prefix}/g, conf.prefix)}`);  
     
     message.channel.send(data, {split: true});
   }

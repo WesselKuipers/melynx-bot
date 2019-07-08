@@ -14,7 +14,7 @@ export default class SetConf {
     this.help = {
       name: 'setconf',
       description: 'Sets server-specific config settings',
-      usage: 'setconf [prop] [value]',
+      usage: '{prefix} setconf [prop] [value]',
     };
   }
 

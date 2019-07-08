@@ -26,7 +26,7 @@ export default class Session {
     this.help = {
       name: 'session',
       description: 'Lists all current sessions or adds one. Sessions expire automatically after 8 hours.',
-      usage: 'session (lists current sessions)\nsession [session id] [description] (Adds a new session)\nsession [remove|r] [session id] (Removes a session)',
+      usage: '{prefix} session (lists current sessions)\n{prefix} session [session id] [description] (Adds a new session)\n{prefix} session [remove|r] [session id] (Removes a session)',
     };
   }
 

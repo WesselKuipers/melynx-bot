@@ -12,7 +12,7 @@ export default class GetConf {
     this.help = {
       name: 'getconf',
       description: 'Lists server-specific config settings',
-      usage: 'getconf',
+      usage: '{prefix} getconf',
     };
   }
 
