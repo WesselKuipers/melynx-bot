@@ -18,33 +18,44 @@ export default class Role {
     this.help = {
       name: 'role',
       description: 'Allows you to join or leave mentionable roles.',
-      usage: '{prefix} role [role] (Joins or leaves a role)\n{prefix} role list (Lists all joinable roles)',
+      usage:
+        '{prefix} role [role] (Joins or leaves a role)\n{prefix} role list (Lists all joinable roles)',
     };
 
-    this.init = async (client) => {
+    this.init = async client => {
       client.defaultSettings.sessionTimeout = 28800000; // 8 hours
       client.defaultSettings.sessionRefreshTimeout = 5 * 60 * 1000; // 5 minutes
 
       /** @type {Sequelize.Sequelize} */
       const { db } = client;
 
-      RoleDb = db.define('role', {
-        id: { type: Sequelize.STRING, primaryKey: true },
-        guildId: { type: Sequelize.STRING, notNull: true },
-        name: { type: Sequelize.STRING, notNull: true },
-      }, { createdAt: 'date' });
+      RoleDb = db.define(
+        'role',
+        {
+          id: { type: Sequelize.STRING, primaryKey: true },
+          guildId: { type: Sequelize.STRING, notNull: true },
+          name: { type: Sequelize.STRING, notNull: true },
+        },
+        { createdAt: 'date' }
+      );
 
       await RoleDb.sync();
     };
 
-    this.listRoles = async (message) => {
-      const roles = await RoleDb.findAll({ where: { guildId: message.guild.id } }) || [{ name: '(none)' }];
-      message.channel.send(`List of joinable roles: ${roles.map(role => `\`${role.name}\``).join(', ')}`);
+    this.listRoles = async message => {
+      const roles = (await RoleDb.findAll({
+        where: { guildId: message.guild.id },
+      })) || [{ name: '(none)' }];
+      message.channel.send(
+        `List of joinable roles: ${roles
+          .map(role => `\`${role.name}\``)
+          .join(', ')}`
+      );
     };
 
     /**
-   * @param {Discord.Message} message
-   */
+     * @param {Discord.Message} message
+     */
     this.addRole = async (message, conf, params) => {
       if (params.length !== 2) {
         message.channel.send('Invalid amount of parameters provided, nya!');
@@ -52,15 +63,19 @@ export default class Role {
       }
 
       if (message.author.id !== '86708235888783360') {
-        if (!message.member.roles
-          .findAll(r => r.name === conf.modRole || r.name === conf.adminRole).length) {
+        if (
+          !message.member.roles.findAll(
+            r => r.name === conf.modRole || r.name === conf.adminRole
+          ).length
+        ) {
           return;
         }
       }
 
       const roleName = params.splice(1).join(' ');
       const role = message.guild.roles
-        .filter(r => r.name.toLowerCase() === roleName.toLowerCase()).first();
+        .filter(r => r.name.toLowerCase() === roleName.toLowerCase())
+        .first();
 
       if (!role) {
         message.channel.send(`Role ${roleName} doesn't exist!`);
@@ -68,12 +83,13 @@ export default class Role {
       }
 
       if (!role.editable) {
-        message.channel.send('I\'m not allowed to assign this role!');
+        message.channel.send("I'm not allowed to assign this role!");
         return;
       }
 
-      const result = await RoleDb
-        .findCreateFind({ where: { id: role.id, name: role.name, guildId: message.guild.id } });
+      const result = await RoleDb.findCreateFind({
+        where: { id: role.id, name: role.name, guildId: message.guild.id },
+      });
       if (!result[1]) {
         message.channel.send(`Role ${role.name} already exists`);
       } else {
@@ -82,8 +98,8 @@ export default class Role {
     };
 
     /**
-   * @param {Discord.Message} message
-   */
+     * @param {Discord.Message} message
+     */
     this.removeRole = async (message, conf, params) => {
       if (params.length < 2) {
         message.channel.send('Invalid amount of parameters provided, nya!');
@@ -91,14 +107,24 @@ export default class Role {
       }
 
       if (message.author.id !== '86708235888783360') {
-        if (!message.member.roles
-          .findAll(r => r.name === conf.modRole || r.name === conf.adminRole).length) {
+        if (
+          !message.member.roles.findAll(
+            r => r.name === conf.modRole || r.name === conf.adminRole
+          ).length
+        ) {
           return;
         }
       }
 
       const roleName = params.splice(1).join(' ');
-      const result = await RoleDb.destroy({ where: { name: Sequelize.where(Sequelize.fn('lower', Sequelize.col('name')), Sequelize.fn('lower', roleName)) } });
+      const result = await RoleDb.destroy({
+        where: {
+          name: Sequelize.where(
+            Sequelize.fn('lower', Sequelize.col('name')),
+            Sequelize.fn('lower', roleName)
+          ),
+        },
+      });
 
       if (result) {
         message.channel.send(`Removed role ${roleName}`);
@@ -108,14 +134,23 @@ export default class Role {
     };
 
     /**
-   * @param {Discord.Message} message
-   */
+     * @param {Discord.Message} message
+     */
     this.handleRoleJoin = async (message, params) => {
       const roleName = params.join(' ');
-      const role = await RoleDb.findOne({ where: { name: Sequelize.where(Sequelize.fn('lower', Sequelize.col('name')), Sequelize.fn('lower', roleName)) } });
+      const role = await RoleDb.findOne({
+        where: {
+          name: Sequelize.where(
+            Sequelize.fn('lower', Sequelize.col('name')),
+            Sequelize.fn('lower', roleName)
+          ),
+        },
+      });
 
       if (!role) {
-        message.channel.send(`Could not find a joinable role called ${roleName}`);
+        message.channel.send(
+          `Could not find a joinable role called ${roleName}`
+        );
       }
 
       if (message.member.roles.has(role.id)) {
@@ -127,11 +162,11 @@ export default class Role {
       }
     };
     /**
-   * @param {Discord.Client} client
-   * @param {Discord.Message} message
-   * @param {Object} conf
-   * @param {String[]} params
-   */
+     * @param {Discord.Client} client
+     * @param {Discord.Message} message
+     * @param {Object} conf
+     * @param {String[]} params
+     */
     this.run = async (client, message, conf, params) => {
       if (!params.length) {
         new Help().run(client, message, conf, [this.help.name]);

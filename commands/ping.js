@@ -15,7 +15,11 @@ export default class Ping {
     };
 
     this.run = (client, message) => {
-      message.channel.send(`Pong! (${Math.abs(new Date().getTime() - message.createdTimestamp)} ms)`);
+      message.channel.send(
+        `Pong! (${Math.abs(
+          new Date().getTime() - message.createdTimestamp
+        )} ms)`
+      );
     };
   }
 }

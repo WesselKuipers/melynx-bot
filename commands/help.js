@@ -17,13 +17,23 @@ export default class Help {
 
   run(client, message, conf, params) {
     if (!params.length) {
-      const commands = [...client.commands.filter(command => !command.config.ownerOnly).keys()];
-      message.channel.send(`Available commands: ${commands.join(', ')}\nType ${this.help.usage.replace(/{prefix}/g, conf.prefix)} for more info!`);
+      const commands = [
+        ...client.commands.filter(command => !command.config.ownerOnly).keys(),
+      ];
+      message.channel.send(
+        `Available commands: ${commands.join(
+          ', '
+        )}\nType ${this.help.usage.replace(
+          /{prefix}/g,
+          conf.prefix
+        )} for more info!`
+      );
       return;
     }
 
     const commandName = params[0];
-    const command = client.commands.get(commandName) || client.aliases.get(commandName);
+    const command =
+      client.commands.get(commandName) || client.aliases.get(commandName);
 
     if (!command || command.ownerOnly) {
       message.channel.send(`Command ${commandName} does not exist, nya!`);
@@ -37,7 +47,9 @@ export default class Help {
     }
 
     data.push(`**Description:** ${command.help.description}`);
-    data.push(`**Usage:** ${command.help.usage.replace(/{prefix}/g, conf.prefix)}`);
+    data.push(
+      `**Usage:** ${command.help.usage.replace(/{prefix}/g, conf.prefix)}`
+    );
 
     message.channel.send(data, { split: true });
   }

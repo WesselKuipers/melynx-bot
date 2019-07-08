@@ -18,7 +18,9 @@ try {
 
 if (!process.env.TOKEN || !process.env.PREFIX || !process.env.DATABASE_URL) {
   // eslint-disable-next-line no-console
-  console.log('TOKEN, PREFIX and DATABASE_URL environment variables must be present');
+  console.log(
+    'TOKEN, PREFIX and DATABASE_URL environment variables must be present'
+  );
 }
 
 const options = {
@@ -37,14 +39,19 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, 'build')));
 app.get('/', async (req, res) => {
-  const catFact = await axios.get('https://cat-fact.herokuapp.com/facts/random');
+  const catFact = await axios.get(
+    'https://cat-fact.herokuapp.com/facts/random'
+  );
   res.send(`<p style='font-family: sans-serif;'>${catFact.data.text}</p>`);
 });
 
 app.get('/api/sessions/:guildId(\\d+)?', cors(), async (req, res) => {
   const { guildId } = req.params;
   const sessions = guildId
-    ? await bot.client.db.models.session.findAll({ where: { guildId }, raw: true })
+    ? await bot.client.db.models.session.findAll({
+        where: { guildId },
+        raw: true,
+      })
     : await bot.client.db.models.session.findAll({ raw: true });
 
   return res.send(sessions);

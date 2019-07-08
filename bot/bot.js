@@ -49,17 +49,17 @@ export default class CFGBot {
       adminRole: 'Administrator',
     };
 
-    this.log = (message) => {
+    this.log = message => {
       // eslint-disable-next-line no-console
       console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${message}`);
     };
 
-    this.error = (error) => {
+    this.error = error => {
       // Logging all errors by default
       this.log(`Error: ${error.message.replace(regToken, '[TOKEN]')}`);
     };
 
-    this.warn = (warning) => {
+    this.warn = warning => {
       this.log(`Warning: ${warning.replace(regToken, '[TOKEN]')}`);
     };
 
@@ -72,14 +72,22 @@ export default class CFGBot {
     this.client.login(this.settings.token);
 
     this.client.on('ready', () => {
-      this.log(`Connected to ${this.client.users.size} users on ${this.client.guilds.size} servers.`);
+      this.log(
+        `Connected to ${this.client.users.size} users on ${this.client.guilds.size} servers.`
+      );
       this.loadCommands();
 
-      this.client.user.setPresence({ status: 'online', game: { name: playingLines[Math.floor(Math.random() * playingLines.length)], type: 'PLAYING' } });
+      this.client.user.setPresence({
+        status: 'online',
+        game: {
+          name: playingLines[Math.floor(Math.random() * playingLines.length)],
+          type: 'PLAYING',
+        },
+      });
       this.client.settings.sync();
     });
 
-    this.client.on('guildDelete', (guild) => {
+    this.client.on('guildDelete', guild => {
       // When the bot leaves or is kicked, delete settings to prevent stale entries.
       this.client.settings.delete(guild.id);
     });
@@ -97,32 +105,44 @@ export default class CFGBot {
 
       this.log(`Loading ${files.length} commands: ${files}`);
 
-      files.filter(n => n.endsWith('.js')).forEach(async (f) => {
-        // eslint-disable-next-line global-require, import/no-dynamic-require
-        const command = require(`../commands/${f}`);
-        // eslint-disable-next-line new-cap
-        const c = new command.default();
+      files
+        .filter(n => n.endsWith('.js'))
+        .forEach(async f => {
+          // eslint-disable-next-line global-require, import/no-dynamic-require
+          const command = require(`../commands/${f}`);
+          // eslint-disable-next-line new-cap
+          const c = new command.default();
 
-        // If command has an init method, run it
-        if (c.init) {
-          this.log(`Running init of ${c.help.name}`);
-          await c.init(this.client);
-        }
+          // If command has an init method, run it
+          if (c.init) {
+            this.log(`Running init of ${c.help.name}`);
+            await c.init(this.client);
+          }
 
-        // Assign the main command name to commands, as well as all of its aliases
-        this.commands.set(c.help.name, c);
-        if (c.config.aliases) {
-          c.config.aliases.forEach((alias) => {
-            if (this.aliases.has(alias)) {
-              this.log(`Warning: Command ${c.help.name} alias ${alias} overlaps with command ${this.aliases.get(alias).help.name}.\r\nOld alias will be overwritten.`);
-            }
+          // Assign the main command name to commands, as well as all of its aliases
+          this.commands.set(c.help.name, c);
+          if (c.config.aliases) {
+            c.config.aliases.forEach(alias => {
+              if (this.aliases.has(alias)) {
+                this.log(
+                  `Warning: Command ${
+                    c.help.name
+                  } alias ${alias} overlaps with command ${
+                    this.aliases.get(alias).help.name
+                  }.\r\nOld alias will be overwritten.`
+                );
+              }
 
-            this.aliases.set(alias, c);
-          });
-        }
+              this.aliases.set(alias, c);
+            });
+          }
 
-        this.log(`Loaded command [${c.help.name}] with aliases [${c.config.aliases.join(', ')}]`);
-      });
+          this.log(
+            `Loaded command [${
+              c.help.name
+            }] with aliases [${c.config.aliases.join(', ')}]`
+          );
+        });
     });
 
     this.client.commands = this.commands;
@@ -148,8 +168,13 @@ export default class CFGBot {
       this.log(`Initialized config for guild ${message.guild.id}`);
     }
 
-    const guildConf = { ...this.defaultSettings, ...guildConfEntry.get('settings') };
-    const prefixRegex = new RegExp(`^(<@!?${this.client.user.id}>|${escapeRegex(guildConf.prefix)})\\s*`);
+    const guildConf = {
+      ...this.defaultSettings,
+      ...guildConfEntry.get('settings'),
+    };
+    const prefixRegex = new RegExp(
+      `^(<@!?${this.client.user.id}>|${escapeRegex(guildConf.prefix)})\\s*`
+    );
 
     if (!prefixRegex.test(message.content)) {
       return; // doesn't start with prefix or mention, don't care what the message is
@@ -162,7 +187,8 @@ export default class CFGBot {
     const commandName = message.content.split(/ +/)[1].toLowerCase();
     const params = message.content.split(/ +/).slice(2);
 
-    const command = this.commands.get(commandName) || this.aliases.get(commandName);
+    const command =
+      this.commands.get(commandName) || this.aliases.get(commandName);
     if (!command) return;
 
     if (command.config.guildOnly && message.channel.type !== 'text') {
@@ -174,11 +200,23 @@ export default class CFGBot {
     }
 
     if (command.config.permissionLevel > 0) {
-      const isAdmin = message.member.roles.some(roles => roles.name === guildConf.adminRole) || message.author.id === '86708235888783360';
-      const isMod = message.member.roles.some(roles => roles.name === guildConf.modRole || roles.name === guildConf.adminRole) || message.author.id === '86708235888783360';
+      const isAdmin =
+        message.member.roles.some(
+          roles => roles.name === guildConf.adminRole
+        ) || message.author.id === '86708235888783360';
+      const isMod =
+        message.member.roles.some(
+          roles =>
+            roles.name === guildConf.modRole ||
+            roles.name === guildConf.adminRole
+        ) || message.author.id === '86708235888783360';
 
-      if (command.config.permissionLevel === 1 && !isMod) { return; }
-      if (command.config.permissionLevel === 2 && !isAdmin) { return; }
+      if (command.config.permissionLevel === 1 && !isMod) {
+        return;
+      }
+      if (command.config.permissionLevel === 2 && !isAdmin) {
+        return;
+      }
     }
 
     await command.run(this.client, message, guildConf, params);
