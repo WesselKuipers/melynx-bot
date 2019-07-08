@@ -286,7 +286,8 @@ export default class Session {
     message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);
 
     // see: http://www.asciitable.com/
-    session.description = session.description.replace(/[^\x20-\x9A]|[<@>]/g, '').slice(0, 100);
+    
+    session.description = Discord.Util.escapeMarkdown(session.description).slice(0, 180);
     let dbSes = await SessionDb.create({ 
       guildId: session.guildId,
       creator: session.creator,
