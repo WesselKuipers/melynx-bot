@@ -9,6 +9,7 @@ import Sequelize from 'sequelize';
 es6.polyfill();
 
 const regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
+const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const playingLines = [
   'stealing gems from hunters',
   'with a hunter',
@@ -17,6 +18,12 @@ const playingLines = [
   'with your palico',
   'with the Meowstress',
   'with the Mewstress',
+  'Monster Hunter World: Iceborne',
+  'Monster Hunter World',
+  'Monster Hunter Generations Ultimate',
+  'Monster Hunter 4 Ultimate',
+  'Monster Hunter Frontier',
+  'with a Khezu',
 ];
 
 export default class CFGBot {
@@ -120,17 +127,18 @@ export default class CFGBot {
     }
 
     const guildConf = { ...this.defaultSettings, ...guildConfEntry.get('settings') };
+    const prefixRegex = new RegExp(`^(<@!?${this.client.user.id}>|${escapeRegex(guildConf.prefix)})\\s*`);
 
-    if (!message.content.startsWith(guildConf.prefix)) {
-      return; // doesn't start with prefix, don't care what the message is
+    if (!prefixRegex.test(message.content)) {
+      return; // doesn't start with prefix or mention, don't care what the message is
     }
 
-    if (message.content.startsWith(guildConf.prefix) && message.content.length === guildConf.prefix.length) {
-      return; // someone only said the prefix and nothing else
+    if (message.content.split(/ +/).length === 1) {
+      return; // usage of mention or prefix without a command
     }
 
-    const commandName = message.content.split(/ +/)[1].toLowerCase(); // .slice(this.settings.prefix.length);
-    const params = message.content.split(/ +/).slice(2); // .slice(1);
+    const commandName = message.content.split(/ +/)[1].toLowerCase();
+    const params = message.content.split(/ +/).slice(2);
 
     const command = this.commands.get(commandName) || this.aliases.get(commandName);
     if (!command) return;
@@ -154,7 +162,6 @@ export default class CFGBot {
     await command.run(this.client, message, guildConf, params);
   }
   
-
   log(message) {
     // eslint-disable-next-line no-console
     console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${message}`);
