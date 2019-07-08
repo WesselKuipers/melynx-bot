@@ -1,5 +1,6 @@
 settings.json
 data/*
+.vscode
 
 # Logs
 logs
