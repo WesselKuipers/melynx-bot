@@ -24,8 +24,10 @@
     "watch": "nodemon -r esm index.js"
   },
   "devDependencies": {
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.14.0",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-flowtype": "^3.11.1",
+    "eslint-plugin-import": "^2.18.0",
     "nodemon": "^1.18.4"
   }
 }

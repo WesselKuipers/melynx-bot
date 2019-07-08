@@ -13,9 +13,9 @@ export default class Ping {
       description: 'Pings the bot, will respond with `Pong! ([latency] ms)`',
       usage: '{prefix} ping',
     };
-  }
 
-  run(client, message) {
-    message.channel.send(`Pong! (${Math.abs(new Date().getTime() - message.createdTimestamp)} ms)`);
+    this.run = (client, message) => {
+      message.channel.send(`Pong! (${Math.abs(new Date().getTime() - message.createdTimestamp)} ms)`);
+    };
   }
 }

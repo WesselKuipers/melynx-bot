@@ -42,13 +42,30 @@ export default class CFGBot {
 
     this.client.db = db;
     this.client.settings = guildSettings;
-    this.client.log = this.log;
 
     this.client.defaultSettings = {
       prefix: settings.prefix,
       modRole: 'Moderator',
       adminRole: 'Administrator',
     };
+
+    this.log = (message) => {
+      // eslint-disable-next-line no-console
+      console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${message}`);
+    };
+
+    this.error = (error) => {
+      // Logging all errors by default
+      this.log(`Error: ${error.message.replace(regToken, '[TOKEN]')}`);
+    };
+
+    this.warn = (warning) => {
+      this.log(`Warning: ${warning.replace(regToken, '[TOKEN]')}`);
+    };
+
+    this.client.log = this.log;
+    this.client.warn = this.warn;
+    this.client.error = this.error;
   }
 
   run() {
@@ -57,12 +74,12 @@ export default class CFGBot {
     this.client.on('ready', () => {
       this.log(`Connected to ${this.client.users.size} users on ${this.client.guilds.size} servers.`);
       this.loadCommands();
-      
-      this.client.user.setPresence({status: 'online', game: {name: playingLines[Math.floor(Math.random() * playingLines.length)], type: 'PLAYING' }});
+
+      this.client.user.setPresence({ status: 'online', game: { name: playingLines[Math.floor(Math.random() * playingLines.length)], type: 'PLAYING' } });
       this.client.settings.sync();
     });
 
-    this.client.on('guildDelete', guild => {
+    this.client.on('guildDelete', (guild) => {
       // When the bot leaves or is kicked, delete settings to prevent stale entries.
       this.client.settings.delete(guild.id);
     });
@@ -81,12 +98,14 @@ export default class CFGBot {
       this.log(`Loading ${files.length} commands: ${files}`);
 
       files.filter(n => n.endsWith('.js')).forEach(async (f) => {
+        // eslint-disable-next-line global-require, import/no-dynamic-require
         const command = require(`../commands/${f}`);
+        // eslint-disable-next-line new-cap
         const c = new command.default();
 
         // If command has an init method, run it
         if (c.init) {
-          this.log('Running init of ' + c.help.name);
+          this.log(`Running init of ${c.help.name}`);
           await c.init(this.client);
         }
 
@@ -111,8 +130,8 @@ export default class CFGBot {
   }
 
   /**
-   * 
-   * @param {Discord.Message} message 
+   *
+   * @param {Discord.Message} message
    */
   async message(message) {
     if (message.author === this.client.user) {
@@ -122,8 +141,11 @@ export default class CFGBot {
     let guildConfEntry = await this.client.settings.findByPk(message.guild.id);
 
     if (!guildConfEntry) {
-      guildConfEntry = await this.client.settings.create({ guildId: message.guild.id, settings: this.client.defaultSettings});
-      this.log('Initialized config for guild ' + message.guild.id);
+      guildConfEntry = await this.client.settings.create({
+        guildId: message.guild.id,
+        settings: this.client.defaultSettings,
+      });
+      this.log(`Initialized config for guild ${message.guild.id}`);
     }
 
     const guildConf = { ...this.defaultSettings, ...guildConfEntry.get('settings') };
@@ -143,8 +165,8 @@ export default class CFGBot {
     const command = this.commands.get(commandName) || this.aliases.get(commandName);
     if (!command) return;
 
-    if (command.config.guildOnly && message.channel.type !== 'text' ) {
-      return; 
+    if (command.config.guildOnly && message.channel.type !== 'text') {
+      return;
     }
 
     if (command.config.ownerOnly && message.author.id !== '86708235888783360') {
@@ -160,19 +182,5 @@ export default class CFGBot {
     }
 
     await command.run(this.client, message, guildConf, params);
-  }
-  
-  log(message) {
-    // eslint-disable-next-line no-console
-    console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${message}`);
-  }
-
-  error(error) {
-    // Logging all errors by default
-    this.log(`Error: ${error.message.replace(regToken, '[TOKEN]')}`);
-  }
-
-  warn(warning) {
-    this.log(`Warning: ${warning.replace(regToken, '[TOKEN]')}`);
   }
 }

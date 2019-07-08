@@ -14,10 +14,10 @@ export default class GetConf {
       description: 'Lists server-specific config settings',
       usage: '{prefix} getconf',
     };
-  }
 
-  async run(client, message, conf, params) {
-    const config = { ...client.defaultSettings, ...conf };
-    message.channel.send('```' + JSON.stringify(config, null, 2) + '```');
+    this.run = async (client, message, conf) => {
+      const config = { ...client.defaultSettings, ...conf };
+      message.channel.send(`\`\`\`${JSON.stringify(config, null, 2)}\`\`\``);
+    };
   }
 }

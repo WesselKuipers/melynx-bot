@@ -29,7 +29,7 @@ export default class Help {
       message.channel.send(`Command ${commandName} does not exist, nya!`);
     }
 
-    let data = [];
+    const data = [];
     data.push(`**Name:** ${command.help.name}`);
 
     if (command.config.aliases) {
@@ -37,8 +37,8 @@ export default class Help {
     }
 
     data.push(`**Description:** ${command.help.description}`);
-    data.push(`**Usage:** ${command.help.usage.replace(/{prefix}/g, conf.prefix)}`);  
-    
-    message.channel.send(data, {split: true});
+    data.push(`**Usage:** ${command.help.usage.replace(/{prefix}/g, conf.prefix)}`);
+
+    message.channel.send(data, { split: true });
   }
 }

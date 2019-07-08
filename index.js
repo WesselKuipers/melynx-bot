@@ -1,16 +1,16 @@
 import axios from 'axios';
-import MelynxBot from './bot/bot';
 import cors from 'cors';
 import express from 'express';
-import bodyParser from 'body-parser'; 
+import bodyParser from 'body-parser';
 import path from 'path';
+import MelynxBot from './bot/bot';
+import settings from './settings.json';
 
 try {
-  const options = require('./settings.json');
-  process.env.TOKEN = options.token;
-  process.env.PREFIX = options.prefix;
-  process.env.DATABASE_URL = options.databaseUrl;
-  process.env.DISABLEDEVENTS = JSON.stringify(options.disabledEvents);
+  process.env.TOKEN = settings.token;
+  process.env.PREFIX = settings.prefix;
+  process.env.DATABASE_URL = settings.databaseUrl;
+  process.env.DISABLEDEVENTS = JSON.stringify(settings.disabledEvents);
 } catch (e) {
   // eslint-disable-next-line no-console
   console.log('Could not find settings.json, falling back to ENV');
@@ -43,7 +43,9 @@ app.get('/', async (req, res) => {
 
 app.get('/api/sessions/:guildId(\\d+)?', cors(), async (req, res) => {
   const { guildId } = req.params;
-  const sessions = guildId ? await bot.client.db.models.session.findAll({where: { guildId }, raw: true}) : await bot.client.db.models.session.findAll({raw:true});
+  const sessions = guildId
+    ? await bot.client.db.models.session.findAll({ where: { guildId }, raw: true })
+    : await bot.client.db.models.session.findAll({ raw: true });
 
   return res.send(sessions);
 });
