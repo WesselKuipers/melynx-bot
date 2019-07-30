@@ -11,11 +11,11 @@
   "scripts": {
     "start": "node -r esm index.js",
     "watch": "nodemon -r esm index.js",
-    "build": "cd client/ && yarn && yarn build"
+    "build": "cd client/ && yarn && yarn build && cd .."
   },
   "cacheDirectories": [
     "node_modules",
-    "react-ui/node_modules"
+    "client/node_modules"
   ],
   "dependencies": {
     "axios": "^0.19.0",
