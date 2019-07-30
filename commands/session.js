@@ -368,9 +368,10 @@ export default class Session {
         );
         session.platform =
           dotProp.get(conf, `channelSettings.${message.channel.id}.platform`) ||
-          (message.channel.name.toUpperCase().contains('PS4') && 'PS4') ||
-          (message.channel.name.toUpperCase().contains('PC') && 'PC') ||
-          (message.channel.name.toUpperCase().contains('XB1') && 'XB1');
+          (message.channel.name.toUpperCase().includes('PS4') && 'PS4') ||
+          (message.channel.name.toUpperCase().includes('PC') && 'PC') ||
+          (message.channel.name.toUpperCase().includes('XB1') && 'XB1') ||
+          'Unknown';
       }
 
       if (foundMHGU) {
