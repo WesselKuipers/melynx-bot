@@ -37,14 +37,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use(express.static(path.join(__dirname, 'build')));
-app.get('/', async (req, res) => {
-  const catFact = await axios.get(
-    'https://cat-fact.herokuapp.com/facts/random'
-  );
-  res.send(`<p style='font-family: sans-serif;'>${catFact.data.text}</p>`);
-});
-
 app.get('/api/sessions/:guildId(\\d+)?', cors(), async (req, res) => {
   const { guildId } = req.params;
   const sessions = guildId
@@ -55,6 +47,19 @@ app.get('/api/sessions/:guildId(\\d+)?', cors(), async (req, res) => {
     : await bot.client.db.models.session.findAll({ raw: true });
 
   return res.send(sessions);
+});
+
+app.get('/api/catfact', async (req, res) => {
+  const { data } = await axios.get(
+    'https://cat-fact.herokuapp.com/facts/random'
+  );
+  res.send(data);
+});
+
+// Front end
+app.use(express.static(path.resolve(__dirname, 'client', 'build')));
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
 });
 
 // eslint-disable-next-line no-console

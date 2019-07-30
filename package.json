@@ -1,9 +1,22 @@
 {
-  "name": "MelynxBot",
+  "name": "melynx-bot",
   "version": "1.0.0",
   "main": "index.js",
   "author": "Wessel Kuipers",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wesselkuioers/melynx-bot.git"
+  },
+  "scripts": {
+    "start": "node -r esm index.js",
+    "watch": "nodemon -r esm index.js",
+    "build": "cd client/ && yarn && yarn build"
+  },
+  "cacheDirectories": [
+    "node_modules",
+    "react-ui/node_modules"
+  ],
   "dependencies": {
     "axios": "^0.19.0",
     "body-parser": "^1.19.0",
@@ -18,10 +31,6 @@
     "pg": "^7.11.0",
     "pg-hstore": "^2.3.3",
     "sequelize": "^5.9.4"
-  },
-  "scripts": {
-    "start": "node -r esm index.js",
-    "watch": "nodemon -r esm index.js"
   },
   "devDependencies": {
     "eslint": "^5.16.0",
