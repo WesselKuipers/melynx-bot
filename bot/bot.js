@@ -26,7 +26,7 @@ const playingLines = [
   'with a Khezu',
 ];
 
-export default class CFGBot {
+export default class MelynxBot {
   constructor(settings) {
     this.settings = settings;
 
