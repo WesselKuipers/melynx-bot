@@ -3,10 +3,11 @@ import cors from 'cors';
 import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
+import fs from 'fs';
 import MelynxBot from './bot/bot';
-import settings from './settings.json';
 
 try {
+  const settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
   process.env.TOKEN = settings.token;
   process.env.PREFIX = settings.prefix;
   process.env.DATABASE_URL = settings.databaseUrl;
