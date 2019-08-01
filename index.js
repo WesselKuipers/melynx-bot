@@ -4,6 +4,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
 import fs from 'fs';
+import btoa from 'btoa';
 import MelynxBot from './bot/bot';
 
 try {
@@ -55,6 +56,38 @@ app.get('/api/catfact', async (req, res) => {
     'https://cat-fact.herokuapp.com/facts/random'
   );
   res.send(data);
+});
+
+const CLIENT_ID = '489555694211694602';
+const CLIENT_SECRET = 'FesHTksz98bgLuP6qAZb3WR5YGxRR4gc';
+
+const redirect = encodeURIComponent(
+  'http://localhost:8080/api/discord/callback'
+);
+
+app.get('/api/discord/login', (req, res) => {
+  res.redirect(
+    `https://discordapp.com/api/oauth2/authorize?client_id=${CLIENT_ID}&scope=identify&response_type=code&redirect_uri=${redirect}`
+  );
+});
+
+app.get('/api/discord/callback', async (req, res) => {
+  if (!req.query.code) throw new Error('NoCodeProvided');
+  const { code } = req.query;
+  const creds = btoa(`${CLIENT_ID}:${CLIENT_SECRET}`);
+  const {
+    data: { access_token: token },
+  } = await axios.get(
+    `https://discordapp.com/api/oauth2/token?grant_type=authorization_code&code=${code}&redirect_uri=${redirect}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${creds}`,
+      },
+    }
+  );
+
+  res.redirect(`/?token=${token}`);
 });
 
 // Front end

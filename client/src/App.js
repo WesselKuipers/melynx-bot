@@ -20,7 +20,8 @@ class App extends Component {
 
     return (
       <div className="App">
-        {result}
+        <p>{result}</p>
+        <a href="/api/discord/login">Login through discord</a>
       </div>
     )
   }
