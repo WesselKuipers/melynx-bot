@@ -1,5 +1,6 @@
 {
   "name": "melynx-bot",
+  "private": true,
   "version": "1.0.0",
   "main": "index.js",
   "author": "Wessel Kuipers",
@@ -8,10 +9,13 @@
     "type": "git",
     "url": "https://github.com/wesselkuioers/melynx-bot.git"
   },
+  "workspaces": [
+    "client"
+  ],
   "scripts": {
     "start": "node -r esm index.js",
     "watch": "nodemon -r esm index.js",
-    "build": "cd client/ && yarn && yarn build && cd .."
+    "build": "yarn webpack --config client/webpack.config.js"
   },
   "cacheDirectories": [
     "node_modules",
@@ -31,15 +35,19 @@
     "mysql2": "^1.6.5",
     "pg": "^7.12.0",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^5.12.1"
+    "sequelize": "^5.12.1",
+    "webpack": "^4.38.0",
+    "webpack-dev-middleware": "^3.7.0"
   },
   "devDependencies": {
     "eslint": "^6.1.0",
-    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-config-airbnb": "^17.1.1",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-flowtype": "^3.12.2",
     "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-prettier": "^3.1.0",
+    "eslint-plugin-react": "^7.14.3",
     "nodemon": "^1.18.4",
     "prettier": "^1.18.2"
   }

@@ -5,7 +5,12 @@ import bodyParser from 'body-parser';
 import path from 'path';
 import fs from 'fs';
 import btoa from 'btoa';
+import webpack from 'webpack';
+import webpackDevMiddleware from 'webpack-dev-middleware';
 import MelynxBot from './bot/bot';
+import webpackConfig from './client/webpack.config';
+
+const compiler = webpack(webpackConfig(null, { mode: 'development' }));
 
 try {
   const settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
@@ -38,6 +43,7 @@ bot.run();
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(webpackDevMiddleware(compiler));
 
 app.get('/api/sessions/:guildId(\\d+)?', cors(), async (req, res) => {
   const { guildId } = req.params;
@@ -91,9 +97,9 @@ app.get('/api/discord/callback', async (req, res) => {
 });
 
 // Front end
-app.use(express.static(path.resolve(__dirname, 'client', 'build')));
+app.use(express.static(path.resolve(__dirname, 'client', 'dist')));
 app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+  res.sendFile(path.resolve(__dirname, 'client', 'dist', 'index.html'));
 });
 
 // eslint-disable-next-line no-console
