@@ -10,7 +10,9 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import MelynxBot from './bot/bot';
 import webpackConfig from './client/webpack.config';
 
-const compiler = webpack(webpackConfig(null, { mode: 'development' }));
+const compiler = webpack(
+  webpackConfig(null, { mode: process.env.NODE_ENV || 'development' })
+);
 
 try {
   const settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
@@ -74,7 +76,11 @@ const redirect = encodeURIComponent(
 
 app.get('/api/discord/login', (req, res) => {
   res.redirect(
-    `https://discordapp.com/api/oauth2/authorize?client_id=${options.clientId}&scope=identify&response_type=code&redirect_uri=${redirect}`
+    `https://discordapp.com/api/oauth2/authorize?client_id=${
+      options.clientId
+    }&scope=identify guilds&response_type=code&redirect_uri=${encodeURIComponent(
+      `${req.protocol}://${req.headers.host}/api/discord/callback`
+    )}`
   );
 });
 
@@ -82,19 +88,21 @@ app.get('/api/discord/callback', async (req, res) => {
   if (!req.query.code) throw new Error('NoCodeProvided');
   const { code } = req.query;
   const creds = btoa(`${options.clientId}:${options.clientSecret}`);
-  const {
-    data: { access_token: token },
-  } = await axios.get(
-    `https://discordapp.com/api/oauth2/token?grant_type=authorization_code&code=${code}&redirect_uri=${redirect}`,
-    {
+  try {
+    const {
+      data: { access_token: token, refresh_token: refreshToken },
+    } = await axios({
+      url: `https://discordapp.com/api/oauth2/token?grant_type=authorization_code&code=${code}&redirect_uri=${redirect}`,
       method: 'POST',
       headers: {
         Authorization: `Basic ${creds}`,
       },
-    }
-  );
+    });
 
-  res.redirect(`/?token=${token}`);
+    res.redirect(`/?token=${token}&refreshToken=${refreshToken}`);
+  } catch (e) {
+    console.log(e);
+  }
 });
 
 // Front end

@@ -18,5 +18,6 @@ module.exports = {
       { props: true, ignorePropertyModificationsFor: ["client"] }
     ],
     "prettier/prettier": ["error", { "singleQuote": true, "trailingComma": 'es5'}],
+    "react/state-in-constructor": 2,
   }
 };

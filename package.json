@@ -15,7 +15,7 @@
   "scripts": {
     "start": "node -r esm index.js",
     "watch": "nodemon -r esm index.js",
-    "build": "yarn webpack --config client/webpack.config.js"
+    "build": "yarn webpack --config client/webpack.config.js --mode production"
   },
   "cacheDirectories": [
     "node_modules",
