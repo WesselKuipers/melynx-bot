@@ -8,6 +8,7 @@ module.exports = {
     Atomics: "readonly",
     SharedArrayBuffer: "readonly"
   },
+  parser: "babel-eslint",
   parserOptions: {
     ecmaVersion: 2018,
     sourceType: "module"
@@ -18,6 +19,7 @@ module.exports = {
       { props: true, ignorePropertyModificationsFor: ["client"] }
     ],
     "prettier/prettier": ["error", { "singleQuote": true, "trailingComma": 'es5'}],
-    "react/state-in-constructor": 2,
+    "react/state-in-constructor": "off",
+    "react/prop-types": "off",
   }
 };

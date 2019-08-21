@@ -3,15 +3,10 @@
   margin-right: 15px;
 }
 
-.discordLogo {
-  padding-left: 5px;
-  height: 32px;
-}
-
 .sessionTitle > span {
   margin-right: 10px;
 }
 
-.sessionCard {
-  margin-bottom: 15px;
+.root {
+  margin-top: 10px;
 }

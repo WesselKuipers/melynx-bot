@@ -1,3 +1,4 @@
+require('@babel/polyfill');
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -8,7 +9,7 @@ module.exports = (env, { mode }) => {
 
   return {
     mode,
-    entry: path.join(__dirname, 'src'),
+    entry: ['@babel/polyfill', path.join(__dirname, 'src')],
     module: {
       rules: [
         {

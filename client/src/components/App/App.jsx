@@ -1,7 +1,6 @@
 import React from 'react';
 import axios from 'axios';
 import {
-  Button,
   Avatar,
   Container,
   Card,
@@ -9,6 +8,7 @@ import {
   CardHeader,
   CardContent,
   Chip,
+  Grid,
   IconButton,
   Typography,
   CssBaseline,
@@ -17,8 +17,9 @@ import {
 } from '@material-ui/core';
 import CopyButton from '@material-ui/icons/FileCopy';
 import styles from './App.css';
-import discordLogo from '../../assets/discord.png';
 import Menu from '../Menu';
+import UserProvider from '../../state/provider';
+import UserConsumer from '../../state/consumer';
 
 const theme = createMuiTheme({
   palette: {
@@ -34,85 +35,67 @@ export default class App extends React.Component {
     };
   }
 
-  componentDidMount() {
-    axios
-      .get('/api/sessions')
-      .then(response => this.setState({ sessions: response.data }));
+  async componentDidMount() {
+    const { data } = await axios.get('/api/sessions');
+    this.setState({
+      sessions: [...data],
+    });
   }
 
   render() {
     const { sessions = [] } = this.state;
 
     return (
-      <MuiThemeProvider theme={theme}>
-        <CssBaseline />
-        <Menu />
-        <Container maxWidth="sm">
-          <Button variant="contained" href="/api/discord/login" color="primary">
-            Login with
-            <img
-              className={styles.discordLogo}
-              src={discordLogo}
-              alt="Discord"
-            />
-          </Button>
-          <Card className={styles.sessionCard}>
-            <CardHeader
-              avatar={<Avatar>C</Avatar>}
-              title={
-                // eslint-disable-next-line react/jsx-wrap-multilines
-                <div className={styles.sessionTitle}>
-                  <span>12-1234-1234-1234</span>
-                  <Chip size="small" label="Switch" />
-                </div>
-              }
-              subheader={new Date().toLocaleString()}
-            />
-            <CardContent>
-              <Typography variant="body2" color="textSecondary" component="p">
-                This impressive paella is a perfect party dish and a fun meal to
-                cook together with your guests. Add 1 cup of frozen peas along
-                with the mussels, if you like.
-              </Typography>
-            </CardContent>
-            <CardActions disableSpacing>
-              <IconButton aria-label="copy session ID">
-                <CopyButton />
-              </IconButton>
-            </CardActions>
-          </Card>
-          {sessions.map(session => (
-            <Card className={styles.sessionCard} key={session.id}>
-              <CardHeader
-                avatar={<Avatar>{session.creator}</Avatar>}
-                title={
-                  // eslint-disable-next-line react/jsx-wrap-multilines
-                  <div className={styles.sessionTitle}>
-                    <span>{session.sessionId}</span>
-                    <Chip
-                      size="small"
-                      label={
-                        session.platform === 'Unknown' ? 'PC' : session.platform
+      <UserProvider>
+        <MuiThemeProvider theme={theme}>
+          <CssBaseline />
+          <UserConsumer>
+            <Menu />
+          </UserConsumer>
+          <Container className={styles.root}>
+            <Grid container spacing={2}>
+              {sessions.map(session => (
+                <Grid item xs={6} key={session.id}>
+                  <Card className={styles.sessionCard}>
+                    <CardHeader
+                      avatar={<Avatar>{session.creator}</Avatar>}
+                      title={
+                        // eslint-disable-next-line react/jsx-wrap-multilines
+                        <div className={styles.sessionTitle}>
+                          <span>{session.sessionId}</span>
+                          <Chip
+                            size="small"
+                            label={
+                              session.platform === 'Unknown'
+                                ? 'PC'
+                                : session.platform
+                            }
+                          />
+                        </div>
                       }
+                      subheader={new Date(session.date).toLocaleString()}
                     />
-                  </div>
-                }
-                subheader={new Date(session.date).toLocaleString()}
-              />
-              <CardContent>
-                <Typography variant="body2" color="textSecondary" component="p">
-                  {session.description}
-                </Typography>
-              </CardContent>
-              <CardActions disableSpacing>
-                <IconButton aria-label="copy session ID">
-                  <CopyButton />
-                </IconButton>
-              </CardActions>
-            </Card>
-          ))}
-        </Container>
-      </MuiThemeProvider>
+                    <CardContent>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        component="p"
+                      >
+                        {session.description}
+                      </Typography>
+                    </CardContent>
+                    <CardActions disableSpacing>
+                      <IconButton aria-label="copy session ID">
+                        <CopyButton />
+                      </IconButton>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </MuiThemeProvider>
+      </UserProvider>
     );
   }
 }
