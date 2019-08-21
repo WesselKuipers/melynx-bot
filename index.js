@@ -38,6 +38,8 @@ const options = {
   disabledEvents: JSON.parse(process.env.DISABLEDEVENTS || '[]'),
   clientId: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
+  protocol: process.env.PROTOCOL || isDevelopment ? 'http' : 'https',
+  host: process.env.HOST || 'localhost:8080',
 };
 
 const bot = new MelynxBot(options);
@@ -76,16 +78,12 @@ app.get('/api/catfact', async (req, res) => {
 });
 
 const redirect = encodeURIComponent(
-  'http://localhost:8080/api/discord/callback'
+  `${options.protocol}://${options.host}/api/discord/callback`
 );
 
 app.get('/api/discord/login', (req, res) => {
   res.redirect(
-    `https://discordapp.com/api/oauth2/authorize?client_id=${
-      options.clientId
-    }&scope=identify guilds&response_type=code&redirect_uri=${encodeURIComponent(
-      `${req.protocol}://${req.headers.host}/api/discord/callback`
-    )}`
+    `https://discordapp.com/api/oauth2/authorize?client_id=${options.clientId}&scope=identify guilds&response_type=code&redirect_uri=${redirect}`
   );
 });
 
