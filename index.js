@@ -8,11 +8,8 @@ import btoa from 'btoa';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import MelynxBot from './bot/bot';
-import webpackConfig from './client/webpack.config';
 
-const compiler = webpack(
-  webpackConfig(null, { mode: process.env.NODE_ENV || 'development' })
-);
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
 try {
   const settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
@@ -49,7 +46,15 @@ bot.run();
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(webpackDevMiddleware(compiler));
+
+if (isDevelopment) {
+  // eslint-disable-next-line global-require
+  const webpackConfig = require('./client/webpack.config');
+  const compiler = webpack(
+    webpackConfig(null, { mode: process.env.NODE_ENV || 'development' })
+  );
+  app.use(webpackDevMiddleware(compiler));
+}
 
 app.get('/api/sessions/:guildId(\\d+)?', cors(), async (req, res) => {
   const { guildId } = req.params;
