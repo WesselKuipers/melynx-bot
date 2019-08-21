@@ -4,7 +4,15 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
 import fs from 'fs';
+import btoa from 'btoa';
+import webpack from 'webpack';
+import webpackDevMiddleware from 'webpack-dev-middleware';
 import MelynxBot from './bot/bot';
+import webpackConfig from './client/webpack.config';
+
+const compiler = webpack(
+  webpackConfig(null, { mode: process.env.NODE_ENV || 'development' })
+);
 
 try {
   const settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
@@ -12,6 +20,8 @@ try {
   process.env.PREFIX = settings.prefix;
   process.env.DATABASE_URL = settings.databaseUrl;
   process.env.DISABLEDEVENTS = JSON.stringify(settings.disabledEvents);
+  process.env.CLIENT_ID = settings.clientId;
+  process.env.CLIENT_SECRET = settings.clientSecret;
 } catch (e) {
   // eslint-disable-next-line no-console
   console.log('Could not find settings.json, falling back to ENV');
@@ -29,6 +39,8 @@ const options = {
   token: process.env.TOKEN,
   databaseUrl: process.env.DATABASE_URL,
   disabledEvents: JSON.parse(process.env.DISABLEDEVENTS || '[]'),
+  clientId: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
 };
 
 const bot = new MelynxBot(options);
@@ -37,6 +49,7 @@ bot.run();
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(webpackDevMiddleware(compiler));
 
 app.get('/api/sessions/:guildId(\\d+)?', cors(), async (req, res) => {
   const { guildId } = req.params;
@@ -57,10 +70,45 @@ app.get('/api/catfact', async (req, res) => {
   res.send(data);
 });
 
+const redirect = encodeURIComponent(
+  'http://localhost:8080/api/discord/callback'
+);
+
+app.get('/api/discord/login', (req, res) => {
+  res.redirect(
+    `https://discordapp.com/api/oauth2/authorize?client_id=${
+      options.clientId
+    }&scope=identify guilds&response_type=code&redirect_uri=${encodeURIComponent(
+      `${req.protocol}://${req.headers.host}/api/discord/callback`
+    )}`
+  );
+});
+
+app.get('/api/discord/callback', async (req, res) => {
+  if (!req.query.code) throw new Error('NoCodeProvided');
+  const { code } = req.query;
+  const creds = btoa(`${options.clientId}:${options.clientSecret}`);
+  try {
+    const {
+      data: { access_token: token, refresh_token: refreshToken },
+    } = await axios({
+      url: `https://discordapp.com/api/oauth2/token?grant_type=authorization_code&code=${code}&redirect_uri=${redirect}`,
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${creds}`,
+      },
+    });
+
+    res.redirect(`/?token=${token}&refreshToken=${refreshToken}`);
+  } catch (e) {
+    console.log(e);
+  }
+});
+
 // Front end
-app.use(express.static(path.resolve(__dirname, 'client', 'build')));
+app.use(express.static(path.resolve(__dirname, 'client', 'dist')));
 app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+  res.sendFile(path.resolve(__dirname, 'client', 'dist', 'index.html'));
 });
 
 // eslint-disable-next-line no-console
