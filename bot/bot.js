@@ -103,7 +103,11 @@ export default class MelynxBot {
         this.log.error(error);
       }
 
-      this.log(`Loading ${files.length} commands: ${files}`);
+      this.log(
+        `Loading ${files.length} commands: ${files.filter(n =>
+          n.endsWith('.js')
+        )}`
+      );
 
       files
         .filter(n => n.endsWith('.js'))
