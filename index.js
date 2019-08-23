@@ -49,15 +49,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-if (isDevelopment) {
-  // eslint-disable-next-line global-require
-  const webpackConfig = require('./client/webpack.config');
-  const compiler = webpack(
-    webpackConfig(null, { mode: process.env.NODE_ENV || 'development' })
-  );
-  app.use(webpackDevMiddleware(compiler));
-}
-
 app.get('/api/sessions/:guildId(\\d+)?', cors(), async (req, res) => {
   const { guildId } = req.params;
   const sessions = guildId
@@ -107,6 +98,24 @@ app.get('/api/discord/callback', async (req, res) => {
     console.log(e);
   }
 });
+
+if (isDevelopment) {
+  // eslint-disable-next-line global-require
+  const webpackConfig = require('./client/webpack.config');
+  // eslint-disable-next-line global-require, import/no-extraneous-dependencies
+  const history = require('connect-history-api-fallback');
+
+  const compiler = webpack(
+    webpackConfig(null, { mode: process.env.NODE_ENV || 'development' })
+  );
+  app.use(history());
+  app.use(webpackDevMiddleware(compiler, { publicPath: '/' }));
+}
+
+app.use(
+  '/stickers',
+  express.static(path.resolve(__dirname, 'commands', 'stickers'))
+);
 
 // Front end
 app.use(express.static(path.resolve(__dirname, 'client', 'dist')));
