@@ -42,7 +42,7 @@ export default class Session {
           sessionMessage.push(
             `(${Math.floor(
               moment.duration(moment().diff(s.date)).asMinutes()
-            )}m ago by ${s.creator}) [${s.platform}]: ${s.sessionId}${
+            )}m ago by ${s.creator}) [${s.platform}]: ${s.sessionId} ${
               s.description
             }`
           );
