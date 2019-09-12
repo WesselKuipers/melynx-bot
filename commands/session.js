@@ -365,7 +365,7 @@ export default class Session {
 
       if (foundMHW || foundIceborne) {
         const sessionId = foundIceborne ? foundIceborne[0] : foundMHW[0];
-        const description = foundMHW.input.slice(
+        const description = joinedParams.slice(
           sessionId.length + foundIceborne
             ? foundIceborne.index
             : foundMHW.index
