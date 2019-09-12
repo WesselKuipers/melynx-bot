@@ -335,7 +335,7 @@ export default class Session {
       };
 
       if (params[0] === 'r' || params[0] === 'remove') {
-        const sessionId = params[1];
+        const sessionId = foundIceborne[0] || foundMHW[0] || foundMHGU[0];
         const session = sessions.find(ses => ses.sessionId === sessionId);
 
         if (!session || session.guildId !== message.guild.id) {
