@@ -364,14 +364,10 @@ export default class Session {
       };
 
       if (foundMHW || foundIceborne) {
-        const sessionId = foundIceborne ? foundIceborne[0] : foundMHW[0];
-        const description = joinedParams.slice(
-          sessionId.length + foundIceborne
-            ? foundIceborne.index
-            : foundMHW.index
-        );
-        session.sessionId = sessionId;
-        session.description = description;
+        session.sessionId = foundIceborne ? foundIceborne[0] : foundMHW[0];
+        session.description = joinedParams
+          .replace(session.sessionId, '')
+          .trim();
         session.platform =
           dotProp.get(conf, `channelSettings.${message.channel.id}.platform`) ||
           (message.channel.name.toUpperCase().includes('PS4') && 'PS4') ||
