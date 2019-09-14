@@ -4,7 +4,7 @@ import Sequelize from 'sequelize';
 import dotProp from 'dot-prop';
 
 const iceborneRegex = /[a-zA-Z0-9#]{4} [a-zA-Z0-9]{4} [a-zA-Z0-9]{4}/;
-const mhwRegex = /\b[a-zA-Z0-9#]{11,12}\b/;
+const mhwRegex = /[a-zA-Z0-9#]{12}\b/;
 const mhguRegex = /\b\d{2}-\d{4}-\d{4}-\d{4}\b/;
 
 let sessions = [];
@@ -334,8 +334,12 @@ export default class Session {
         guildId: message.guild.id,
       };
 
+      const sessionId =
+        (foundIceborne && foundIceborne[0]) ||
+        (foundMHW && foundMHW[0]) ||
+        (foundMHGU && foundMHGU[0]);
+
       if (params[0] === 'r' || params[0] === 'remove') {
-        const sessionId = foundIceborne[0] || foundMHW[0] || foundMHGU[0];
         const session = sessions.find(ses => ses.sessionId === sessionId);
 
         if (!session || session.guildId !== message.guild.id) {
@@ -364,7 +368,7 @@ export default class Session {
       };
 
       if (foundMHW || foundIceborne) {
-        session.sessionId = foundIceborne ? foundIceborne[0] : foundMHW[0];
+        session.sessionId = sessionId;
         session.description = joinedParams
           .replace(session.sessionId, '')
           .trim();
@@ -377,7 +381,7 @@ export default class Session {
       }
 
       if (foundMHGU) {
-        [session.sessionId] = foundMHGU;
+        session.sessionId = sessionId;
         session.description = foundMHGU.input.slice(
           foundMHGU[0].length + foundMHGU.index
         );
