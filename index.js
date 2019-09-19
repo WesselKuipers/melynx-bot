@@ -7,6 +7,7 @@ import fs from 'fs';
 import btoa from 'btoa';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
+import * as Sentry from '@sentry/node';
 import MelynxBot from './bot/bot';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -19,6 +20,7 @@ try {
   process.env.DISABLEDEVENTS = JSON.stringify(settings.disabledEvents);
   process.env.CLIENT_ID = settings.clientId;
   process.env.CLIENT_SECRET = settings.clientSecret;
+  process.env.SENTRY_DSN = settings.sentryDsn;
 } catch (e) {
   // eslint-disable-next-line no-console
   console.log('Could not find settings.json, falling back to ENV');
@@ -40,12 +42,20 @@ const options = {
   clientSecret: process.env.CLIENT_SECRET,
   protocol: process.env.PROTOCOL || isDevelopment ? 'http' : 'https',
   host: process.env.HOST || 'localhost:8080',
+  sentryDsn: process.env.SENTRY_DSN,
 };
 
 const bot = new MelynxBot(options);
 bot.run();
 
 const app = express();
+
+if (options.sentryDsn) {
+  Sentry.init({ dsn: options.sentryDsn });
+  app.use(Sentry.Handlers.requestHandler());
+  app.use(Sentry.Handlers.errorHandler());
+}
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
