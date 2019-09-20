@@ -151,6 +151,7 @@ export default class Role {
         message.channel.send(
           `Could not find a joinable role called ${roleName}`
         );
+        return;
       }
 
       if (message.member.roles.has(role.id)) {
