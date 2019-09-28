@@ -335,8 +335,8 @@ export default class Session {
       };
 
       const sessionId =
-        (foundIceborne && foundIceborne[0]) ||
         (foundMHW && foundMHW[0]) ||
+        (foundIceborne && foundIceborne[0]) ||
         (foundMHGU && foundMHGU[0]);
 
       if (params[0] === 'r' || params[0] === 'remove') {
