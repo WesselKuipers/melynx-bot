@@ -4,7 +4,7 @@ import Sequelize from 'sequelize';
 import dotProp from 'dot-prop';
 
 const iceborneRegex = /[a-zA-Z0-9#]{4} [a-zA-Z0-9]{4} [a-zA-Z0-9]{4}/;
-const mhwRegex = /[a-zA-Z0-9#]{12}\b/;
+const mhwRegex = /[a-zA-Z0-9#]{11,12}\b/;
 const mhguRegex = /\b\d{2}-\d{4}-\d{4}-\d{4}\b/;
 
 let sessions = [];
