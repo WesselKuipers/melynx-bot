@@ -1,6 +1,7 @@
 import Discord from 'discord.js';
 
 import fs from 'fs';
+import path from 'path';
 import moment from 'moment';
 
 import es6 from 'es6-promise';
@@ -98,9 +99,9 @@ export default class MelynxBot {
   }
 
   loadCommands() {
-    fs.readdir('./commands', (error, files) => {
+    fs.readdir(path.join(__dirname, 'commands'), (error, files) => {
       if (error) {
-        this.log.error(error);
+        this.error(error);
       }
 
       this.log(
@@ -113,7 +114,7 @@ export default class MelynxBot {
         .filter(n => n.endsWith('.js'))
         .forEach(async f => {
           // eslint-disable-next-line global-require, import/no-dynamic-require
-          const command = require(`../commands/${f}`);
+          const command = require(path.join(__dirname, 'commands', f));
           // eslint-disable-next-line new-cap
           const c = new command.default();
 

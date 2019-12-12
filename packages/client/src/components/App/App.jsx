@@ -9,7 +9,6 @@ import {
 import {
   BrowserRouter as Router,
   Route,
-  Link,
   Switch,
   Redirect,
 } from 'react-router-dom';

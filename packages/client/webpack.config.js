@@ -10,8 +10,21 @@ module.exports = (env, { mode }) => {
   return {
     mode,
     entry: ['@babel/polyfill', path.join(__dirname, 'src')],
+    // Enable sourcemaps for debugging webpack's output.
+    devtool: 'source-map',
     module: {
       rules: [
+        {
+          test: /\.tsx?$/,
+          loader: 'ts-loader',
+          exclude: /node_modules/,
+        },
+        // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
+        {
+          enforce: 'pre',
+          test: /\.js$/,
+          loader: 'source-map-loader',
+        },
         {
           test: /\.(js|jsx)$/,
           exclude: /node_modules/,
@@ -43,7 +56,7 @@ module.exports = (env, { mode }) => {
       ],
     },
     resolve: {
-      extensions: ['*', '.js', '.jsx'],
+      extensions: ['*', '.js', '.jsx', '.ts', '.tsx'],
     },
     output: {
       path: `${__dirname}/dist`,

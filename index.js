@@ -8,7 +8,7 @@ import btoa from 'btoa';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import * as Sentry from '@sentry/node';
-import MelynxBot from './bot/bot';
+import MelynxBot from './packages/bot';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -111,7 +111,7 @@ app.get('/api/discord/callback', async (req, res) => {
 
 if (isDevelopment) {
   // eslint-disable-next-line global-require
-  const webpackConfig = require('./client/webpack.config');
+  const webpackConfig = require('./packages/client/webpack.config');
   // eslint-disable-next-line global-require, import/no-extraneous-dependencies
   const history = require('connect-history-api-fallback');
 
@@ -128,9 +128,11 @@ app.use(
 );
 
 // Front end
-app.use(express.static(path.resolve(__dirname, 'client', 'dist')));
+app.use(express.static(path.resolve(__dirname, 'packages', 'client', 'dist')));
 app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'client', 'dist', 'index.html'));
+  res.sendFile(
+    path.resolve(__dirname, 'packages', 'client', 'dist', 'index.html')
+  );
 });
 
 // eslint-disable-next-line no-console

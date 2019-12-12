@@ -27,8 +27,13 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const Menu = ({ user, setUser }) => {
-  const classes = useStyles();
+interface MenuProps {
+  user: { id: string; avatar: string; };
+  setUser: (token: string, refreshToken: string) => void;
+}
+
+const Menu = ({ user, setUser }: MenuProps) => {
+  const classes = useStyles({});
 
   if (!user) {
     const params = new URLSearchParams(window.location.search);
@@ -51,7 +56,6 @@ const Menu = ({ user, setUser }) => {
       <AppBar position="static">
         <Toolbar>
           <img
-            edge="start"
             className={`${styles.logo} ${classes.menuButton}`}
             alt="Logo"
             src={logo}

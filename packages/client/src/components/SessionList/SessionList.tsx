@@ -19,8 +19,19 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export default function SessionList({ sessions }) {
-  const classes = useStyles();
+interface SessionListProps {
+  sessions: {
+    id: number;
+    sessionId: string;
+    platform: string;
+    date: string;
+    creator: string;
+    description: string;
+  }[]
+}
+
+export default function SessionList({ sessions }: SessionListProps) {
+  const classes = useStyles({});
 
   return (
     <Grid container spacing={2}>

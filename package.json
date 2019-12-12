@@ -10,12 +10,12 @@
     "url": "https://github.com/wesselkuioers/melynx-bot.git"
   },
   "workspaces": [
-    "client"
+    "packages/*"
   ],
   "scripts": {
     "start": "node -r esm index.js",
     "watch": "nodemon -r esm index.js",
-    "build": "yarn webpack --config client/webpack.config.js --mode production"
+    "build": "yarn webpack --config packages/client/webpack.config.js --mode production"
   },
   "cacheDirectories": [
     "node_modules",
@@ -27,20 +27,17 @@
     "body-parser": "^1.19.0",
     "btoa": "^1.2.1",
     "cors": "^2.8.5",
-    "discord.js": "^11.5.1",
-    "dot-prop": "^5.1.0",
     "es6-promise": "^4.2.8",
     "esm": "^3.2.25",
     "express": "^4.17.1",
-    "moment": "^2.24.0",
-    "mysql2": "^1.6.5",
-    "pg": "^7.12.0",
-    "pg-hstore": "^2.3.3",
-    "sequelize": "^5.12.1",
     "webpack": "^4.38.0",
     "webpack-dev-middleware": "^3.7.0"
   },
   "devDependencies": {
+    "@types/css-modules": "^1.0.0",
+    "@types/react": "^16.9.16",
+    "@types/react-dom": "^16.9.4",
+    "awesome-typescript-loader": "^5.2.1",
     "babel-eslint": "^10.0.2",
     "connect-history-api-fallback": "^1.6.0",
     "eslint": "^6.1.0",
@@ -52,6 +49,9 @@
     "eslint-plugin-prettier": "^3.1.0",
     "eslint-plugin-react": "^7.14.3",
     "nodemon": "^1.18.4",
-    "prettier": "^1.18.2"
+    "prettier": "^1.18.2",
+    "source-map-loader": "^0.2.4",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.3"
   }
 }
