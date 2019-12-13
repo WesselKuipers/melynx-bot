@@ -1,30 +1,30 @@
 import Discord from 'discord.js';
-
 import fs from 'fs';
 import path from 'path';
 import moment from 'moment';
-
-import es6 from 'es6-promise';
 import Sequelize from 'sequelize';
 
-es6.polyfill();
+import * as commands from './commands';
 
 const regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
 const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const playingLines = [
-  'stealing gems from hunters',
-  'with a hunter',
-  'smoking felvine',
-  'the hunting horn',
-  'with your palico',
-  'with the Meowstress',
-  'with the Mewstress',
-  'Monster Hunter World: Iceborne',
-  'Monster Hunter World',
-  'Monster Hunter Generations Ultimate',
-  'Monster Hunter 4 Ultimate',
-  'Monster Hunter Frontier',
-  'with a Khezu',
+  { type: 'PLAYING', name: 'stealing gems from hunters' },
+  { type: 'PLAYING', name: 'with a hunter' },
+  { type: 'STREAMING', name: 'smoking felvine' },
+  { type: 'PLAYING', name: 'the hunting horn' },
+  { type: 'PLAYING', name: 'the fungasax' },
+  { type: 'PLAYING', name: 'with your palico' },
+  { type: 'PLAYING', name: 'with the Meowstress' },
+  { type: 'PLAYING', name: 'with the Mewstress' },
+  { type: 'PLAYING', name: 'Monster Hunter World' },
+  { type: 'PLAYING', name: 'Monster Hunter Generations Ultimate' },
+  { type: 'PLAYING', name: 'Monster Hunter World: Iceborne' },
+  { type: 'PLAYING', name: 'Monster Hunter 4 Ultimate' },
+  { type: 'PLAYING', name: 'Monster Hunter Frontier' },
+  { type: 'PLAYING', name: 'with a Khezu' },
+  { type: 'LISTENING', name: "to Khezu's theme" },
+  { type: 'WATCHING', name: 'hunters carrying eggs' },
 ];
 
 export default class MelynxBot {
@@ -52,16 +52,20 @@ export default class MelynxBot {
 
     this.log = message => {
       // eslint-disable-next-line no-console
-      console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${message}`);
+      console.log(
+        `[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${message.replace(
+          regToken,
+          '[TOKEN]'
+        )}`
+      );
     };
 
     this.error = error => {
-      // Logging all errors by default
-      this.log(`Error: ${error.message.replace(regToken, '[TOKEN]')}`);
+      this.log(`Error: ${error.message}`);
     };
 
     this.warn = warning => {
-      this.log(`Warning: ${warning.replace(regToken, '[TOKEN]')}`);
+      this.log(`Warning: ${warning}`);
     };
 
     this.client.log = this.log;
@@ -80,10 +84,7 @@ export default class MelynxBot {
 
       this.client.user.setPresence({
         status: 'online',
-        game: {
-          name: playingLines[Math.floor(Math.random() * playingLines.length)],
-          type: 'PLAYING',
-        },
+        game: playingLines[Math.floor(Math.random() * playingLines.length)],
       });
       this.client.settings.sync();
     });
@@ -98,57 +99,41 @@ export default class MelynxBot {
     this.client.on('message', message => this.message(message));
   }
 
-  loadCommands() {
-    fs.readdir(path.join(__dirname, 'commands'), (error, files) => {
-      if (error) {
-        this.error(error);
-      }
+  async loadCommands() {
+    await Promise.all(
+      Object.values(commands).map(async Command => {
+        const command = new Command();
+        // If command has an init method, run it
+        if (command.init) {
+          this.log(`Running init of ${command.help.name}`);
+          await command.init(this.client);
+        }
 
-      this.log(
-        `Loading ${files.length} commands: ${files.filter(n =>
-          n.endsWith('.js')
-        )}`
-      );
+        // Assign the main command name to commands, as well as all of its aliases
+        this.commands.set(command.help.name, command);
+        if (command.config.aliases) {
+          command.config.aliases.forEach(alias => {
+            if (this.aliases.has(alias)) {
+              this.log(
+                `Warning: Command ${
+                  command.help.name
+                } alias ${alias} overlaps with command ${
+                  this.aliases.get(alias).help.name
+                }.\r\nOld alias will be overwritten.`
+              );
+            }
 
-      files
-        .filter(n => n.endsWith('.js'))
-        .forEach(async f => {
-          // eslint-disable-next-line global-require, import/no-dynamic-require
-          const command = require(path.join(__dirname, 'commands', f));
-          // eslint-disable-next-line new-cap
-          const c = new command.default();
+            this.aliases.set(alias, command);
+          });
+        }
 
-          // If command has an init method, run it
-          if (c.init) {
-            this.log(`Running init of ${c.help.name}`);
-            await c.init(this.client);
-          }
-
-          // Assign the main command name to commands, as well as all of its aliases
-          this.commands.set(c.help.name, c);
-          if (c.config.aliases) {
-            c.config.aliases.forEach(alias => {
-              if (this.aliases.has(alias)) {
-                this.log(
-                  `Warning: Command ${
-                    c.help.name
-                  } alias ${alias} overlaps with command ${
-                    this.aliases.get(alias).help.name
-                  }.\r\nOld alias will be overwritten.`
-                );
-              }
-
-              this.aliases.set(alias, c);
-            });
-          }
-
-          this.log(
-            `Loaded command [${
-              c.help.name
-            }] with aliases [${c.config.aliases.join(', ')}]`
-          );
-        });
-    });
+        this.log(
+          `Loaded command [${
+            command.help.name
+          }] with aliases [${command.config.aliases.join(', ')}]`
+        );
+      })
+    );
 
     this.client.commands = this.commands;
     this.client.aliases = this.aliases;

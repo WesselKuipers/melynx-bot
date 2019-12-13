@@ -25,6 +25,7 @@ module.exports = {
       "error",
       { props: true, ignorePropertyModificationsFor: ["client"] }
     ],
+    "new-cap": ["error", { newIsCap: false }],
     "prettier/prettier": ["error", { "singleQuote": true, "trailingComma": 'es5' }],
     "react/state-in-constructor": "off",
     "react/prop-types": "off",

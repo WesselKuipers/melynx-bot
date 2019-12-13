@@ -105,7 +105,7 @@ app.get('/api/discord/callback', async (req, res) => {
 
     res.redirect(`/?token=${token}&refreshToken=${refreshToken}`);
   } catch (e) {
-    console.log(e);
+    this.error(e);
   }
 });
 

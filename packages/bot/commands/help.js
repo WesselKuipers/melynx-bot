@@ -21,9 +21,9 @@ export default class Help {
         ...client.commands.filter(command => !command.config.ownerOnly).keys(),
       ];
       message.channel.send(
-        `Available commands: ${commands.join(
-          ', '
-        )}\nType ${this.help.usage.replace(
+        `Available commands: \`${commands.join(
+          '`, `'
+        )}\`\nType ${this.help.usage.replace(
           /{prefix}/g,
           conf.prefix
         )} for more info!`

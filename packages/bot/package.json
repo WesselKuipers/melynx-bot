@@ -5,7 +5,6 @@
   "dependencies": {
     "discord.js": "^11.5.1",
     "dot-prop": "^5.2.0",
-    "es6-promise": "^4.2.8",
     "moment": "^2.24.0",
     "mysql2": "^2.0.2",
     "pg": "^7.14.0",
