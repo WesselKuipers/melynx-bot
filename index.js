@@ -1,14 +1,13 @@
-import axios from 'axios';
 import cors from 'cors';
 import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
 import fs from 'fs';
-import btoa from 'btoa';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import * as Sentry from '@sentry/node';
 import MelynxBot from './packages/bot';
+import api from './api';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -58,56 +57,8 @@ if (options.sentryDsn) {
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
-app.get('/api/sessions/:guildId(\\d+)?', cors(), async (req, res) => {
-  const { guildId } = req.params;
-  const sessions = guildId
-    ? await bot.client.db.models.session.findAll({
-        where: { guildId },
-        raw: true,
-      })
-    : await bot.client.db.models.session.findAll({ raw: true });
-
-  return res.send(sessions);
-});
-
-app.get('/api/catfact', async (req, res) => {
-  const { data } = await axios.get(
-    'https://cat-fact.herokuapp.com/facts/random'
-  );
-  res.send(data);
-});
-
-const redirect = encodeURIComponent(
-  `${options.protocol}://${options.host}/api/discord/callback`
-);
-
-app.get('/api/discord/login', (req, res) => {
-  res.redirect(
-    `https://discordapp.com/api/oauth2/authorize?client_id=${options.clientId}&scope=identify guilds&response_type=code&redirect_uri=${redirect}`
-  );
-});
-
-app.get('/api/discord/callback', async (req, res) => {
-  if (!req.query.code) throw new Error('NoCodeProvided');
-  const { code } = req.query;
-  const creds = btoa(`${options.clientId}:${options.clientSecret}`);
-  try {
-    const {
-      data: { access_token: token, refresh_token: refreshToken },
-    } = await axios({
-      url: `https://discordapp.com/api/oauth2/token?grant_type=authorization_code&code=${code}&redirect_uri=${redirect}`,
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${creds}`,
-      },
-    });
-
-    res.redirect(`/?token=${token}&refreshToken=${refreshToken}`);
-  } catch (e) {
-    this.error(e);
-  }
-});
+app.use('/api/*', cors());
+app.use('/api', api({ options, db: bot.client.db }));
 
 if (isDevelopment) {
   // eslint-disable-next-line global-require
@@ -124,7 +75,9 @@ if (isDevelopment) {
 
 app.use(
   '/stickers',
-  express.static(path.resolve(__dirname, 'commands', 'stickers'))
+  express.static(
+    path.resolve(__dirname, 'packages', 'bot', 'commands', 'stickers')
+  )
 );
 
 // Front end

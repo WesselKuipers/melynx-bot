@@ -1,6 +1,4 @@
 import Discord from 'discord.js';
-import fs from 'fs';
-import path from 'path';
 import moment from 'moment';
 import Sequelize from 'sequelize';
 
