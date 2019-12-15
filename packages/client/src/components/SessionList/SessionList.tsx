@@ -70,7 +70,7 @@ export default function SessionList() {
     );
   }
 
-  if (sessions.length > 0) {
+  if (sessions.length === 0) {
     return (
       <div className={styles.center}>
         <NonIdealState
