@@ -1,0 +1,21 @@
+.container {
+  text-align: center;
+}
+
+.stickers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stickers > span {
+  margin: 5px 10px;
+}
+
+.stickers img {
+  user-select: none;
+}
+
+.stickers p {
+  margin-bottom: 0;
+}

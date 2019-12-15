@@ -13,16 +13,22 @@ import {
 } from "@blueprintjs/core";
 import useUser from "../../hooks/useUser";
 import Avatar from '../Avatar';
+import { useLocation } from "react-router-dom";
+import NavLink from "../NavLink";
 
 const Menu = () => {
 
   const { user, logout } = useUser();
+  const location = useLocation();
 
   return (
     <Navbar className={styles.navbar}>
       <Navbar.Group align={Alignment.LEFT}>
         <img className={styles.logo} alt="Logo" src={logo} />
         <Navbar.Heading>Melynx Bot</Navbar.Heading>
+        <Navbar.Divider />
+        <NavLink icon="heart" to="/sessions">Sessions</NavLink>
+        <NavLink icon="clipboard" to="/stickers">Stickers</NavLink>
       </Navbar.Group>
       <Navbar.Group align={Alignment.RIGHT}>
         {!user && (

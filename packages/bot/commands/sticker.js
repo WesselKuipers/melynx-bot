@@ -1,6 +1,6 @@
+import Discord, { RichEmbed } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
-import Discord, { RichEmbed } from 'discord.js';
 
 const files = fs.readdirSync(path.join(__dirname, 'stickers'));
 const stickers = files.map(file => {

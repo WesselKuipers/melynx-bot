@@ -12,6 +12,7 @@ import {
 
 import Menu from '../Menu';
 import SessionList from '../SessionList';
+import Stickers from '../Stickers';
 import UserProvider from '../UserProvider';
 import styles from './App.css';
 
@@ -24,6 +25,7 @@ export default function App() {
           <div className={styles.container}>
             <Switch>
               <Route exact path="/sessions" component={SessionList} />
+              <Route exact path="/stickers" component={Stickers} />
               <Redirect to="/sessions" />
             </Switch>
           </div>

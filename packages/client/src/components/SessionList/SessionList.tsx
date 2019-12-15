@@ -52,7 +52,7 @@ export default function SessionList() {
   const copySession = (s: Session) => {
     copy(s.sessionId);
     setCopiedMessage(s.id);
-    setTimeout(() => setCopiedMessage(0), 1e3);
+    setTimeout(() => setCopiedMessage(0), 2e3);
   };
 
   if (sessions === undefined) {

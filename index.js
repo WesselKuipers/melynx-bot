@@ -1,13 +1,14 @@
+import * as Sentry from '@sentry/node';
+import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
-import bodyParser from 'body-parser';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
-import * as Sentry from '@sentry/node';
-import MelynxBot from './packages/bot';
+
 import api from './api';
+import MelynxBot from './packages/bot';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -74,7 +75,7 @@ if (isDevelopment) {
 }
 
 app.use(
-  '/stickers',
+  '/assets/stickers',
   express.static(
     path.resolve(__dirname, 'packages', 'bot', 'commands', 'stickers')
   )
