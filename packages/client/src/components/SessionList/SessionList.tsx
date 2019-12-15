@@ -42,6 +42,7 @@ export default function SessionList() {
     };
 
     if (!user) {
+      setSessions([]);
       return;
     }
 
@@ -54,7 +55,7 @@ export default function SessionList() {
     setTimeout(() => setCopiedMessage(0), 1e3);
   };
 
-  if (sessions === undefined || user === undefined) {
+  if (sessions === undefined) {
     return <Spinner className={styles.center} size={Spinner.SIZE_LARGE} />;
   }
 
