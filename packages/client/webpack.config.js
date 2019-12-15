@@ -32,23 +32,50 @@ module.exports = (env, { mode }) => {
         },
         {
           test: /\.css$/,
-          use: [
+          oneOf: [
             {
-              loader: MiniCssExtractPlugin.loader,
-              options: {
-                hmr: !production,
-              },
+              include: /node_modules/,
+              use: [
+                'style-loader',
+                { loader: 'css-loader', options: { modules: false } },
+              ],
             },
-            { loader: 'css-loader', options: { modules: true } },
+            {
+              use: [
+                {
+                  loader: MiniCssExtractPlugin.loader,
+                  options: {
+                    hmr: !production,
+                  },
+                },
+                { loader: 'css-loader', options: { modules: true } },
+              ],
+            },
           ],
         },
         {
-          test: /\.(png|jpe?g|gif)$/,
+          test: /\.(png|jpe?g|gif|svg)$/,
           use: [
             {
               loader: 'file-loader',
               options: {
                 name: '[path][name].[ext]',
+              },
+            },
+          ],
+        },
+        {
+          test: /\.svg$/,
+          loader: 'svgo-loader',
+        },
+        {
+          test: /\.(woff(2)?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                name: '[name].[ext]',
+                outputPath: 'fonts/',
               },
             },
           ],

@@ -1,72 +1,118 @@
-import React from 'react';
+import React from "react";
+import axios from "axios";
 import {
-  Avatar,
+  Button,
+  Callout,
+  Spinner,
   Card,
-  CardActions,
-  CardHeader,
-  CardContent,
-  Chip,
-  Grid,
-  IconButton,
-  Typography,
-  makeStyles,
-} from '@material-ui/core';
-import CopyButton from '@material-ui/icons/FileCopy';
+  Tag,
+  Popover,
+  Tooltip,
+  NonIdealState
+} from "@blueprintjs/core";
+import Avatar from "../Avatar";
+import copy from "copy-to-clipboard";
+import styles from "./SessionList.css";
+import useUser from "../../hooks/useUser";
+import kutku from "../../assets/kutku.png";
+import garuga from "../../assets/garuga.png";
 
-const useStyles = makeStyles(() => ({
-  sessionId: {
-    marginRight: '10px',
-  },
-}));
-
-interface SessionListProps {
-  sessions: {
-    id: number;
-    sessionId: string;
-    platform: string;
-    date: string;
-    creator: string;
-    description: string;
-  }[]
+interface Session {
+  id: number;
+  sessionId: string;
+  platform: string;
+  date: string;
+  guildId: string;
+  userId: string;
+  avatar: string;
+  creator: string;
+  description: string;
 }
 
-export default function SessionList({ sessions }: SessionListProps) {
-  const classes = useStyles({});
+export default function SessionList() {
+  const [sessions, setSessions] = React.useState<Session[]>(undefined);
+  const [copiedMessage, setCopiedMessage] = React.useState(0);
+
+  const { user } = useUser();
+
+  React.useEffect(() => {
+    const getSessions = async () => {
+      const { data } = await axios.get<Session[]>("/api/sessions");
+      setSessions(data);
+    };
+
+    if (!user) {
+      return;
+    }
+
+    getSessions();
+  }, [user]);
+
+  const copySession = (s: Session) => {
+    copy(s.sessionId);
+    setCopiedMessage(s.id);
+    setTimeout(() => setCopiedMessage(0), 1e3);
+  };
+
+  if (sessions === undefined || user === undefined) {
+    return <Spinner className={styles.center} size={Spinner.SIZE_LARGE} />;
+  }
+
+  if (!user) {
+    return (
+      <div className={styles.center}>
+        <img
+          className={styles.shake}
+          src={Math.round(Math.random()) ? kutku : garuga}
+        />
+        <p>Please log in to view sessions</p>
+      </div>
+    );
+  }
+
+  if (sessions.length > 0) {
+    return (
+      <div className={styles.center}>
+        <NonIdealState
+          icon="heart-broken"
+          description="Looks like there aren't any sessions yet!"
+        />
+      </div>
+    );
+  }
 
   return (
-    <Grid container spacing={2}>
+    <div className={styles.sessionList}>
       {sessions.map(session => (
-        <Grid item xs={6} key={session.id}>
-          <Card>
-            <CardHeader
-              avatar={<Avatar>{session.creator}</Avatar>}
-              title={
-                // eslint-disable-next-line react/jsx-wrap-multilines
-                <div>
-                  <span className={classes.sessionId}>{session.sessionId}</span>
-                  <Chip
-                    size="small"
-                    label={
-                      session.platform === 'Unknown' ? 'PC' : session.platform
-                    }
-                  />
-                </div>
-              }
-              subheader={new Date(session.date).toLocaleString()}
-            />
-            <CardContent>
-              <Typography variant="body2" color="textSecondary" component="p">
-                {session.description}
-              </Typography>
-            </CardContent>
-            <CardActions disableSpacing>
-              <IconButton aria-label="copy session ID">
-                <CopyButton />
-              </IconButton>
-            </CardActions>
-          </Card>
-        </Grid>
+        <Card key={session.id} className={styles.session}>
+          <div className={styles.cardHeader}>
+            <Avatar className={styles.cardAvatar} url={session.avatar} />
+            <div>
+              <span>{session.sessionId}</span>
+              <Tag className={styles.tag} minimal round>
+                {session.platform}
+              </Tag>
+              <p className={styles.date}>
+                {new Date(session.date).toLocaleString()}
+              </p>
+            </div>
+          </div>
+          <p>{session.description}</p>
+          <Popover
+            isOpen={copiedMessage === session.id}
+            content={
+              <Callout icon="tick" intent="success">
+                Copied! Happy hunting!
+              </Callout>
+            }
+            position="right"
+          >
+            <Tooltip content="Copy to clipboard" position="right">
+              <Button onClick={() => copySession(session)} icon="clipboard" />
+            </Tooltip>
+          </Popover>
+        </Card>
       ))}
-    </Grid>
+    </div>
   );
 }

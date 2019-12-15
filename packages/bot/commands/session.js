@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
+import dotProp from 'dot-prop';
 import moment from 'moment';
 import Sequelize from 'sequelize';
-import dotProp from 'dot-prop';
 
 const iceborneRegex = /[a-zA-Z0-9#]{4} [a-zA-Z0-9]{4} [a-zA-Z0-9]{4}/;
 const mhwRegex = /[a-zA-Z0-9#]{11,12}\b/;
@@ -95,6 +95,8 @@ export default class Session {
             autoIncrement: true,
           },
           guildId: { type: Sequelize.STRING, notNull: true },
+          userId: { type: Sequelize.STRING, notNull: true },
+          avatar: { type: Sequelize.STRING, notNull: true },
           creator: { type: Sequelize.STRING, notNull: true },
           platform: {
             type: Sequelize.STRING,
@@ -211,6 +213,8 @@ export default class Session {
 
           SessionDb.create({
             guildId: session.guildId,
+            userId: session.userId,
+            avatar: session.avatar,
             creator: session.creator,
             channelId: channel.id,
             platform: session.platform,
@@ -362,6 +366,8 @@ export default class Session {
       }
 
       const session = {
+        userId: message.author.id,
+        avatar: message.author.avatarURL,
         creator: message.author.username,
         date: moment(),
         guildId: message.guild.id,
@@ -414,6 +420,8 @@ export default class Session {
       ).slice(0, 180);
       const dbSes = await SessionDb.create({
         guildId: session.guildId,
+        userId: session.userId,
+        avatar: session.avatar,
         creator: session.creator,
         channelId: message.channel.id,
         platform: session.platform,

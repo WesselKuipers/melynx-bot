@@ -1,91 +1,52 @@
-import React from 'react';
+import React from "react";
+import logo from "../../assets/logo.png";
+import discordLogo from "../../assets/discord.svg";
+import styles from "./Menu.css";
 import {
-  AppBar,
-  Avatar,
+  AnchorButton,
   Button,
-  Toolbar,
-  Typography,
-  makeStyles,
-} from '@material-ui/core';
-import logo from '../../assets/logo.png';
-import discordLogo from '../../assets/discord.png';
-import styles from './Menu.css';
+  Navbar,
+  Alignment,
+  Menu as BPMenu,
+  MenuItem,
+  Popover
+} from "@blueprintjs/core";
+import useUser from "../../hooks/useUser";
+import Avatar from '../Avatar';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    flexGrow: 1,
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  title: {
-    flexGrow: 1,
-  },
-  discordLogo: {
-    paddingLeft: '5px',
-    height: '32px',
-  },
-}));
+const Menu = () => {
 
-interface MenuProps {
-  user: { id: string; avatar: string; };
-  setUser: (token: string, refreshToken: string) => void;
-}
-
-const Menu = ({ user, setUser }: MenuProps) => {
-  const classes = useStyles({});
-
-  if (!user) {
-    const params = new URLSearchParams(window.location.search);
-    if (params.has('token')) {
-      setUser(params.get('token'), params.get('refreshToken'));
-      window.history.pushState(
-        {},
-        document.title,
-        `/${
-          window.location.href
-            .substring(window.location.href.lastIndexOf('/') + 1)
-            .split('?')[0]
-        }`
-      );
-    }
-  }
+  const { user, logout } = useUser();
 
   return (
-    <div className={classes.root}>
-      <AppBar position="static">
-        <Toolbar>
-          <img
-            className={`${styles.logo} ${classes.menuButton}`}
-            alt="Logo"
-            src={logo}
-          />
-          <Typography className={classes.title} variant="h6">
-            Melynx Bot
-          </Typography>
-          {!user && (
-            <Button
-              variant="contained"
-              href="/api/discord/login"
-              color="primary"
-            >
-              Login with
-              <img
-                className={classes.discordLogo}
-                src={discordLogo}
-                alt="Discord"
-              />
-            </Button>
-          )}
-          {user && (
-            <Avatar
-              alt="Avatar"
-              src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}`}
+    <Navbar className={styles.navbar}>
+      <Navbar.Group align={Alignment.LEFT}>
+        <img className={styles.logo} alt="Logo" src={logo} />
+        <Navbar.Heading>Melynx Bot</Navbar.Heading>
+      </Navbar.Group>
+      <Navbar.Group align={Alignment.RIGHT}>
+        {!user && (
+          <AnchorButton
+            href="/api/discord/login"
+            className={styles.discordButton}
+          >
+            <img
+              className={styles.discordLogo}
+              src={discordLogo}
+              alt="Discord Logo"
             />
-          )}
-        </Toolbar>
-      </AppBar>
-    </div>
+            <span>Login with Discord</span>
+          </AnchorButton>
+        )}
+        {user && (
+          <Popover content={<BPMenu><MenuItem onClick={logout} icon="log-out" text="Logout" /></BPMenu>} position="bottom-right">
+            <Button minimal rightIcon="caret-down">
+              <Avatar url={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}`} />
+            </Button>
+          </Popover>
+        )}
+      </Navbar.Group>
+    </Navbar>
   );
 };
 

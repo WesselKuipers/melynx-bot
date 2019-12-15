@@ -13,6 +13,9 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: "module"
   },
+  plugins: [
+    'simple-import-sort'
+  ],
   settings: {
     "import/resolver": {
       node: {
@@ -29,5 +32,17 @@ module.exports = {
     "prettier/prettier": ["error", { "singleQuote": true, "trailingComma": 'es5' }],
     "react/state-in-constructor": "off",
     "react/prop-types": "off",
+    'simple-import-sort/sort': 'error',
+    'import/no-unresolved': 'off',
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never"
+      }
+   ]
   }
 };
