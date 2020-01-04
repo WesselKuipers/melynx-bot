@@ -36,9 +36,9 @@ export default class Sticker {
     this.run = async (client, message, conf, params) => {
       const [command] = params;
 
-      if (command.toLowerCase() === 'list') {
+      if (!command || command.toLowerCase() === 'list') {
         message.channel.send(
-          `\`\`\`${stickers.map(sticker => sticker.name).join(', ')}\`\`\``
+          `You can view a list of stickers at https://${client.options.host}/stickers`
         );
 
         return;
