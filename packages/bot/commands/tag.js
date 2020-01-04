@@ -23,7 +23,7 @@ export default class Ping {
       {prefix} tag [tagname] (Gets a tag matching this name)
       {prefix} tag list (Shows a list of all available tags)
       {prefix} tag add [tagname] (Creates or edits a new tag)
-      {prefix} tag delete [tagname] (Deletes an existing tag)`)}`,
+      {prefix} tag remove [tagname] (Removes an existing tag)`)}`,
     };
 
     this.init = async client => {
@@ -81,6 +81,11 @@ export default class Ping {
       }
 
       const tagName = params[1];
+
+      if (tagName === 'list' || tagName === 'add' || tagName === 'remove') {
+        message.channel.send(`Can't create a tag called ${tagName}.`);
+      }
+
       const content = params.slice(2).join(' ');
       const tag = await TagDb.findOne({ where: { guildId: message.guild.id, name: tagName } });
 
@@ -133,7 +138,7 @@ export default class Ping {
         case 'add':
           await this.addTag(message, conf, params, client);
           break;
-        case 'delete':
+        case 'remove':
           await this.deleteTag(message, conf, params, client);
           break;
         default:
