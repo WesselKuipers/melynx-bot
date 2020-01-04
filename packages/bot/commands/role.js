@@ -45,11 +45,11 @@ export default class Role {
     this.listRoles = async message => {
       const roles = (await RoleDb.findAll({
         where: { guildId: message.guild.id },
-      })) || [{ name: '(none)' }];
+      }));
       message.channel.send(
-        `List of joinable roles: ${roles
+        `List of joinable roles: \`\`\`${roles.length ? roles
           .map(role => `\`${role.name}\``)
-          .join(', ')}`
+          .join(', ') : '(none)'}\`\`\``
       );
     };
 

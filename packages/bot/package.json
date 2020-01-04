@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "dependencies": {
+    "dedent": "^0.7.0",
     "discord.js": "^11.5.1",
     "dot-prop": "^5.2.0",
     "moment": "^2.24.0",
