@@ -56,13 +56,13 @@ export default class Role {
     /**
      * @param {Discord.Message} message
      */
-    this.addRole = async (message, conf, params) => {
+    this.addRole = async (message, conf, params, client) => {
       if (params.length !== 2) {
         message.channel.send('Invalid amount of parameters provided, nya!');
         return;
       }
 
-      if (message.author.id !== '86708235888783360') {
+      if (message.author.id !== client.options.ownerId) {
         if (
           !message.member.roles.findAll(
             r => r.name === conf.modRole || r.name === conf.adminRole
@@ -100,13 +100,13 @@ export default class Role {
     /**
      * @param {Discord.Message} message
      */
-    this.removeRole = async (message, conf, params) => {
+    this.removeRole = async (message, conf, params, client) => {
       if (params.length < 2) {
         message.channel.send('Invalid amount of parameters provided, nya!');
         return;
       }
 
-      if (message.author.id !== '86708235888783360') {
+      if (message.author.id !== client.options.ownerId) {
         if (
           !message.member.roles.findAll(
             r => r.name === conf.modRole || r.name === conf.adminRole
@@ -179,10 +179,10 @@ export default class Role {
           await this.listRoles(message, conf);
           break;
         case 'add':
-          await this.addRole(message, conf, params);
+          await this.addRole(message, conf, params, client);
           break;
         case 'remove':
-          await this.removeRole(message, conf, params);
+          await this.removeRole(message, conf, params, client);
           break;
         default:
           this.handleRoleJoin(message, params);

@@ -183,7 +183,10 @@ export default class MelynxBot {
       return;
     }
 
-    if (command.config.ownerOnly && message.author.id !== '86708235888783360') {
+    if (
+      command.config.ownerOnly &&
+      message.author.id !== this.client.options.ownerId
+    ) {
       return;
     }
 
@@ -191,13 +194,13 @@ export default class MelynxBot {
       const isAdmin =
         message.member.roles.some(
           roles => roles.name === guildConf.adminRole
-        ) || message.author.id === '86708235888783360';
+        ) || message.author.id === this.client.options.ownerId;
       const isMod =
         message.member.roles.some(
           roles =>
             roles.name === guildConf.modRole ||
             roles.name === guildConf.adminRole
-        ) || message.author.id === '86708235888783360';
+        ) || message.author.id === this.client.options.ownerId;
 
       if (command.config.permissionLevel === 1 && !isMod) {
         return;
