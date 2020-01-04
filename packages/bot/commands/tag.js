@@ -54,7 +54,6 @@ export default class Ping {
     }
 
     this.getTag = async (message, params) => {
-      console.log({ guildId: message.guild.id, name: params[0] });
       const tag = await TagDb.findOne({ where: { guildId: message.guild.id, name: params[0] }, raw: true });
 
       if (!tag) {
