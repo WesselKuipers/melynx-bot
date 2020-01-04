@@ -42,7 +42,6 @@ export default function SessionList() {
     };
 
     if (!user) {
-      setSessions([]);
       return;
     }
 
