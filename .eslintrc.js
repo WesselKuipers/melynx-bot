@@ -3,7 +3,7 @@ module.exports = {
     es6: true,
     node: true
   },
-  extends: ["airbnb", "plugin:prettier/recommended"],
+  extends: ["airbnb", "prettier", "plugin:prettier/recommended"],
   globals: {
     Atomics: "readonly",
     SharedArrayBuffer: "readonly"
@@ -13,9 +13,7 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: "module"
   },
-  plugins: [
-    'simple-import-sort'
-  ],
+  plugins: ["simple-import-sort", "prettier"],
   settings: {
     "import/resolver": {
       node: {
@@ -29,20 +27,20 @@ module.exports = {
       { props: true, ignorePropertyModificationsFor: ["client"] }
     ],
     "new-cap": ["error", { newIsCap: false }],
-    "prettier/prettier": ["error", { "singleQuote": true, "trailingComma": 'es5' }],
+    "prettier/prettier": ["error", { singleQuote: true, trailingComma: "es5" }],
     "react/state-in-constructor": "off",
     "react/prop-types": "off",
-    'simple-import-sort/sort': 'error',
-    'import/no-unresolved': 'off',
+    "simple-import-sort/sort": "error",
+    "import/no-unresolved": "off",
     "import/extensions": [
       "error",
       "ignorePackages",
       {
-        "js": "never",
-        "jsx": "never",
-        "ts": "never",
-        "tsx": "never"
+        js: "never",
+        jsx: "never",
+        ts: "never",
+        tsx: "never"
       }
-   ]
+    ]
   }
 };
