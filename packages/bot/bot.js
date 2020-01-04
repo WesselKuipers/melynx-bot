@@ -51,10 +51,7 @@ export default class MelynxBot {
     this.log = message => {
       // eslint-disable-next-line no-console
       console.log(
-        `[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${message.replace(
-          regToken,
-          '[TOKEN]'
-        )}`
+        `[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${message.replace(regToken, '[TOKEN]')}`
       );
     };
 
@@ -113,10 +110,8 @@ export default class MelynxBot {
           command.config.aliases.forEach(alias => {
             if (this.aliases.has(alias)) {
               this.log(
-                `Warning: Command ${
-                  command.help.name
-                } alias ${alias} overlaps with command ${
-                  this.aliases.get(alias).help.name
+                `Warning: Command ${command.help.name} alias ${alias} overlaps with command ${
+                this.aliases.get(alias).help.name
                 }.\r\nOld alias will be overwritten.`
               );
             }
@@ -126,9 +121,9 @@ export default class MelynxBot {
         }
 
         this.log(
-          `Loaded command [${
-            command.help.name
-          }] with aliases [${command.config.aliases.join(', ')}]`
+          `Loaded command [${command.help.name}] with aliases [${command.config.aliases.join(
+            ', '
+          )}]`
         );
       })
     );
@@ -175,31 +170,24 @@ export default class MelynxBot {
     const commandName = message.content.split(/ +/)[1].toLowerCase();
     const params = message.content.split(/ +/).slice(2);
 
-    const command =
-      this.commands.get(commandName) || this.aliases.get(commandName);
+    const command = this.commands.get(commandName) || this.aliases.get(commandName);
     if (!command) return;
 
     if (command.config.guildOnly && message.channel.type !== 'text') {
       return;
     }
 
-    if (
-      command.config.ownerOnly &&
-      message.author.id !== this.client.options.ownerId
-    ) {
+    if (command.config.ownerOnly && message.author.id !== this.client.options.ownerId) {
       return;
     }
 
     if (command.config.permissionLevel > 0) {
       const isAdmin =
-        message.member.roles.some(
-          roles => roles.name === guildConf.adminRole
-        ) || message.author.id === this.client.options.ownerId;
+        message.member.roles.some(roles => roles.name === guildConf.adminRole) ||
+        message.author.id === this.client.options.ownerId;
       const isMod =
         message.member.roles.some(
-          roles =>
-            roles.name === guildConf.modRole ||
-            roles.name === guildConf.adminRole
+          roles => roles.name === guildConf.modRole || roles.name === guildConf.adminRole
         ) || message.author.id === this.client.options.ownerId;
 
       if (command.config.permissionLevel === 1 && !isMod) {

@@ -4,7 +4,7 @@ export default class Help {
       enabled: true,
       aliases: ['h', 'commands'],
       permissionLevel: 0,
-      guildOnly: true,
+      guildOnly: false,
       cooldown: 5,
     };
 

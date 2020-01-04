@@ -4,7 +4,7 @@ export default class SetConf {
   constructor() {
     this.config = {
       enabled: true,
-      permissionLevel: 0,
+      permissionLevel: 2,
       aliases: [],
       guildOnly: true,
       ownerOnly: true,
