@@ -6,3 +6,4 @@ export { default as session } from './session';
 export { default as setconf } from './setconf';
 export { default as sticker } from './sticker';
 export { default as tag } from './tag';
+export { default as catfact } from './catfact';
