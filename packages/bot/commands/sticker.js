@@ -15,7 +15,7 @@ export default class Sticker {
     this.config = {
       enabled: true,
       permissionLevel: 0,
-      aliases: ['stamp', 'st'],
+      aliases: ['stamp', 'st', 'stickers'],
       guildOnly: true,
       ownerOnly: false,
       cooldown: 5,

@@ -7,7 +7,7 @@ export default class SetConf {
       permissionLevel: 2,
       aliases: [],
       guildOnly: true,
-      ownerOnly: true,
+      ownerOnly: false,
       cooldown: 5,
     };
 

@@ -2,10 +2,10 @@ export default class GetConf {
   constructor() {
     this.config = {
       enabled: true,
-      permissionLevel: 0,
+      permissionLevel: 2,
       aliases: ['getconfig'],
       guildOnly: true,
-      ownerOnly: true,
+      ownerOnly: false,
       cooldown: 5,
     };
 
