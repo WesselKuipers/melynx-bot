@@ -58,6 +58,7 @@ export default class Ping {
 
       if (!tag) {
         message.channel.send(`Could not find a tag called ${params[0]}, nya!`);
+        return;
       }
 
       message.channel.send(`>>> ${tag.content}`);
