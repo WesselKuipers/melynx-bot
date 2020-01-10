@@ -54,7 +54,7 @@ export default class Ping {
     }
 
     this.getTag = async (message, params) => {
-      const tag = await TagDb.findOne({ where: { guildId: message.guild.id, name: params[0] }, raw: true });
+      const tag = await TagDb.findOne({ where: { guildId: message.guild.id, $col: Sequelize.where(Sequelize.fn('lower', Sequelize.col('name')), params[0].toLowerCase()) }, raw: true });
 
       if (!tag) {
         message.channel.send(`Could not find a tag called ${params[0]}, nya!`);

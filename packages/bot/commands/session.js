@@ -4,7 +4,7 @@ import moment from 'moment';
 import Sequelize from 'sequelize';
 
 const iceborneRegex = /[a-zA-Z0-9#]{4} [a-zA-Z0-9]{4} [a-zA-Z0-9]{4}/;
-const pcRegex = /^[a-zA-Z0-9#+?@$#&!=-]{12}$/;
+const pcRegex = /\b[a-zA-Z0-9#+?@$#&!=-]{12}\b/;
 const mhguRegex = /\b\d{2}-\d{4}-\d{4}-\d{4}\b/;
 
 let sessions = [];
