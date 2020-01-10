@@ -4,7 +4,7 @@ import moment from 'moment';
 import Sequelize from 'sequelize';
 
 const iceborneRegex = /[a-zA-Z0-9#]{4} [a-zA-Z0-9]{4} [a-zA-Z0-9]{4}/;
-const mhwRegex = /[a-zA-Z0-9#]{11,12}\b/;
+const pcRegex = /^[a-zA-Z0-9#+?@$#&!=-]{12}$/;
 const mhguRegex = /\b\d{2}-\d{4}-\d{4}-\d{4}\b/;
 
 let sessions = [];
@@ -329,7 +329,7 @@ export default class Session {
 
       const joinedParams = params.join(' ');
       const foundIceborne = iceborneRegex.exec(joinedParams);
-      const foundMHW = mhwRegex.exec(joinedParams);
+      const foundPC = pcRegex.exec(joinedParams);
       const foundMHGU = mhguRegex.exec(joinedParams);
 
       const { prefix, sessionTimeout, sessionRefreshTimeout } = {
@@ -339,7 +339,7 @@ export default class Session {
       };
 
       const sessionId =
-        (foundMHW && foundMHW[0]) ||
+        (foundPC && foundPC[0]) ||
         (foundIceborne && foundIceborne[0]) ||
         (foundMHGU && foundMHGU[0]);
 
@@ -360,7 +360,7 @@ export default class Session {
         return;
       }
 
-      if (!foundIceborne && !foundMHW && !foundMHGU) {
+      if (!foundIceborne && !foundPC && !foundMHGU) {
         message.channel.send("Couldn't find any sessions, nya...");
         return;
       }
@@ -373,7 +373,7 @@ export default class Session {
         guildId: message.guild.id,
       };
 
-      if (foundMHW || foundIceborne) {
+      if (foundPC || foundIceborne) {
         session.sessionId = sessionId;
         session.description = joinedParams
           .replace(session.sessionId, '')
@@ -383,6 +383,7 @@ export default class Session {
           (message.channel.name.toUpperCase().includes('PS4') && 'PS4') ||
           (message.channel.name.toUpperCase().includes('PC') && 'PC') ||
           (message.channel.name.toUpperCase().includes('XB1') && 'XB1') ||
+          !!foundPC && 'PC' ||
           'Unknown';
       }
 
