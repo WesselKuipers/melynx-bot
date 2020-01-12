@@ -144,7 +144,7 @@ export default class MelynxBot {
     let guildConfEntry;
 
     if (message.guild) {
-      await this.client.settings.findByPk(message.guild.id);
+      guildConfEntry = await this.client.settings.findByPk(message.guild.id);
     } else {
       guildConfEntry = this.client.defaultSettings;
     }
