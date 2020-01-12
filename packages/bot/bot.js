@@ -21,7 +21,7 @@ const playingLines = [
   { type: 'PLAYING', name: 'Monster Hunter 4 Ultimate' },
   { type: 'PLAYING', name: 'Monster Hunter Frontier' },
   { type: 'PLAYING', name: 'with a Khezu' },
-  { type: 'LISTENING', name: "to Khezu's theme" },
+  { type: 'LISTENING', name: "Khezu's theme" },
   { type: 'WATCHING', name: 'hunters carrying eggs' },
 ];
 
@@ -141,9 +141,15 @@ export default class MelynxBot {
       return; // don't respond to yourself
     }
 
-    let guildConfEntry = await this.client.settings.findByPk(message.guild.id);
+    let guildConfEntry;
 
-    if (!guildConfEntry) {
+    if (message.guild) {
+      await this.client.settings.findByPk(message.guild.id);
+    } else {
+      guildConfEntry = this.client.defaultSettings;
+    }
+
+    if (!guildConfEntry && message.guild) {
       guildConfEntry = await this.client.settings.create({
         guildId: message.guild.id,
         settings: this.client.defaultSettings,
