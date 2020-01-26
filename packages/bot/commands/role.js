@@ -48,7 +48,7 @@ export default class Role {
       }));
       message.channel.send(
         `List of joinable roles: \`\`\`${roles.length ? roles
-          .map(role => `\`${role.name}\``)
+          .map(role => `${role.name}`)
           .join(', ') : '(none)'}\`\`\``
       );
     };
