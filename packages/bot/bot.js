@@ -86,7 +86,8 @@ export default class MelynxBot {
 
     this.client.on('guildDelete', guild => {
       // When the bot leaves or is kicked, delete settings to prevent stale entries.
-      this.client.settings.delete(guild.id);
+      this.log(`Left guild ${guild.id} (${guild.name})`);
+      this.client.settings.destroy(guild.id);
     });
 
     this.client.on('error', error => this.error(error));
