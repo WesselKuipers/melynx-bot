@@ -87,7 +87,7 @@ export default class MelynxBot {
     this.client.on('guildDelete', guild => {
       // When the bot leaves or is kicked, delete settings to prevent stale entries.
       this.log(`Left guild ${guild.id} (${guild.name})`);
-      this.client.settings.destroy(guild.id);
+      this.client.settings.destroy({ where: { guildId: guild.id } });
     });
 
     this.client.on('error', error => this.error(error));
@@ -112,7 +112,7 @@ export default class MelynxBot {
             if (this.aliases.has(alias)) {
               this.log(
                 `Warning: Command ${command.help.name} alias ${alias} overlaps with command ${
-                this.aliases.get(alias).help.name
+                  this.aliases.get(alias).help.name
                 }.\r\nOld alias will be overwritten.`
               );
             }
