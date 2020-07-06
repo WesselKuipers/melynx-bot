@@ -153,7 +153,7 @@ export default class Session {
             5 * 60 * 1000
           );
           sessionChannelTimers[guildId] = timer;
-          this.updateSessionMessage(client, settings);
+          this.updateSessionMessage(client, guildId);
         }
 
         return null;
@@ -265,7 +265,12 @@ export default class Session {
      * @param {Discord.Client} client
      * @param {Object} conf
      */
-    this.updateSessionMessage = async (client, conf) => {
+    this.updateSessionMessage = async (client, guildId) => {
+      const conf = await {
+        ...client.defaultSettings,
+        ...(await client.settings.findByPk(guildId)).settings,
+      };
+
       if (conf.sessionChannel) {
         /**
          * @type {Discord.TextChannel}
@@ -279,8 +284,6 @@ export default class Session {
           await this.removeSessionChannel(client, conf);
           return;
         }
-
-        client.log(JSON.stringify(conf, null, 2));
 
         if (!conf.sessionChannelMessage) {
           client.log('SessionChannelMessage was not set, creating a new one.');
@@ -309,7 +312,7 @@ export default class Session {
     this.run = async (client, message, conf, params) => {
       if (conf.sessionChannel && !sessionChannelTimers[message.guild.id]) {
         const timer = setInterval(
-          async () => this.updateSessionMessage(client, conf),
+          async () => this.updateSessionMessage(client, message.guild.id),
           5 * 60 * 1000
         );
         sessionChannelTimers[message.guild.id] = timer;
@@ -347,7 +350,7 @@ export default class Session {
         this.removeSession(session.id);
         clearTimeout(session.timer);
         message.channel.send(`Remeowved session ${session.sessionId}! ${prefix}`);
-        await this.updateSessionMessage(client, conf);
+        await this.updateSessionMessage(client, message.guild.id);
         return;
       }
 
@@ -424,7 +427,7 @@ export default class Session {
       ); // auto clear after (default) 8 hours;
 
       sessions.push(dbSes);
-      await this.updateSessionMessage(client, conf);
+      await this.updateSessionMessage(client, session.guildId);
     };
   }
 }
