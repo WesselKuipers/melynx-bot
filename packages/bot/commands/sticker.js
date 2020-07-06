@@ -51,7 +51,7 @@ export default class Sticker {
       }
 
       const embed = new MessageEmbed()
-        .attachFile(new Discord.Attachment(sticker.path, `${sticker.name}.png`))
+        .attachFiles([sticker.path])
         .setImage(`attachment://${sticker.name}.png`);
 
       message.channel.send({ embed });
