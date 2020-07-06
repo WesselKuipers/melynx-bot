@@ -37,14 +37,12 @@ export default class Session {
       const sessionMessage = [];
 
       sessions
-        .filter(s => s.guildId === channel.guild.id)
-        .map(s => {
+        .filter((s) => s.guildId === channel.guild.id)
+        .map((s) => {
           sessionMessage.push(
-            `(${Math.floor(
-              moment.duration(moment().diff(s.date)).asMinutes()
-            )}m ago by ${s.creator}) [${s.platform}]: ${s.sessionId} ${
-              s.description
-            }`
+            `(${Math.floor(moment.duration(moment().diff(s.date)).asMinutes())}m ago by ${
+              s.creator
+            }) [${s.platform}]: ${s.sessionId} ${s.description}`
           );
           return null;
         });
@@ -58,8 +56,8 @@ export default class Session {
       return sessionMessage;
     };
 
-    this.removeSession = id => {
-      sessions = sessions.filter(item => item.id !== id);
+    this.removeSession = (id) => {
+      sessions = sessions.filter((item) => item.id !== id);
       SessionDb.destroy({ where: { id } }).then(() => {});
     };
 
@@ -77,7 +75,7 @@ export default class Session {
       );
     };
 
-    this.init = async client => {
+    this.init = async (client) => {
       client.defaultSettings.sessionTimeout = 28800000; // 8 hours
       client.defaultSettings.sessionRefreshTimeout = 5 * 60 * 1000; // 5 minutes
       client.defaultSettings.sessionChannel = undefined;
@@ -111,37 +109,40 @@ export default class Session {
       );
 
       await SessionDb.sync();
-      sessions = await SessionDb.findAll().map(async session => {
-        const conf = {
-          ...client.defaultSettings,
-          ...(await client.settings.findByPk(session.guildId)).settings,
-          guildId: session.guildId,
-        };
+      const dbSessions = await SessionDb.findAll();
+      sessions = await Promise.all(
+        dbSessions.map(async (session) => {
+          const conf = {
+            ...client.defaultSettings,
+            ...(await client.settings.findByPk(session.guildId)).settings,
+            guildId: session.guildId,
+          };
 
-        const { prefix, sessionTimeout, sessionRefreshTimeout } = conf;
-        const channel = client.channels.get(session.channelId);
+          const { prefix, sessionTimeout, sessionRefreshTimeout } = conf;
+          const channel = client.channels.cache.get(session.channelId);
 
-        client.log(`Restoring session: ${session.sessionId}`);
-        const posted = session.date.getTime();
-        const now = new Date().getTime();
-        const remaining = posted - now + Number(sessionTimeout);
+          client.log(`Restoring session: ${session.sessionId}`);
+          const posted = session.date.getTime();
+          const now = new Date().getTime();
+          const remaining = posted - now + Number(sessionTimeout);
 
-        Object.assign(session, {
-          timer: setTimeout(
-            () =>
-              this.handleExpiredSession(
-                client,
-                channel,
-                prefix,
-                sessionTimeout,
-                sessionRefreshTimeout,
-                session
-              ),
-            remaining
-          ),
-        });
-        return session;
-      });
+          Object.assign(session, {
+            timer: setTimeout(
+              () =>
+                this.handleExpiredSession(
+                  client,
+                  channel,
+                  prefix,
+                  sessionTimeout,
+                  sessionRefreshTimeout,
+                  session
+                ),
+              remaining
+            ),
+          });
+          return session;
+        })
+      );
 
       const guilds = await client.settings.findAll();
 
@@ -188,22 +189,19 @@ export default class Session {
       };
 
       sentMessage
-        .awaitReactions(
-          (r, user) => r.emoji.name === '♻' && user.id !== client.user.id,
-          { max: 1, time: sessionRefreshTimeout }
-        )
-        .then(collected => {
+        .awaitReactions((r, user) => r.emoji.name === '♻' && user.id !== client.user.id, {
+          max: 1,
+          time: sessionRefreshTimeout,
+        })
+        .then((collected) => {
           const reactions = collected.first();
 
-          if (sessions.some(s => s.sessionId === session.sessionId)) {
+          if (sessions.some((s) => s.sessionId === session.sessionId)) {
             removeReactions();
             return;
           }
 
-          if (
-            reactions.count === 0 ||
-            (reactions.count === 1 && reactions.first().me)
-          ) {
+          if (reactions.count === 0 || (reactions.count === 1 && reactions.first().me)) {
             removeReactions();
             return;
           }
@@ -220,7 +218,7 @@ export default class Session {
             platform: session.platform,
             description: session.description,
             sessionId: session.sessionId,
-          }).then(dbSes => {
+          }).then((dbSes) => {
             Object.assign(dbSes, {
               timer: setTimeout(
                 () =>
@@ -247,10 +245,9 @@ export default class Session {
     };
 
     this.createSessionMessage = async (client, conf, channel) => {
-      const sessionChannelMessage = await channel.send(
-        this.buildSessionMessage(conf, channel),
-        { split: true }
-      );
+      const sessionChannelMessage = await channel.send(this.buildSessionMessage(conf, channel), {
+        split: true,
+      });
       await client.settings.update(
         {
           settings: {
@@ -274,13 +271,11 @@ export default class Session {
          * @type {Discord.TextChannel}
          */
         const channel = client.channels.find(
-          c => c.id === conf.sessionChannel.replace(/<|#|>/g, '')
+          (c) => c.id === conf.sessionChannel.replace(/<|#|>/g, '')
         );
 
         if (!channel) {
-          client.log(
-            `Unable to find channel ${conf.sessionChannel}, removing it.`
-          );
+          client.log(`Unable to find channel ${conf.sessionChannel}, removing it.`);
           await this.removeSessionChannel(client, conf);
           return;
         }
@@ -290,12 +285,8 @@ export default class Session {
           await this.createSessionMessage(client, conf, channel);
         } else {
           try {
-            const sessionChannelMessage = await channel.fetchMessage(
-              conf.sessionChannelMessage
-            );
-            sessionChannelMessage.edit(
-              this.buildSessionMessage(conf, channel).join('\n')
-            );
+            const sessionChannelMessage = await channel.fetchMessage(conf.sessionChannelMessage);
+            sessionChannelMessage.edit(this.buildSessionMessage(conf, channel).join('\n'));
           } catch (e) {
             client.log(
               `Unable to fetch sessionChannelMessage ${conf.sessionChannelMessage}, creating a new one.`
@@ -344,7 +335,7 @@ export default class Session {
         (foundMHGU && foundMHGU[0]);
 
       if (params[0] === 'r' || params[0] === 'remove') {
-        const session = sessions.find(ses => ses.sessionId === sessionId);
+        const session = sessions.find((ses) => ses.sessionId === sessionId);
 
         if (!session || session.guildId !== message.guild.id) {
           message.channel.send('A session with that ID does not exist, nya...');
@@ -353,9 +344,7 @@ export default class Session {
 
         this.removeSession(session.id);
         clearTimeout(session.timer);
-        message.channel.send(
-          `Remeowved session ${session.sessionId}! ${prefix}`
-        );
+        message.channel.send(`Remeowved session ${session.sessionId}! ${prefix}`);
         await this.updateSessionMessage(client, conf);
         return;
       }
@@ -367,7 +356,7 @@ export default class Session {
 
       const session = {
         userId: message.author.id,
-        avatar: message.author.avatarURL,
+        avatar: message.author.avatarURL(),
         creator: message.author.username,
         date: moment(),
         guildId: message.guild.id,
@@ -375,31 +364,24 @@ export default class Session {
 
       if (foundPC || foundIceborne) {
         session.sessionId = sessionId;
-        session.description = joinedParams
-          .replace(session.sessionId, '')
-          .trim();
+        session.description = joinedParams.replace(session.sessionId, '').trim();
         session.platform =
           dotProp.get(conf, `channelSettings.${message.channel.id}.platform`) ||
           (message.channel.name.toUpperCase().includes('PS4') && 'PS4') ||
           (message.channel.name.toUpperCase().includes('PC') && 'PC') ||
           (message.channel.name.toUpperCase().includes('XB1') && 'XB1') ||
-          !!foundPC && 'PC' ||
+          (!!foundPC && 'PC') ||
           'Unknown';
       }
 
       if (foundMHGU) {
         session.sessionId = sessionId;
-        session.description = foundMHGU.input.slice(
-          foundMHGU[0].length + foundMHGU.index
-        );
+        session.description = foundMHGU.input.slice(foundMHGU[0].length + foundMHGU.index);
         session.platform = 'Switch';
       }
 
       if (
-        sessions.some(
-          s =>
-            s.sessionId === session.sessionId && s.guildId === message.guild.id
-        )
+        sessions.some((s) => s.sessionId === session.sessionId && s.guildId === message.guild.id)
       ) {
         message.channel.send('A lobby with this ID already exists!');
         return;
@@ -410,15 +392,11 @@ export default class Session {
         session.platform = 'Unknown';
       }
 
-      message.channel.send(
-        `Added ${session.platform} session ${session.sessionId}! ${prefix}`
-      );
+      message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);
 
       // see: http://www.asciitable.com/
 
-      session.description = Discord.Util.escapeMarkdown(
-        session.description
-      ).slice(0, 180);
+      session.description = Discord.Util.escapeMarkdown(session.description).slice(0, 180);
       const dbSes = await SessionDb.create({
         guildId: session.guildId,
         userId: session.userId,

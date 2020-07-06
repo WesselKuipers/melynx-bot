@@ -1,14 +1,9 @@
-:global(html, body) {
+/* :global(html, body) {
   background-color: #293742;
   width: 100%;
   height: 100%;
-}
+} */
 
-.logo {
-  height: 46px;
-  margin-right: 15px;
-}
-
-.container {
+.content {
   padding: 10px;
 }

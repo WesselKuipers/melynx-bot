@@ -5,10 +5,9 @@
 }
 
 .session {
-  margin: 5px 10px;
-  padding: 10px !important;
+  margin: 5px 10px !important;
   flex-basis: 30%;
-  min-width: 250px;
+  min-width: 270px;
 }
 
 .date {
@@ -25,7 +24,16 @@
 }
 
 .tag {
-  margin-left: 5px;
+  margin-left: 8px !important;
+}
+
+.spinner,
+.spinner * {
+  margin: 0 auto !important;
+  display: block !important;
+  font-size: 96px !important;
+  width: 96px !important;
+  height: 96px !important;
 }
 
 .center {

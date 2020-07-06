@@ -5,7 +5,7 @@ import Sequelize from 'sequelize';
 import * as commands from './commands';
 
 const regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
-const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const playingLines = [
   { type: 'PLAYING', name: 'stealing gems from hunters' },
   { type: 'PLAYING', name: 'with a hunter' },
@@ -48,18 +48,18 @@ export default class MelynxBot {
       adminRole: 'Administrator',
     };
 
-    this.log = message => {
+    this.log = (message) => {
       // eslint-disable-next-line no-console
       console.log(
         `[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${message.replace(regToken, '[TOKEN]')}`
       );
     };
 
-    this.error = error => {
+    this.error = (error) => {
       this.log(`Error: ${error.message}`);
     };
 
-    this.warn = warning => {
+    this.warn = (warning) => {
       this.log(`Warning: ${warning}`);
     };
 
@@ -73,7 +73,7 @@ export default class MelynxBot {
 
     this.client.on('ready', () => {
       this.log(
-        `Connected to ${this.client.users.size} users on ${this.client.guilds.size} servers.`
+        `Connected to ${this.client.users.cache.size} users on ${this.client.guilds.cache.size} servers.`
       );
       this.loadCommands();
 
@@ -84,20 +84,20 @@ export default class MelynxBot {
       this.client.settings.sync();
     });
 
-    this.client.on('guildDelete', guild => {
+    this.client.on('guildDelete', (guild) => {
       // When the bot leaves or is kicked, delete settings to prevent stale entries.
       this.log(`Left guild ${guild.id} (${guild.name})`);
       this.client.settings.destroy({ where: { guildId: guild.id } });
     });
 
-    this.client.on('error', error => this.error(error));
-    this.client.on('warn', warning => this.warn(warning));
-    this.client.on('message', message => this.message(message));
+    this.client.on('error', (error) => this.error(error));
+    this.client.on('warn', (warning) => this.warn(warning));
+    this.client.on('message', (message) => this.message(message));
   }
 
   async loadCommands() {
     await Promise.all(
-      Object.values(commands).map(async Command => {
+      Object.values(commands).map(async (Command) => {
         const command = new Command();
         // If command has an init method, run it
         if (command.init) {
@@ -108,7 +108,7 @@ export default class MelynxBot {
         // Assign the main command name to commands, as well as all of its aliases
         this.commands.set(command.help.name, command);
         if (command.config.aliases) {
-          command.config.aliases.forEach(alias => {
+          command.config.aliases.forEach((alias) => {
             if (this.aliases.has(alias)) {
               this.log(
                 `Warning: Command ${command.help.name} alias ${alias} overlaps with command ${
@@ -190,11 +190,11 @@ export default class MelynxBot {
 
     if (command.config.permissionLevel > 0) {
       const isAdmin =
-        message.member.roles.some(roles => roles.name === guildConf.adminRole) ||
+        message.member.roles.cache.some((roles) => roles.name === guildConf.adminRole) ||
         message.author.id === this.client.options.ownerId;
       const isMod =
-        message.member.roles.some(
-          roles => roles.name === guildConf.modRole || roles.name === guildConf.adminRole
+        message.member.roles.cache.some(
+          (roles) => roles.name === guildConf.modRole || roles.name === guildConf.adminRole
         ) || message.author.id === this.client.options.ownerId;
 
       if (command.config.permissionLevel === 1 && !isMod) {

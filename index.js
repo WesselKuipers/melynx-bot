@@ -29,9 +29,7 @@ try {
 
 if (!process.env.TOKEN || !process.env.PREFIX || !process.env.DATABASE_URL) {
   // eslint-disable-next-line no-console
-  console.log(
-    'TOKEN, PREFIX and DATABASE_URL environment variables must be present'
-  );
+  console.log('TOKEN, PREFIX and DATABASE_URL environment variables must be present');
 }
 
 const options = {
@@ -69,26 +67,20 @@ if (isDevelopment) {
   // eslint-disable-next-line global-require, import/no-extraneous-dependencies
   const history = require('connect-history-api-fallback');
 
-  const compiler = webpack(
-    webpackConfig(null, { mode: process.env.NODE_ENV || 'development' })
-  );
+  const compiler = webpack(webpackConfig(null, { mode: process.env.NODE_ENV || 'development' }));
   app.use(history());
   app.use(webpackDevMiddleware(compiler, { publicPath: '/' }));
 }
 
 app.use(
   '/assets/stickers',
-  express.static(
-    path.resolve(__dirname, 'packages', 'bot', 'commands', 'stickers')
-  )
+  express.static(path.resolve(__dirname, 'packages', 'bot', 'commands', 'stickers'))
 );
 
 // Front end
 app.use(express.static(path.resolve(__dirname, 'packages', 'client', 'dist')));
 app.get('*', (req, res) => {
-  res.sendFile(
-    path.resolve(__dirname, 'packages', 'client', 'dist', 'index.html')
-  );
+  res.sendFile(path.resolve(__dirname, 'packages', 'client', 'dist', 'index.html'));
 });
 
 // eslint-disable-next-line no-console

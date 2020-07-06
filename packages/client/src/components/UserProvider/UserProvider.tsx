@@ -1,19 +1,17 @@
-import axios from "axios";
-import * as React from "react";
+import axios from 'axios';
+import * as React from 'react';
 
-import { UserContext } from "../../hooks/useUser";
-import { User } from "../../types";
-import useQuery from "../../hooks/useQuery";
-import { RouteComponentProps } from "react-router-dom";
+import { UserContext } from '../../hooks/useUser';
+import { User } from '../../types';
+import useQuery from '../../hooks/useQuery';
+import { RouteComponentProps } from 'react-router-dom';
 
 interface UserProviderProps extends RouteComponentProps {
   children: React.ReactNode;
 }
 
-export default function UserProvider({
-  children
-}: UserProviderProps): React.ReactElement {
-  const [user, setUser] = React.useState<User>();
+export default function UserProvider({ children }: UserProviderProps): React.ReactElement {
+  const [user, setUser] = React.useState<User>(null);
   const query = useQuery();
 
   React.useEffect(() => {
@@ -27,12 +25,10 @@ export default function UserProvider({
 
   React.useEffect(() => {
     const getUser = async () => {
-      const token = query.get("token");
-      const refreshToken = query.get("refreshToken");
+      const token = query.get('token');
+      const refreshToken = query.get('refreshToken');
       axios.defaults.headers.common.Authorization = `Bearer ${token}`;
-      const { data: discordUser } = await axios.get(
-        "https://discordapp.com/api/users/@me"
-      );
+      const { data: discordUser } = await axios.get('https://discordapp.com/api/users/@me');
       const u = {
         token,
         refreshToken,
@@ -40,37 +36,33 @@ export default function UserProvider({
         id: discordUser.id,
         name: discordUser.username,
         discriminator: discordUser.discriminator,
-        avatar: discordUser.avatar
+        avatar: discordUser.avatar,
       };
-      localStorage.setItem("user", JSON.stringify(u));
+      localStorage.setItem('user', JSON.stringify(u));
       setUser(u);
 
       window.history.pushState(
         {},
         document.title,
         `/${
-          window.location.href
-            .substring(window.location.href.lastIndexOf("/") + 1)
-            .split("?")[0]
+          window.location.href.substring(window.location.href.lastIndexOf('/') + 1).split('?')[0]
         }`
       );
     };
 
-    if (query.has("token")) {
+    if (query.has('token')) {
       getUser();
     }
   }, [query]);
 
   const refreshUser = React.useCallback(async () => {
-    const { data: discordUser } = await axios.get(
-      "https://discordapp.com/api/users/@me"
-    );
+    const { data: discordUser } = await axios.get('https://discordapp.com/api/users/@me');
     setUser({
       ...user,
       id: discordUser.id,
       name: discordUser.username,
       discriminator: discordUser.discriminator,
-      avatar: discordUser.avatar
+      avatar: discordUser.avatar,
     });
   }, [user]);
 
@@ -84,7 +76,7 @@ export default function UserProvider({
     () => ({
       logout,
       user,
-      refreshUser
+      refreshUser,
     }),
     [logout, user, refreshUser]
   );

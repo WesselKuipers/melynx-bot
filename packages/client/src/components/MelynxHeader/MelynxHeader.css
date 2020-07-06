@@ -1,0 +1,62 @@
+.brand {
+  float: left;
+  white-space: nowrap;
+  width: 180px;
+  color: hsla(0, 0%, 100%, 0.65);
+}
+
+.logo {
+  height: 46px;
+  margin-right: 15px;
+}
+
+.header {
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+.menu {
+  width: calc(100% - 80px - 93px);
+}
+
+.rightMenu {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding-right: 10px;
+}
+
+.discordButton {
+  background-color: #7289da !important;
+}
+
+.discordButton > :global(.bp3-button-text) {
+  display: flex;
+}
+
+.discordLogo {
+  padding-right: 5px;
+  height: 1.5em;
+}
+
+.avatarButton {
+  cursor: pointer;
+}
+
+.avatarButton span:first-child {
+  margin-right: 5px;
+}
+
+@media (max-width: 480px) {
+  .brand {
+    width: 80px;
+  }
+
+  .brand span {
+    display: none;
+  }
+
+  .menu {
+    width: calc(100% - 130px);
+  }
+}

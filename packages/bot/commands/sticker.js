@@ -1,9 +1,9 @@
-import Discord, { RichEmbed } from 'discord.js';
+import Discord, { MessageEmbed } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
 
 const files = fs.readdirSync(path.join(__dirname, 'stickers'));
-const stickers = files.map(file => {
+const stickers = files.map((file) => {
   return {
     name: file.split('.')[0],
     path: path.join(__dirname, 'stickers', file),
@@ -44,15 +44,13 @@ export default class Sticker {
         return;
       }
 
-      const sticker = stickers.find(
-        s => s.name.toLowerCase() === command.toLowerCase()
-      );
+      const sticker = stickers.find((s) => s.name.toLowerCase() === command.toLowerCase());
       if (!sticker) {
         message.channel.send(`Could nyot find this sticker..`);
         return;
       }
 
-      const embed = new RichEmbed()
+      const embed = new MessageEmbed()
         .attachFile(new Discord.Attachment(sticker.path, `${sticker.name}.png`))
         .setImage(`attachment://${sticker.name}.png`);
 

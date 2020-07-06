@@ -5,4 +5,5 @@ import App from './components/App';
 
 ReactDOM.render(<App />, document.getElementById('app'));
 
+// @ts-ignore
 module.hot.accept();
