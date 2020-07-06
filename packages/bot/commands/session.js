@@ -149,7 +149,7 @@ export default class Session {
       guilds.map(({ guildId, settings }) => {
         if (settings.sessionChannel && !sessionChannelTimers[guildId]) {
           const timer = setInterval(
-            async () => this.updateSessionMessage(client, settings),
+            async () => this.updateSessionMessage(client, guildId),
             5 * 60 * 1000
           );
           sessionChannelTimers[guildId] = timer;
