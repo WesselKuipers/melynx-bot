@@ -77,10 +77,7 @@ export default class MelynxBot {
       );
       this.loadCommands();
 
-      this.client.user.setPresence({
-        status: 'online',
-        game: playingLines[Math.floor(Math.random() * playingLines.length)],
-      });
+      this.client.user.setActivity(playingLines[Math.floor(Math.random() * playingLines.length)]);
       this.client.settings.sync();
     });
 
