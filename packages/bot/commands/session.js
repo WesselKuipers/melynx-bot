@@ -270,7 +270,7 @@ export default class Session {
         /**
          * @type {Discord.TextChannel}
          */
-        const channel = client.channels.find(
+        const channel = client.channels.cache.find(
           (c) => c.id === conf.sessionChannel.replace(/<|#|>/g, '')
         );
 
