@@ -245,9 +245,8 @@ export default class Session {
     };
 
     this.createSessionMessage = async (client, conf, channel) => {
-      const sessionChannelMessage = await channel.send(this.buildSessionMessage(conf, channel), {
-        split: true,
-      });
+      const sessionChannelMessage = await channel.send(this.buildSessionMessage(conf, channel));
+      client.log(`Created ${sessionChannelMessage.id}`);
       await client.settings.update(
         {
           settings: {
@@ -260,6 +259,7 @@ export default class Session {
 
       return sessionChannelMessage;
     };
+
     /**
      *
      * @param {Discord.Client} client
@@ -280,13 +280,15 @@ export default class Session {
           return;
         }
 
+        client.log(JSON.stringify(conf, null, 2));
+
         if (!conf.sessionChannelMessage) {
           client.log('SessionChannelMessage was not set, creating a new one.');
           await this.createSessionMessage(client, conf, channel);
         } else {
           try {
-            const sessionChannelMessage = await channel.fetchMessage(conf.sessionChannelMessage);
-            sessionChannelMessage.edit(this.buildSessionMessage(conf, channel).join('\n'));
+            const sessionChannelMessage = await channel.messages.fetch(conf.sessionChannelMessage);
+            await sessionChannelMessage.edit(this.buildSessionMessage(conf, channel).join('\n'));
           } catch (e) {
             client.log(
               `Unable to fetch sessionChannelMessage ${conf.sessionChannelMessage}, creating a new one.`
