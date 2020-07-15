@@ -185,7 +185,9 @@ export default class Session {
       const reaction = await sentMessage.react('♻');
       const removeReactions = () => {
         sentMessage.edit(expireMessage);
-        reaction.remove();
+        sentMessage.reactions.removeAll().catch(() => {
+          reaction.users.remove((u) => u.id === client.user.id);
+        });
       };
 
       sentMessage
