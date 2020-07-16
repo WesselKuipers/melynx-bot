@@ -26,7 +26,7 @@ export default class Ping {
       {prefix} tag remove [tagname] (Removes an existing tag)`)}`,
     };
 
-    this.init = async client => {
+    this.init = async (client) => {
       /** @type {Sequelize.Sequelize} */
       const { db } = client;
 
@@ -44,17 +44,26 @@ export default class Ping {
       await TagDb.sync();
     };
 
-    this.listTags = async message => {
-      const tags = (await TagDb.findAll({
+    this.listTags = async (message) => {
+      const tags = await TagDb.findAll({
         where: { guildId: message.guild.id },
-      }));
+      });
 
       message.channel.send(`
-      List of tags: \`\`\`${tags.map(tag => tag.name).join(', ')}\`\`\``);
-    }
+      List of tags: \`\`\`${tags.map((tag) => tag.name).join(', ')}\`\`\``);
+    };
 
     this.getTag = async (message, params) => {
-      const tag = await TagDb.findOne({ where: { guildId: message.guild.id, $col: Sequelize.where(Sequelize.fn('lower', Sequelize.col('name')), params[0].toLowerCase()) }, raw: true });
+      const tag = await TagDb.findOne({
+        where: {
+          guildId: message.guild.id,
+          $col: Sequelize.where(
+            Sequelize.fn('lower', Sequelize.col('name')),
+            params[0].toLowerCase()
+          ),
+        },
+        raw: true,
+      });
 
       if (!tag) {
         message.channel.send(`Could not find a tag called ${params[0]}, nya!`);
@@ -62,7 +71,7 @@ export default class Ping {
       }
 
       message.channel.send(`>>> ${tag.content}`);
-    }
+    };
 
     this.addTag = async (message, conf, params, client) => {
       if (params.length < 2) {
@@ -72,8 +81,8 @@ export default class Ping {
 
       if (message.author.id !== client.options.ownerId) {
         if (
-          !message.member.roles.findAll(
-            r => r.name === conf.modRole || r.name === conf.adminRole
+          !message.member.roles.cache.filter(
+            (r) => r.name === conf.modRole || r.name === conf.adminRole
           ).length
         ) {
           return;
@@ -96,7 +105,7 @@ export default class Ping {
         await tag.update({ content });
         message.channel.send(`Updated tag \`${tagName}\`.`);
       }
-    }
+    };
 
     this.deleteTag = async (message, conf, params, client) => {
       if (params.length < 2) {
@@ -106,8 +115,8 @@ export default class Ping {
 
       if (message.author.id !== client.options.ownerId) {
         if (
-          !message.member.roles.findAll(
-            r => r.name === conf.modRole || r.name === conf.adminRole
+          !message.member.roles.cache.filter(
+            (r) => r.name === conf.modRole || r.name === conf.adminRole
           ).length
         ) {
           return;
@@ -123,7 +132,7 @@ export default class Ping {
         await tag.destroy();
         message.channel.send(`Deleted tag \`${tagName}\`.`);
       }
-    }
+    };
 
     this.run = async (client, message, conf, params) => {
       if (!params.length) {

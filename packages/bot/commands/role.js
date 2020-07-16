@@ -64,8 +64,9 @@ export default class Role {
 
       if (message.author.id !== client.options.ownerId) {
         if (
-          !message.member.roles.findAll((r) => r.name === conf.modRole || r.name === conf.adminRole)
-            .length
+          !message.member.roles.cache.filter(
+            (r) => r.name === conf.modRole || r.name === conf.adminRole
+          ).length
         ) {
           return;
         }
@@ -107,8 +108,9 @@ export default class Role {
 
       if (message.author.id !== client.options.ownerId) {
         if (
-          !message.member.roles.findAll((r) => r.name === conf.modRole || r.name === conf.adminRole)
-            .length
+          !message.member.roles.cache.filter(
+            (r) => r.name === conf.modRole || r.name === conf.adminRole
+          ).length
         ) {
           return;
         }
