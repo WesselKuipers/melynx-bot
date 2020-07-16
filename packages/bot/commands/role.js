@@ -22,7 +22,7 @@ export default class Role {
         '{prefix} role [role] (Joins or leaves a role)\n{prefix} role list (Lists all joinable roles)',
     };
 
-    this.init = async client => {
+    this.init = async (client) => {
       client.defaultSettings.sessionTimeout = 28800000; // 8 hours
       client.defaultSettings.sessionRefreshTimeout = 5 * 60 * 1000; // 5 minutes
 
@@ -42,14 +42,14 @@ export default class Role {
       await RoleDb.sync();
     };
 
-    this.listRoles = async message => {
-      const roles = (await RoleDb.findAll({
+    this.listRoles = async (message) => {
+      const roles = await RoleDb.findAll({
         where: { guildId: message.guild.id },
-      }));
+      });
       message.channel.send(
-        `List of joinable roles: \`\`\`${roles.length ? roles
-          .map(role => `${role.name}`)
-          .join(', ') : '(none)'}\`\`\``
+        `List of joinable roles: \`\`\`${
+          roles.length ? roles.map((role) => `${role.name}`).join(', ') : '(none)'
+        }\`\`\``
       );
     };
 
@@ -64,9 +64,8 @@ export default class Role {
 
       if (message.author.id !== client.options.ownerId) {
         if (
-          !message.member.roles.findAll(
-            r => r.name === conf.modRole || r.name === conf.adminRole
-          ).length
+          !message.member.roles.findAll((r) => r.name === conf.modRole || r.name === conf.adminRole)
+            .length
         ) {
           return;
         }
@@ -74,7 +73,7 @@ export default class Role {
 
       const roleName = params.splice(1).join(' ');
       const role = message.guild.roles
-        .filter(r => r.name.toLowerCase() === roleName.toLowerCase())
+        .filter((r) => r.name.toLowerCase() === roleName.toLowerCase())
         .first();
 
       if (!role) {
@@ -108,9 +107,8 @@ export default class Role {
 
       if (message.author.id !== client.options.ownerId) {
         if (
-          !message.member.roles.findAll(
-            r => r.name === conf.modRole || r.name === conf.adminRole
-          ).length
+          !message.member.roles.findAll((r) => r.name === conf.modRole || r.name === conf.adminRole)
+            .length
         ) {
           return;
         }
@@ -148,17 +146,15 @@ export default class Role {
       });
 
       if (!role) {
-        message.channel.send(
-          `Could not find a joinable role called ${roleName}`
-        );
+        message.channel.send(`Could not find a joinable role called ${roleName}`);
         return;
       }
 
-      if (message.member.roles.has(role.id)) {
-        message.member.removeRole(role.id);
+      if (message.member.roles.cache.has(role.id)) {
+        message.member.roles.remove(role.id);
         message.reply(`remeowved role ${role.name}, nya!`);
       } else {
-        message.member.addRole(role.id);
+        message.member.roles.add(role.id);
         message.reply(`added role ${role.name}, meow!`);
       }
     };
