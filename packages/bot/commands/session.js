@@ -295,6 +295,7 @@ export default class Session {
             const sessionChannelMessage = await channel.messages.fetch(conf.sessionChannelMessage);
             await sessionChannelMessage.edit(this.buildSessionMessage(conf, channel).join('\n'));
           } catch (e) {
+            client.error(e);
             client.log(
               `Unable to fetch sessionChannelMessage ${conf.sessionChannelMessage}, creating a new one.`
             );
