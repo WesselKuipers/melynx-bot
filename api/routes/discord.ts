@@ -1,23 +1,26 @@
 import axios from 'axios';
 import btoa from 'btoa';
 import qs from 'querystring';
+import { Router, Request, Response } from 'express';
+import { ApplicationSettings } from '../../packages/bot/bot';
 
-const getRedirect = options => `${options.protocol}://${options.host}/api/discord/callback`;
+const getRedirect = (options: ApplicationSettings) =>
+  `${options.protocol}://${options.host}/api/discord/callback`;
 
-function login(options) {
+function login(options: ApplicationSettings) {
   const redirect = getRedirect(options);
 
-  return (req, res) => {
+  return (req: Request, res: Response) => {
     res.redirect(
       `https://discordapp.com/api/oauth2/authorize?client_id=${options.clientId}&scope=identify guilds&response_type=code&redirect_uri=${redirect}`
     );
   };
 }
 
-function callback(options) {
+function callback(options: ApplicationSettings) {
   const redirect = getRedirect(options);
 
-  return async (req, res) => {
+  return async (req: Request<{}, {}, {}, { code: string }>, res: Response) => {
     if (!req.query.code) {
       throw new Error('NoCodeProvided');
     }
@@ -44,7 +47,7 @@ function callback(options) {
   };
 }
 
-export default (router, { options }) => {
+export default (router: Router, { options }: { options: ApplicationSettings }) => {
   router.get('/discord/login', login(options));
   router.get('/discord/callback', callback(options));
 };

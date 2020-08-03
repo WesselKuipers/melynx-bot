@@ -39,7 +39,7 @@ const options = {
   disabledEvents: JSON.parse(process.env.DISABLEDEVENTS || '[]'),
   clientId: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
-  protocol: process.env.PROTOCOL || isDevelopment ? 'http' : 'https',
+  protocol: (process.env.PROTOCOL || isDevelopment ? 'http' : 'https') as 'http' | 'https',
   host: process.env.HOST || 'localhost:8080',
   sentryDsn: process.env.SENTRY_DSN,
   ownerId: process.env.OWNER_ID || '86708235888783360',
@@ -79,7 +79,7 @@ app.use(
 
 // Front end
 app.use(express.static(path.resolve(__dirname, 'packages', 'client', 'dist')));
-app.get('*', (req, res) => {
+app.get('*', (_, res) => {
   res.sendFile(path.resolve(__dirname, 'packages', 'client', 'dist', 'index.html'));
 });
 
