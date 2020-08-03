@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "types": ["node"],
     "esModuleInterop": true,
     "jsx": "react",
-    "module": "commonjs",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "noImplicitAny": true,
     "outDir": "./build/",
     "preserveConstEnums": true,

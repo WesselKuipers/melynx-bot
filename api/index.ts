@@ -4,7 +4,7 @@ import * as routes from './routes';
 import { Sequelize } from 'sequelize';
 import { ApplicationSettings } from '../packages/bot/bot';
 
-export default (params: { options: ApplicationSettings; db: Sequelize }) => {
+export function API(params: { options: ApplicationSettings; db: Sequelize }) {
   const apiRouter = Router();
   Object.values(routes).map((route) => route(apiRouter, params));
   apiRouter.get('/*', (_, res) => {
@@ -12,4 +12,4 @@ export default (params: { options: ApplicationSettings; db: Sequelize }) => {
   });
 
   return apiRouter;
-};
+}

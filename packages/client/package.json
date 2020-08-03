@@ -2,7 +2,7 @@
   "name": "melynx-client",
   "private": true,
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.tsx",
   "license": "MIT",
   "scripts": {
     "build": "webpack --mode production"

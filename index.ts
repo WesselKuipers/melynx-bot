@@ -7,8 +7,8 @@ import path from 'path';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 
-import api from './api';
-import MelynxBot from './packages/bot';
+import { API } from './api/index';
+import { MelynxBot } from './packages/bot/bot';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -59,7 +59,7 @@ if (options.sentryDsn) {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/api/*', cors());
-app.use('/api', api({ options, db: bot.client.db }));
+app.use('/api', API({ options, db: bot.client.db }));
 
 if (isDevelopment) {
   // eslint-disable-next-line global-require

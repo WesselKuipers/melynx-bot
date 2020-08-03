@@ -1,6 +1,6 @@
 import Discord, { Message, ActivityOptions } from 'discord.js';
 import moment from 'moment';
-import { Sequelize, DataType, DataTypes } from 'sequelize';
+import { Sequelize, DataTypes } from 'sequelize';
 
 import * as commands from './commands';
 import Command from './types/command';
@@ -55,7 +55,7 @@ function warn(warning: string) {
   this.log(`Warning: ${warning}`);
 }
 
-export default class MelynxBot {
+export class MelynxBot {
   client: MelynxClient;
   commands: Discord.Collection<string, Command>;
   aliases: Discord.Collection<string, Command>;

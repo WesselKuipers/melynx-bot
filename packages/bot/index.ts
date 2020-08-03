@@ -1,3 +1,3 @@
-import bot from './bot';
+import { MelynxBot } from './bot';
 
-export default bot;
+export { MelynxBot };
