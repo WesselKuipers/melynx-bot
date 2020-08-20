@@ -338,9 +338,9 @@ export default class Session {
       };
 
       const sessionId =
+        (foundMHGU && foundMHGU[0]) ||
         (foundPC && foundPC[0]) ||
-        (foundIceborne && foundIceborne[0]) ||
-        (foundMHGU && foundMHGU[0]);
+        (foundIceborne && foundIceborne[0]);
 
       if (params[0] === 'r' || params[0] === 'remove') {
         const session = sessions.find((ses) => ses.sessionId === sessionId);
