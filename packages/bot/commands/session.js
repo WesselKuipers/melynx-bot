@@ -370,7 +370,13 @@ export default class Session {
         guildId: message.guild.id,
       };
 
-      if (foundPC || foundIceborne) {
+      if (foundMHGU) {
+        session.sessionId = sessionId;
+        session.description = foundMHGU.input.slice(foundMHGU[0].length + foundMHGU.index);
+        session.platform = 'Switch';
+      }
+
+      if ((foundPC || foundIceborne) && !session.sessionId) {
         session.sessionId = sessionId;
         session.description = joinedParams.replace(session.sessionId, '').trim();
         session.platform =
@@ -380,12 +386,6 @@ export default class Session {
           (message.channel.name.toUpperCase().includes('XB1') && 'XB1') ||
           (!!foundPC && 'PC') ||
           'Unknown';
-      }
-
-      if (foundMHGU) {
-        session.sessionId = sessionId;
-        session.description = foundMHGU.input.slice(foundMHGU[0].length + foundMHGU.index);
-        session.platform = 'Switch';
       }
 
       if (
