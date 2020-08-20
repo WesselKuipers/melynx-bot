@@ -371,12 +371,14 @@ export default class Session {
       };
 
       if (foundMHGU) {
+        client.log('Matched MHGU session');
         session.sessionId = sessionId;
         session.description = foundMHGU.input.slice(foundMHGU[0].length + foundMHGU.index);
         session.platform = 'Switch';
       }
 
       if ((foundPC || foundIceborne) && !session.sessionId) {
+        client.log('Matched Iceborne/PC session');
         session.sessionId = sessionId;
         session.description = joinedParams.replace(session.sessionId, '').trim();
         session.platform =
@@ -400,11 +402,9 @@ export default class Session {
         session.platform = 'Unknown';
       }
 
-      message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);
-
       // see: http://www.asciitable.com/
-
       session.description = Discord.Util.escapeMarkdown(session.description).slice(0, 180);
+
       const dbSes = await SessionDb.create({
         guildId: session.guildId,
         userId: session.userId,
@@ -431,6 +431,8 @@ export default class Session {
 
       sessions.push(dbSes);
       await this.updateSessionMessage(client, session.guildId);
+      message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);
+      client.info(`Added session ${session.sessionId} for platform ${session.platform} by ${session.creator} on ${session.guildId}`);
     };
   }
 }
