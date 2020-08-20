@@ -432,7 +432,7 @@ export default class Session {
       sessions.push(dbSes);
       await this.updateSessionMessage(client, session.guildId);
       message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);
-      client.info(`Added session ${session.sessionId} for platform ${session.platform} by ${session.creator} on ${session.guildId}`);
+      client.log(`Added session ${session.sessionId} for platform ${session.platform} by ${session.creator} on ${session.guildId}`);
     };
   }
 }
