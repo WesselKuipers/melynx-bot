@@ -23,7 +23,7 @@ export interface GuildConfig {
   };
 }
 
-export default interface Command {
+export interface Command {
   config: {
     guildOnly: boolean;
     ownerOnly: boolean;
@@ -47,3 +47,5 @@ export default interface Command {
 
   init?: (client: MelynxClient) => Promise<void>;
 }
+
+export default Command;

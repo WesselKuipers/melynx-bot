@@ -1,4 +1,4 @@
-import Discord, { Message, ActivityOptions } from 'discord.js';
+import { Client, Collection, Message, ActivityOptions } from 'discord.js';
 import moment from 'moment';
 import { Sequelize, DataTypes } from 'sequelize';
 
@@ -57,16 +57,16 @@ function warn(warning: string) {
 
 export class MelynxBot {
   client: MelynxClient;
-  commands: Discord.Collection<string, Command>;
-  aliases: Discord.Collection<string, Command>;
+  commands: Collection<string, Command>;
+  aliases: Collection<string, Command>;
   settings: ApplicationSettings;
 
   constructor(settings: ApplicationSettings) {
     this.settings = settings;
 
-    this.client = new Discord.Client() as MelynxClient;
-    this.commands = new Discord.Collection();
-    this.aliases = new Discord.Collection();
+    this.client = new Client() as MelynxClient;
+    this.commands = new Collection();
+    this.aliases = new Collection();
 
     const db = new Sequelize(settings.databaseUrl, { logging: false });
     const guildSettings = db.define<DbSettings>('settings', {

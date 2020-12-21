@@ -1,4 +1,4 @@
-import Command, { PermissionLevel } from '../types/command';
+import { Command, PermissionLevel } from '../types/command';
 
 export default {
   config: {

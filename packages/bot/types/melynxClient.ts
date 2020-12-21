@@ -2,7 +2,7 @@ import { Client, Collection, ClientOptions } from 'discord.js';
 import Command, { GuildConfig } from './command';
 import { Sequelize, ModelCtor, Model } from 'sequelize';
 
-interface DbSettings extends Model {
+export interface DbSettings extends Model {
   guildId: string;
   settings: GuildConfig;
 }

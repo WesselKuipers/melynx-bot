@@ -154,7 +154,7 @@ async function handleExpiredSession(
 }
 
 async function createSessionMessage(client: MelynxClient, conf: GuildConfig, channel: TextChannel) {
-  const sessionChannelMessage = await channel.send(buildSessionMessage(conf, channel));
+  const sessionChannelMessage = await channel.send(await buildSessionMessage(conf, channel));
   client.log(`Created ${sessionChannelMessage.id}`);
   await client.settings.update(
     {
