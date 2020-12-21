@@ -32,7 +32,6 @@
     "axios": "^0.21.0",
     "classnames": "^2.2.6",
     "copy-to-clipboard": "^3.3.1",
-    "form-data": "^3.0.0",
     "normalize.css": "^8.0.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

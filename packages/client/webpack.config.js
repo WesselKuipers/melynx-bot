@@ -1,4 +1,3 @@
-require('@babel/polyfill');
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -9,7 +8,7 @@ module.exports = (env, { mode }) => {
 
   return {
     mode,
-    entry: ['@babel/polyfill', path.join(__dirname, 'src')],
+    entry: [path.join(__dirname, 'src')],
     // Enable sourcemaps for debugging webpack's output.
     devtool: 'source-map',
     module: {
@@ -19,34 +18,20 @@ module.exports = (env, { mode }) => {
           loader: 'ts-loader',
           exclude: /node_modules/,
         },
-        // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
-        {
-          enforce: 'pre',
-          test: /\.js$/,
-          loader: 'source-map-loader',
-        },
-        {
-          test: /\.(js|jsx)$/,
-          exclude: /node_modules/,
-          use: ['babel-loader'],
-        },
         {
           test: /\.css$/,
           oneOf: [
             {
               include: /node_modules/,
-              use: [
-                'style-loader',
-                { loader: 'css-loader', options: { modules: false } },
-              ],
+              use: ['style-loader', { loader: 'css-loader', options: { modules: false } }],
             },
             {
               use: [
                 {
                   loader: MiniCssExtractPlugin.loader,
-                  options: {
-                    hmr: !production,
-                  },
+                  // options: {
+                  //   hmr: !production,
+                  // },
                 },
                 { loader: 'css-loader', options: { modules: true } },
               ],
@@ -83,7 +68,7 @@ module.exports = (env, { mode }) => {
       ],
     },
     resolve: {
-      extensions: ['*', '.js', '.jsx', '.ts', '.tsx'],
+      extensions: ['.js', '.ts', '.tsx'],
     },
     output: {
       path: `${__dirname}/dist`,

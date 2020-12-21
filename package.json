@@ -20,15 +20,7 @@
     "node_modules",
     "client/node_modules"
   ],
-  "dependencies": {
-    "btoa": "^1.2.1",
-    "es6-promise": "^4.2.8",
-    "esm": "^3.2.25",
-    "form-data": "^3.0.0",
-    "ts-node": "^9.1.1"
-  },
   "devDependencies": {
-    "@babel/preset-typescript": "^7.12.7",
     "@types/btoa": "^1.2.3",
     "@types/classnames": "^2.2.11",
     "@types/cors": "^2.8.9",
@@ -44,9 +36,6 @@
     "@types/webpack-env": "^1.16.0",
     "@typescript-eslint/eslint-plugin": "^4.10.0",
     "@typescript-eslint/parser": "^4.10.0",
-    "awesome-typescript-loader": "^5.2.1",
-    "babel-eslint": "^10.1.0",
-    "connect-history-api-fallback": "^1.6.0",
     "eslint": "^7.16.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^7.1.0",
@@ -60,7 +49,7 @@
     "prettier": "^2.2.1",
     "source-map-loader": "^1.1.3",
     "ts-loader": "^8.0.12",
-    "tsconfig-paths": "^3.9.0",
+    "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
   }
 }

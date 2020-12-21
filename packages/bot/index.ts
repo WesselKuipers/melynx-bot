@@ -65,7 +65,7 @@ app.use('/api', API({ options, db: bot.client.db }));
 if (isDevelopment) {
   // eslint-disable-next-line global-require
   const webpackConfig = require('../client/webpack.config');
-  // eslint-disable-next-line global-require, import/no-extraneous-dependencies
+  // eslint-disable-next-line global-require
   const history = require('connect-history-api-fallback');
 
   const compiler = webpack(webpackConfig(null, { mode: process.env.NODE_ENV || 'development' }));
