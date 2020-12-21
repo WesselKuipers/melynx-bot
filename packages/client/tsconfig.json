@@ -4,6 +4,6 @@
     "noEmit": false,
     "isolatedModules": true,
     "lib": ["dom", "esnext"],
-    "types": ["css-modules"]
+    "types": ["css-modules", "webpack-env"]
   }
 }
