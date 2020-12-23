@@ -2,7 +2,7 @@ import axios from 'axios';
 import btoa from 'btoa';
 import qs from 'querystring';
 import { Router, Request, Response } from 'express';
-import { ApplicationSettings } from '../../bot';
+import { ApplicationSettings } from '../../server';
 
 const getRedirect = (options: ApplicationSettings) =>
   `${options.protocol}://${options.host}/api/discord/callback`;
