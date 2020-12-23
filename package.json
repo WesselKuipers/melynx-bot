@@ -12,8 +12,8 @@
     "packages/*"
   ],
   "scripts": {
-    "start": "ts-node -TP packages/bot/tsconfig.json ./packages/bot/index.ts",
-    "watch": "nodemon --exec ts-node packages/bot/index.ts",
+    "start": "ts-node -TP packages/server/tsconfig.json ./packages/server/src/index.ts",
+    "watch": "nodemon --exec ts-node packages/server/src/index.ts",
     "build": "yarn webpack --config packages/client/webpack.config.js --mode production"
   },
   "cacheDirectories": [
