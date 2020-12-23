@@ -73,7 +73,7 @@ module.exports = (env, { mode }) => {
     output: {
       path: `${__dirname}/dist`,
       publicPath: '/',
-      filename: production ? '[hash].js' : '[name].js',
+      filename: production ? '[name].[contenthash].js' : '[name].js',
     },
     plugins: [
       new webpack.HotModuleReplacementPlugin(),
@@ -82,7 +82,7 @@ module.exports = (env, { mode }) => {
         template: path.join(__dirname, 'src', 'index.html'),
       }),
       new MiniCssExtractPlugin({
-        filename: production ? '_/[hash].css' : '[name].css',
+        filename: production ? '_/[name].[contenthash].css' : '[name].css',
       }),
     ],
     devServer: {
