@@ -327,7 +327,7 @@ export default {
     };
 
     const sessionId =
-      (foundPC && foundPC[0]) || (foundIceborne && foundIceborne[0]) || (foundMHGU && foundMHGU[0]);
+      (foundMHGU && foundMHGU[0]) || (foundPC && foundPC[0]) || (foundIceborne && foundIceborne[0]);
 
     if (params[0] === 'r' || params[0] === 'remove') {
       const session = sessions.find((ses) => ses.sessionId === sessionId);
@@ -357,7 +357,13 @@ export default {
       guildId: message.guild.id,
     };
 
-    if (foundPC || foundIceborne) {
+    if (foundMHGU) {
+      session.sessionId = sessionId;
+      session.description = foundMHGU.input.slice(foundMHGU[0].length + foundMHGU.index);
+      session.platform = 'Switch';
+    }
+
+    if ((foundPC || foundIceborne) && !session.sessionId) {
       session.sessionId = sessionId;
       session.description = joinedParams.replace(session.sessionId, '').trim();
       session.platform =
@@ -367,12 +373,6 @@ export default {
         ((message.channel as TextChannel).name.toUpperCase().includes('XB1') && 'XB1') ||
         (!!foundPC && 'PC') ||
         'Unknown';
-    }
-
-    if (foundMHGU) {
-      session.sessionId = sessionId;
-      session.description = foundMHGU.input.slice(foundMHGU[0].length + foundMHGU.index);
-      session.platform = 'Switch';
     }
 
     if (sessions.some((s) => s.sessionId === session.sessionId && s.guildId === message.guild.id)) {
@@ -385,10 +385,7 @@ export default {
       session.platform = 'Unknown';
     }
 
-    message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);
-
     // see: http://www.asciitable.com/
-
     session.description = Discord.Util.escapeMarkdown(session.description).slice(0, 180);
     const dbSes = await SessionDb.create({
       guildId: session.guildId,
@@ -416,5 +413,9 @@ export default {
 
     sessions.push(dbSes);
     await updateSessionMessage(client, session.guildId);
+    message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);
+    client.log(
+      `Added session ${session.sessionId} for platform ${session.platform} by ${session.creator} on ${session.guildId}`
+    );
   },
 } as Command;
