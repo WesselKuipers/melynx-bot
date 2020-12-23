@@ -2,9 +2,9 @@ import { Client, Collection, Message, ActivityOptions } from 'discord.js';
 import moment from 'moment';
 import { Sequelize, DataTypes } from 'sequelize';
 
-import * as commands from './commands';
-import Command from './types/command';
-import { MelynxClient, DbSettings } from './types/melynxClient';
+import * as commands from '../commands';
+import Command from '../types/command';
+import { MelynxClient, DbSettings } from '../types/melynxClient';
 
 export interface ApplicationSettings {
   prefix: string;
@@ -17,6 +17,7 @@ export interface ApplicationSettings {
   host: string;
   sentryDsn: string;
   ownerId: string;
+  port: number;
 }
 
 const regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
