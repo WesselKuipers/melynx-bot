@@ -113,6 +113,11 @@ async function listTags(message: Message) {
     where: { guildId: message.guild.id },
   });
 
+  if (!tags.length) {
+    message.channel.send('This server currently has no tags.');
+    return;
+  }
+
   await message.channel.send(`
     List of tags: \`\`\`${tags.map((tag) => tag.name).join(', ')}\`\`\``);
 }
