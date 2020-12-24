@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
+    "isolatedModules": true,
     "esModuleInterop": true,
-    "jsx": "react",
-    "module": "commonjs",
+    "jsx": "react-jsx",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "noImplicitAny": true,
     "outDir": "./build/",
-    "preserveConstEnums": true,
     "removeComments": true,
-    "target": "ES6"
-  },
-  "exclude": ["node_modules"]
+    "target": "ES6",
+    "noEmit": true
+  }
 }

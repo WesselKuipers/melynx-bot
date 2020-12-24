@@ -10,7 +10,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 const { Header } = Layout;
 
-const MelynxHeader = () => {
+export function MelynxHeader() {
   const { user, logout } = useUser();
   const location = useLocation();
   const current = location.pathname.split('/')[1];

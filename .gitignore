@@ -1,6 +1,7 @@
 settings.json
 data/*
 .vscode
+**/dist
 
 # Logs
 logs

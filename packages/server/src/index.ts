@@ -7,8 +7,8 @@ import path from 'path';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 
-import api from './api';
-import MelynxBot from './packages/bot';
+import { API } from './api/index';
+import { ApplicationSettings, MelynxBot } from './bot';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -32,7 +32,7 @@ if (!process.env.TOKEN || !process.env.PREFIX || !process.env.DATABASE_URL) {
   console.log('TOKEN, PREFIX and DATABASE_URL environment variables must be present');
 }
 
-const options = {
+const options: ApplicationSettings = {
   prefix: process.env.PREFIX,
   token: process.env.TOKEN,
   databaseUrl: process.env.DATABASE_URL,
@@ -40,9 +40,10 @@ const options = {
   clientId: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
   protocol: process.env.PROTOCOL || isDevelopment ? 'http' : 'https',
-  host: process.env.HOST || 'localhost:8080',
+  host: process.env.HOST || 'localhost',
   sentryDsn: process.env.SENTRY_DSN,
   ownerId: process.env.OWNER_ID || '86708235888783360',
+  port: Number(process.env.PORT) || 8080,
 };
 
 const bot = new MelynxBot(options);
@@ -59,12 +60,13 @@ if (options.sentryDsn) {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/api/*', cors());
-app.use('/api', api({ options, db: bot.client.db }));
+// eslint-disable-next-line new-cap
+app.use('/api', API({ options, db: bot.client.db }));
 
 if (isDevelopment) {
   // eslint-disable-next-line global-require
-  const webpackConfig = require('./packages/client/webpack.config');
-  // eslint-disable-next-line global-require, import/no-extraneous-dependencies
+  const webpackConfig = require('../../client/webpack.config');
+  // eslint-disable-next-line global-require
   const history = require('connect-history-api-fallback');
 
   const compiler = webpack(webpackConfig(null, { mode: process.env.NODE_ENV || 'development' }));
@@ -72,17 +74,14 @@ if (isDevelopment) {
   app.use(webpackDevMiddleware(compiler, { publicPath: '/' }));
 }
 
-app.use(
-  '/assets/stickers',
-  express.static(path.resolve(__dirname, 'packages', 'bot', 'commands', 'stickers'))
-);
+app.use('/assets/stickers', express.static(path.resolve(__dirname, 'commands', 'stickers')));
 
 // Front end
-app.use(express.static(path.resolve(__dirname, 'packages', 'client', 'dist')));
-app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'packages', 'client', 'dist', 'index.html'));
+app.use(express.static(path.resolve(__dirname, '..', '..', 'client', 'dist')));
+app.get('*', (_, res) => {
+  res.sendFile(path.resolve(__dirname, '..', '..', 'client', 'dist', 'index.html'));
 });
 
 // eslint-disable-next-line no-console
-console.log(`Listening on port ${process.env.PORT || 8080}`);
-app.listen(process.env.PORT || 8080);
+console.log(`Listening on: ${options.protocol}://${options.host}:${options.port}`);
+app.listen(options.port);

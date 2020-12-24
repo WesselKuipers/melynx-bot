@@ -1,12 +1,28 @@
-import Discord from 'discord.js';
+import { Client, Collection, Message, ActivityOptions } from 'discord.js';
 import moment from 'moment';
-import Sequelize from 'sequelize';
+import { Sequelize, DataTypes } from 'sequelize';
 
-import * as commands from './commands';
+import * as commands from '../commands';
+import Command from '../types/command';
+import { MelynxClient, DbSettings } from '../types/melynxClient';
+
+export interface ApplicationSettings {
+  prefix: string;
+  token: string;
+  databaseUrl: string;
+  disabledEvents: [];
+  clientId: string;
+  clientSecret: string;
+  protocol: 'http' | 'https';
+  host: string;
+  sentryDsn: string;
+  ownerId: string;
+  port: number;
+}
 
 const regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
-const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const playingLines = [
+const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const playingLines: ActivityOptions[] = [
   { type: 'PLAYING', name: 'stealing gems from hunters' },
   { type: 'PLAYING', name: 'with a hunter' },
   { type: 'STREAMING', name: 'smoking felvine' },
@@ -25,54 +41,67 @@ const playingLines = [
   { type: 'WATCHING', name: 'hunters carrying eggs' },
 ];
 
-export default class MelynxBot {
-  constructor(settings) {
+function log(message: string) {
+  // eslint-disable-next-line no-console
+  console.log(
+    `[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${message.replace(regToken, '[TOKEN]')}`
+  );
+}
+
+function error(error: Error) {
+  log(`Error: ${error.message}`);
+}
+
+function warn(warning: string) {
+  this.log(`Warning: ${warning}`);
+}
+
+export class MelynxBot {
+  client: MelynxClient;
+  commands: Collection<string, Command>;
+  aliases: Collection<string, Command>;
+  settings: ApplicationSettings;
+
+  constructor(settings: ApplicationSettings) {
     this.settings = settings;
 
-    this.client = new Discord.Client(settings);
-    this.commands = new Discord.Collection();
-    this.aliases = new Discord.Collection();
+    this.client = new Client() as MelynxClient;
+    this.client.options.ownerId = settings.ownerId;
+    this.client.options.host = settings.host;
+    this.commands = new Collection();
+    this.aliases = new Collection();
 
     const db = new Sequelize(settings.databaseUrl, { logging: false });
-    const guildSettings = db.define('settings', {
-      guildId: { type: Sequelize.STRING, unique: true, primaryKey: true },
-      settings: Sequelize.JSON,
+    const guildSettings = db.define<DbSettings>('settings', {
+      guildId: { type: DataTypes.STRING, unique: true, primaryKey: true },
+      settings: DataTypes.JSON,
     });
 
     this.client.db = db;
     this.client.settings = guildSettings;
 
     this.client.defaultSettings = {
+      guildId: '0',
       prefix: settings.prefix,
       modRole: 'Moderator',
       adminRole: 'Administrator',
+      sessionTimeout: 28800000, // 8 hours
+      sessionRefreshTimeout: 300000, // 5 minutes
+      sessionChannel: undefined,
+      sessionChannelMessage: undefined,
+      channelSettings: {},
     };
 
-    this.log = (message) => {
-      // eslint-disable-next-line no-console
-      console.log(
-        `[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${message.replace(regToken, '[TOKEN]')}`
-      );
-    };
-
-    this.error = (error) => {
-      this.log(`Error: ${error.message}`);
-    };
-
-    this.warn = (warning) => {
-      this.log(`Warning: ${warning}`);
-    };
-
-    this.client.log = this.log;
-    this.client.warn = this.warn;
-    this.client.error = this.error;
+    this.client.log = log;
+    this.client.warn = warn;
+    this.client.error = error;
   }
 
   run() {
     this.client.login(this.settings.token);
 
     this.client.on('ready', () => {
-      this.log(
+      this.client.log(
         `Connected to ${this.client.users.cache.size} users on ${this.client.guilds.cache.size} servers.`
       );
       this.loadCommands();
@@ -83,22 +112,21 @@ export default class MelynxBot {
 
     this.client.on('guildDelete', (guild) => {
       // When the bot leaves or is kicked, delete settings to prevent stale entries.
-      this.log(`Left guild ${guild.id} (${guild.name})`);
+      this.client.log(`Left guild ${guild.id} (${guild.name})`);
       this.client.settings.destroy({ where: { guildId: guild.id } });
     });
 
-    this.client.on('error', (error) => this.error(error));
-    this.client.on('warn', (warning) => this.warn(warning));
+    this.client.on('error', (error) => this.client.error(error));
+    this.client.on('warn', (warning) => this.client.warn(warning));
     this.client.on('message', (message) => this.message(message));
   }
 
   async loadCommands() {
     await Promise.all(
-      Object.values(commands).map(async (Command) => {
-        const command = new Command();
+      Object.values(commands).map(async (command) => {
         // If command has an init method, run it
         if (command.init) {
-          this.log(`Running init of ${command.help.name}`);
+          this.client.log(`Running init of ${command.help.name}`);
           await command.init(this.client);
         }
 
@@ -107,7 +135,7 @@ export default class MelynxBot {
         if (command.config.aliases) {
           command.config.aliases.forEach((alias) => {
             if (this.aliases.has(alias)) {
-              this.log(
+              this.client.log(
                 `Warning: Command ${command.help.name} alias ${alias} overlaps with command ${
                   this.aliases.get(alias).help.name
                 }.\r\nOld alias will be overwritten.`
@@ -118,7 +146,7 @@ export default class MelynxBot {
           });
         }
 
-        this.log(
+        this.client.log(
           `Loaded command [${command.help.name}] with aliases [${command.config.aliases.join(
             ', '
           )}]`
@@ -130,11 +158,7 @@ export default class MelynxBot {
     this.client.aliases = this.aliases;
   }
 
-  /**
-   *
-   * @param {Discord.Message} message
-   */
-  async message(message) {
+  async message(message: Message) {
     if (message.author === this.client.user) {
       return; // don't respond to yourself
     }
@@ -142,7 +166,7 @@ export default class MelynxBot {
     let guildConfEntry;
 
     if (message.guild) {
-      guildConfEntry = await this.client.settings.findByPk(message.guild.id);
+      guildConfEntry = (await this.client.settings.findByPk(message.guild.id)).settings;
     } else {
       guildConfEntry = this.client.defaultSettings;
     }
@@ -152,12 +176,12 @@ export default class MelynxBot {
         guildId: message.guild.id,
         settings: this.client.defaultSettings,
       });
-      this.log(`Initialized config for guild ${message.guild.id}`);
+      this.client.log(`Initialized config for guild ${message.guild.id}`);
     }
 
     const guildConf = {
-      ...this.defaultSettings,
-      ...guildConfEntry.get('settings'),
+      ...this.client.defaultSettings,
+      ...guildConfEntry,
     };
     const prefixRegex = new RegExp(
       `^(<@!?${this.client.user.id}>|${escapeRegex(guildConf.prefix)})\\s*`
@@ -167,15 +191,19 @@ export default class MelynxBot {
       return; // doesn't start with prefix or mention, don't care what the message is
     }
 
-    if (message.content.split(/ +/).length === 1) {
+    const split = message.content.split(/\s+/);
+
+    if (split.length === 1) {
       return; // usage of mention or prefix without a command
     }
 
-    const commandName = message.content.split(/ +/)[1].toLowerCase();
-    const params = message.content.split(/ +/).slice(2);
-
+    const commandName = split[1].toLowerCase();
+    const params = split.slice(2);
     const command = this.commands.get(commandName) || this.aliases.get(commandName);
-    if (!command) return;
+
+    if (!command) {
+      return;
+    }
 
     if (command.config.guildOnly && message.channel.type !== 'text') {
       return;
@@ -190,9 +218,7 @@ export default class MelynxBot {
         message.member.roles.cache.some((roles) => roles.name === guildConf.adminRole) ||
         message.author.id === this.client.options.ownerId;
       const isMod =
-        message.member.roles.cache.some(
-          (roles) => roles.name === guildConf.modRole || roles.name === guildConf.adminRole
-        ) || message.author.id === this.client.options.ownerId;
+        isAdmin || message.member.roles.cache.some((roles) => roles.name === guildConf.modRole);
 
       if (command.config.permissionLevel === 1 && !isMod) {
         return;
