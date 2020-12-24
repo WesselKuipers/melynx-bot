@@ -66,6 +66,8 @@ export class MelynxBot {
     this.settings = settings;
 
     this.client = new Client() as MelynxClient;
+    this.client.options.ownerId = settings.ownerId;
+    this.client.options.host = settings.host;
     this.commands = new Collection();
     this.aliases = new Collection();
 
@@ -189,7 +191,7 @@ export class MelynxBot {
       return; // doesn't start with prefix or mention, don't care what the message is
     }
 
-    const split = message.content.split(/\w+/);
+    const split = message.content.split(/\s+/);
 
     if (split.length === 1) {
       return; // usage of mention or prefix without a command
@@ -197,9 +199,11 @@ export class MelynxBot {
 
     const commandName = split[1].toLowerCase();
     const params = split.slice(2);
-
     const command = this.commands.get(commandName) || this.aliases.get(commandName);
-    if (!command) return;
+
+    if (!command) {
+      return;
+    }
 
     if (command.config.guildOnly && message.channel.type !== 'text') {
       return;
@@ -214,9 +218,7 @@ export class MelynxBot {
         message.member.roles.cache.some((roles) => roles.name === guildConf.adminRole) ||
         message.author.id === this.client.options.ownerId;
       const isMod =
-        message.member.roles.cache.some(
-          (roles) => roles.name === guildConf.modRole || roles.name === guildConf.adminRole
-        ) || message.author.id === this.client.options.ownerId;
+        isAdmin || message.member.roles.cache.some((roles) => roles.name === guildConf.modRole);
 
       if (command.config.permissionLevel === 1 && !isMod) {
         return;

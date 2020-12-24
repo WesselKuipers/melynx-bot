@@ -59,9 +59,7 @@ async function buildSessionMessage(conf: GuildConfig, channel: TextChannel): Pro
     });
 
   if (!sessionMessage.length) {
-    sessionMessage.push(
-      `There are no active sessions! Feel free to create one yourself! ${prefix}`
-    );
+    sessionMessage.push('There are no active sessions! Feel free to create one yourself!');
   }
 
   return sessionMessage;
@@ -115,7 +113,7 @@ async function handleExpiredSession(
         return;
       }
 
-      const refreshMessage = `Refreshed session ${session.sessionId}! ${prefix}`;
+      const refreshMessage = `Refreshed session ${session.sessionId}!`;
       channel.send(refreshMessage);
 
       SessionDb.create({
@@ -170,7 +168,7 @@ async function createSessionMessage(client: MelynxClient, conf: GuildConfig, cha
 }
 
 async function listSessions(conf: GuildConfig, channel: TextChannel) {
-  const sessionMessage = buildSessionMessage(conf, channel);
+  const sessionMessage = await buildSessionMessage(conf, channel);
   await channel.send(sessionMessage, { split: true });
 }
 
@@ -310,7 +308,7 @@ export default {
       sessionChannelTimers[message.guild.id] = timer;
     }
 
-    if (!params.length) {
+    if (!params.length || params[0] === 'list') {
       listSessions(conf, message.channel as TextChannel);
       return;
     }
@@ -339,7 +337,7 @@ export default {
 
       removeSession(session.id);
       clearTimeout(session.timer);
-      message.channel.send(`Remeowved session ${session.sessionId}! ${prefix}`);
+      message.channel.send(`Remeowved session ${session.sessionId}!`);
       await updateSessionMessage(client, message.guild.id);
       return;
     }
@@ -413,7 +411,7 @@ export default {
 
     sessions.push(dbSes);
     await updateSessionMessage(client, session.guildId);
-    message.channel.send(`Added ${session.platform} session ${session.sessionId}! ${prefix}`);
+    message.channel.send(`Added ${session.platform} session ${session.sessionId}!`);
     client.log(
       `Added session ${session.sessionId} for platform ${session.platform} by ${session.creator} on ${session.guildId}`
     );
