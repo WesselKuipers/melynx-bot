@@ -63,14 +63,12 @@ async function addTag(message: Message, conf: GuildConfig, params: string[], cli
     return;
   }
 
-  if (message.author.id !== client.options.ownerId) {
-    if (
-      !message.member.roles.cache.filter(
-        (r) => r.name === conf.modRole || r.name === conf.adminRole
-      ).size
-    ) {
-      return;
-    }
+  if (
+    message.author.id !== client.options.ownerId &&
+    !message.member.roles.cache.filter((r) => r.name === conf.modRole || r.name === conf.adminRole)
+      .size
+  ) {
+    return;
   }
 
   const tagName = params[1];
@@ -80,6 +78,11 @@ async function addTag(message: Message, conf: GuildConfig, params: string[], cli
   }
 
   const content = params.slice(2).join(' ');
+  if (!content) {
+    await message.channel.send("This tag doesn't have any content.");
+    return;
+  }
+
   const tag = await TagDb.findOne({ where: { guildId: message.guild.id, name: tagName } });
 
   if (!tag) {
@@ -130,9 +133,7 @@ export default {
     guildOnly: true,
     ownerOnly: false,
   },
-
   help,
-
   init: async (client) => {
     const { db } = client;
 
