@@ -102,7 +102,9 @@ export class MelynxBot {
 
     this.client.on('ready', () => {
       this.client.log(
-        `Connected to ${this.client.users.cache.size} users on ${this.client.guilds.cache.size} servers.`
+        `Connected to ${this.client.guilds.cache.reduce((a, g) => a + g.memberCount, 0)} users on ${
+          this.client.guilds.cache.size
+        } servers.`
       );
       this.loadCommands();
 
