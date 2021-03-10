@@ -58,11 +58,9 @@ export default class SessionManager {
       `${expireMessage} React within 5 minutes ♻ to refresh this session!`
     );
     const reaction = await sentMessage.react('♻');
-    const removeReactions = () => {
-      sentMessage.edit(expireMessage);
-      sentMessage.reactions.removeAll().catch(() => {
-        reaction.users.cache.delete(this.client.user.id);
-      });
+    const removeReactions = async () => {
+      await sentMessage.edit(expireMessage);
+      await reaction.remove();
     };
 
     try {
@@ -77,12 +75,12 @@ export default class SessionManager {
       const reactions = collected.first();
 
       if (this.sessions.some((s) => s.sessionId === session.sessionId)) {
-        removeReactions();
+        await removeReactions();
         return;
       }
 
       if (reactions.count === 0 || (reactions.count === 1 && reactions.me)) {
-        removeReactions();
+        await removeReactions();
         return;
       }
 
@@ -106,9 +104,9 @@ export default class SessionManager {
       this.sessions.push(dbSes);
       this.client.log(refreshMessage);
 
-      removeReactions();
+      await removeReactions();
     } catch {
-      removeReactions();
+      await removeReactions();
     }
   }
 
