@@ -75,7 +75,15 @@ export class MelynxBot {
     this.client.options.ownerId = settings.ownerId;
     this.client.options.host = settings.host;
 
-    const db = new Sequelize(settings.databaseUrl, { logging: false });
+    const isDev = process.env.NODE_ENV !== 'production';
+    const db = new Sequelize(
+      isDev ? settings.databaseUrl : `${settings.databaseUrl}?sslmode=require`,
+      {
+        logging: false,
+        dialect: isDev ? 'mysql' : 'postgres',
+        dialectOptions: isDev ? {} : { ssl: { rejectUnauthorized: false } },
+      }
+    );
     const guildSettings = db.define<DbSettings>('settings', {
       guildId: { type: DataTypes.STRING, unique: true, primaryKey: true },
       settings: DataTypes.JSON,
