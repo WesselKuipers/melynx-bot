@@ -1,4 +1,4 @@
-import { Client, Message } from 'discord.js';
+import { Message } from 'discord.js';
 import { MelynxClient } from './melynxClient';
 
 export enum PermissionLevel {
@@ -17,7 +17,7 @@ export interface GuildConfig {
   sessionChannel: string;
   sessionChannelMessage: string;
   channelSettings: {
-    [guildId: string]: {
+    [channelId: string]: {
       platform: 'PS4' | 'PC' | 'Switch' | 'XB1';
     };
   };

@@ -1,23 +1,19 @@
-import Command, { PermissionLevel } from '../types/command';
+import { Message } from 'discord.js';
+import { MelynxCommand, MelynxMessage } from '../types/melynxClient';
 
-export default {
-  config: {
-    enabled: true,
-    aliases: ['p'],
-    permissionLevel: PermissionLevel.Anyone,
-    guildOnly: true,
-    ownerOnly: false,
-  },
+export default class Ping extends MelynxCommand {
+  constructor() {
+    super('ping', {
+      aliases: ['p', 'ping'],
+      description: 'Pings the bot, will respond with `Pong! ([latency] ms)`',
+    });
 
-  help: {
-    name: 'ping',
-    description: 'Pings the bot, will respond with `Pong! ([latency] ms)`',
-    usage: '{prefix} ping',
-  },
+    this.usage = '{prefix}ping';
+  }
 
-  run: async (_, message) => {
-    await message.channel.send(
+  public async exec(message: MelynxMessage): Promise<Message> {
+    return message.util.send(
       `Pong! (${Math.abs(new Date().getTime() - message.createdTimestamp)} ms)`
     );
-  },
-} as Command;
+  }
+}

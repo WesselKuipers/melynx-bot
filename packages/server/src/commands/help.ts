@@ -1,48 +1,68 @@
-import Command from '../types/command';
+import { MessageEmbed } from 'discord.js';
+import { Message } from 'discord.js';
+import { getGuildSettings } from '../bot/utils';
+import { MelynxCommand, MelynxMessage } from '../types/melynxClient';
 
-const help = {
-  name: 'help',
-  description: 'List all of my commands or info about a specific command.',
-  usage: '{prefix} help [command name]',
-};
+export async function generateHelp(message: MelynxMessage, command: string): Promise<MessageEmbed> {
+  const com = message.client.commandHandler.findCommand(command) as MelynxCommand;
+  if (!com || !com.aliases.length) {
+    return;
+  }
 
-export default {
-  config: {
-    enabled: true,
-    aliases: ['h', 'commands'],
-    permissionLevel: 0,
-    guildOnly: false,
-  },
-  help,
-  run: async (client, message, conf, params) => {
-    if (!params.length) {
-      const commands = [...client.commands.filter((command) => !command.config.ownerOnly).keys()];
-      await message.channel.send(
-        `Available commands: \`${commands.join('`, `')}\`\nType ${help.usage.replace(
+  const prefix = message.guild
+    ? (await getGuildSettings(message.client, message.guild.id)).prefix
+    : message.client.defaultSettings.prefix;
+
+  const embed = new MessageEmbed({ title: com.id, description: com.description });
+  const aliases = com.aliases.filter((a) => a !== com.id);
+
+  if (aliases.length) {
+    embed.addField('Aliases', `\`${aliases.join('`, ')}\``);
+  }
+
+  if (com.usage) {
+    embed.addField('Usage', com.usage.replace(/{prefix}/g, prefix));
+  }
+
+  return embed;
+}
+
+export default class Help extends MelynxCommand {
+  constructor() {
+    super('help', {
+      aliases: ['help', 'h'],
+      description: 'List all of my commands or info about a specific command.',
+      args: [{ id: 'command', description: 'The command to display the help message of' }],
+    });
+
+    this.usage = '{prefix}help [command name]';
+  }
+
+  public async exec(message: MelynxMessage, { command }: { command: string }): Promise<Message> {
+    const prefix = message.guild
+      ? (await getGuildSettings(message.client, message.guild.id)).prefix
+      : message.client.defaultSettings.prefix;
+    if (!command) {
+      const commands = [...message.client.commandHandler.modules.values()].filter(
+        // Filter out owner-only messages.
+        // No aliases means that the command should not be called directly. It's probably a subcommand.
+        (c) => !c.ownerOnly && c.aliases.length
+      ) as MelynxCommand[];
+      return message.util.send(
+        `Available commands: \`${commands.join('`, `')}\`\nType \`${this.usage.replace(
           /{prefix}/g,
-          conf.prefix
-        )} for more info!`
+          prefix
+        )}\` for more info!`
       );
-      return;
     }
 
-    const commandName = params[0];
-    const command = client.commands.get(commandName) || client.aliases.get(commandName);
-
-    if (!command || command.config.ownerOnly) {
-      message.channel.send(`Command ${commandName} does not exist, nya!`);
+    const com = message.client.commandHandler.findCommand(command) as MelynxCommand;
+    if (!com || com.ownerOnly) {
+      return message.util.send(`Command ${command} does not exist, nya!`);
     }
 
-    const data = [];
-    data.push(`**Name:** ${command.help.name}`);
+    const embed = await generateHelp(message, com.id);
 
-    if (command.config.aliases) {
-      data.push(`**Aliases:** ${command.config.aliases.join(', ')}`);
-    }
-
-    data.push(`**Description:** ${command.help.description}`);
-    data.push(`**Usage:** ${command.help.usage.replace(/{prefix}/g, conf.prefix)}`);
-
-    message.channel.send(data, { split: true });
-  },
-} as Command;
+    return message.util.send({ embed });
+  }
+}
