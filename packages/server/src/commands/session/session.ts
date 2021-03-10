@@ -50,16 +50,14 @@ export default class SessionComand extends MelynxCommand {
     };
 
     // Run exec()
-    return { args: rest, name };
+    return rest ? { args: `${name} ${rest}` } : { args: name };
   }
 
-  public async exec(
-    message: MelynxMessage,
-    { args, name }: { args: string; name: 'session-remove' }
-  ): Promise<Message> {
-    const foundIceborne = iceborneRegex.exec(args);
-    const foundPC = pcRegex.exec(args);
-    const foundMHGU = mhguRegex.exec(args);
+  public async exec(message: MelynxMessage, { args }: { args: string }): Promise<Message> {
+    const id = args.startsWith('session-remove') ? args.replace('session-remove ', '') : args;
+    const foundIceborne = iceborneRegex.exec(id);
+    const foundPC = pcRegex.exec(id);
+    const foundMHGU = mhguRegex.exec(id);
 
     if (!foundMHGU && !foundPC && !foundIceborne) {
       return message.util.send('Could not find any sessions, nya...');
@@ -68,7 +66,7 @@ export default class SessionComand extends MelynxCommand {
     const config = await getGuildSettings(message.client, message.guild.id);
     const sessionId = foundMHGU?.[0] ?? foundPC?.[0] ?? foundIceborne[0];
 
-    if (name === 'session-remove') {
+    if (args.startsWith('session-remove')) {
       const session = this.client.sessionManager.sessions.find((s) => s.sessionId === sessionId);
       if (!session) {
         return message.util.send('A session with that ID does not exist, nya...');
@@ -94,7 +92,7 @@ export default class SessionComand extends MelynxCommand {
       session.platform = 'Switch';
     } else {
       session.sessionId = sessionId;
-      session.description = args.replace(session.sessionId, '').trim();
+      session.description = id.replace(sessionId, '').trim();
       session.platform =
         dotProp.get(config, `channelSettings.${message.channel.id}.platform`) ||
         ((message.channel as TextChannel).name.toUpperCase().includes('PS4') && 'PS4') ||
