@@ -1,10 +1,13 @@
-import { Client, Collection, Message, ActivityOptions } from 'discord.js';
+import { Collection, ActivityOptions } from 'discord.js';
 import moment from 'moment';
-import { Sequelize, DataTypes } from 'sequelize';
+import { Sequelize, DataTypes, Model } from 'sequelize';
+import { AkairoClient, CommandHandler, SequelizeProvider } from 'discord-akairo';
 
-import * as commands from '../commands';
 import Command from '../types/command';
-import { MelynxClient, DbSettings } from '../types/melynxClient';
+import { MelynxClient, DbSettings, MelynxMessage, Tag, Role, Session } from '../types/melynxClient';
+import path from 'path';
+import { getGuildSettings } from './utils';
+import SessionManager from './sessionManager';
 
 export interface ApplicationSettings {
   prefix: string;
@@ -49,7 +52,7 @@ function log(message: string) {
 }
 
 function error(error: Error) {
-  log(`Error: ${error.message}`);
+  this.log(`Error: ${error.message}`);
 }
 
 function warn(warning: string) {
@@ -65,11 +68,12 @@ export class MelynxBot {
   constructor(settings: ApplicationSettings) {
     this.settings = settings;
 
-    this.client = new Client() as MelynxClient;
+    this.client = new AkairoClient(
+      { ownerID: settings.ownerId },
+      { disableMentions: 'everyone' }
+    ) as MelynxClient;
     this.client.options.ownerId = settings.ownerId;
     this.client.options.host = settings.host;
-    this.commands = new Collection();
-    this.aliases = new Collection();
 
     const db = new Sequelize(settings.databaseUrl, { logging: false });
     const guildSettings = db.define<DbSettings>('settings', {
@@ -77,8 +81,53 @@ export class MelynxBot {
       settings: DataTypes.JSON,
     });
 
+    const tagModel = db.define<Tag>(
+      'tag',
+      {
+        id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        guildId: { type: DataTypes.STRING, allowNull: false },
+        name: { type: DataTypes.STRING, allowNull: false },
+        content: { type: DataTypes.STRING, allowNull: false },
+      },
+      { createdAt: 'date' }
+    );
+
+    const roleModel = db.define<Role>(
+      'role',
+      {
+        id: { type: DataTypes.STRING, primaryKey: true },
+        guildId: { type: DataTypes.STRING, allowNull: false },
+        name: { type: DataTypes.STRING, allowNull: false },
+      },
+      { createdAt: 'date' }
+    );
+
+    const sessionModel = db.define<Session>(
+      'session',
+      {
+        id: {
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+        },
+        guildId: { type: DataTypes.STRING, allowNull: false },
+        userId: { type: DataTypes.STRING, allowNull: false },
+        avatar: { type: DataTypes.STRING, allowNull: true },
+        creator: { type: DataTypes.STRING, allowNull: false },
+        platform: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        description: DataTypes.STRING,
+        sessionId: { type: DataTypes.STRING, unique: true, allowNull: false },
+        channelId: { type: DataTypes.STRING, allowNull: false },
+      },
+      { createdAt: 'date' }
+    );
+
     this.client.db = db;
-    this.client.settings = guildSettings;
+    this.client.settings = { model: guildSettings, cache: {} };
+    this.client.models = { tag: tagModel, role: roleModel, session: sessionModel };
 
     this.client.defaultSettings = {
       guildId: '0',
@@ -95,141 +144,53 @@ export class MelynxBot {
     this.client.log = log;
     this.client.warn = warn;
     this.client.error = error;
+
+    guildSettings.sync();
+    tagModel.sync();
+    roleModel.sync();
+
+    const handler = new CommandHandler(this.client, {
+      directory: path.join(__dirname, '..', 'commands'),
+      allowMention: true,
+      handleEdits: true,
+      blockBots: true,
+      blockClient: true,
+      commandUtil: true,
+      prefix: async (message) =>
+        message.guild
+          ? (await getGuildSettings(this.client, message.guild.id)).prefix
+          : this.settings.prefix,
+    });
+
+    this.client.sessionManager = new SessionManager();
+    this.client.commandHandler = handler;
+    this.client.commandHandler.loadAll();
   }
 
   run() {
     this.client.login(this.settings.token);
 
-    this.client.on('ready', () => {
+    this.client.on('ready', async () => {
       this.client.log(
         `Connected to ${this.client.guilds.cache.reduce((a, g) => a + g.memberCount, 0)} users on ${
           this.client.guilds.cache.size
         } servers.`
       );
-      this.loadCommands();
 
-      this.client.user.setActivity(playingLines[Math.floor(Math.random() * playingLines.length)]);
-      this.client.settings.sync();
+      await this.client.user.setActivity(
+        playingLines[Math.floor(Math.random() * playingLines.length)]
+      );
+
+      await this.client.sessionManager.init(this.client);
     });
 
     this.client.on('guildDelete', (guild) => {
       // When the bot leaves or is kicked, delete settings to prevent stale entries.
       this.client.log(`Left guild ${guild.id} (${guild.name})`);
-      this.client.settings.destroy({ where: { guildId: guild.id } });
+      this.client.settings.model.destroy({ where: { guildId: guild.id } });
     });
 
     this.client.on('error', (error) => this.client.error(error));
     this.client.on('warn', (warning) => this.client.warn(warning));
-    this.client.on('message', (message) => this.message(message));
-  }
-
-  async loadCommands() {
-    await Promise.all(
-      Object.values(commands).map(async (command) => {
-        // If command has an init method, run it
-        if (command.init) {
-          this.client.log(`Running init of ${command.help.name}`);
-          await command.init(this.client);
-        }
-
-        // Assign the main command name to commands, as well as all of its aliases
-        this.commands.set(command.help.name, command);
-        if (command.config.aliases) {
-          command.config.aliases.forEach((alias) => {
-            if (this.aliases.has(alias)) {
-              this.client.log(
-                `Warning: Command ${command.help.name} alias ${alias} overlaps with command ${
-                  this.aliases.get(alias).help.name
-                }.\r\nOld alias will be overwritten.`
-              );
-            }
-
-            this.aliases.set(alias, command);
-          });
-        }
-
-        this.client.log(
-          `Loaded command [${command.help.name}] with aliases [${command.config.aliases.join(
-            ', '
-          )}]`
-        );
-      })
-    );
-
-    this.client.commands = this.commands;
-    this.client.aliases = this.aliases;
-  }
-
-  async message(message: Message) {
-    if (message.author === this.client.user) {
-      return; // don't respond to yourself
-    }
-
-    let guildConfEntry;
-
-    if (message.guild) {
-      guildConfEntry = (await this.client.settings.findByPk(message.guild.id)).settings;
-    } else {
-      guildConfEntry = this.client.defaultSettings;
-    }
-
-    if (!guildConfEntry && message.guild) {
-      guildConfEntry = await this.client.settings.create({
-        guildId: message.guild.id,
-        settings: this.client.defaultSettings,
-      });
-      this.client.log(`Initialized config for guild ${message.guild.id}`);
-    }
-
-    const guildConf = {
-      ...this.client.defaultSettings,
-      ...guildConfEntry,
-    };
-    const prefixRegex = new RegExp(
-      `^(<@!?${this.client.user.id}>|${escapeRegex(guildConf.prefix)})\\s*`
-    );
-
-    if (!prefixRegex.test(message.content)) {
-      return; // doesn't start with prefix or mention, don't care what the message is
-    }
-
-    const split = message.content.split(/\s+/);
-
-    if (split.length === 1) {
-      return; // usage of mention or prefix without a command
-    }
-
-    const commandName = split[1].toLowerCase();
-    const params = split.slice(2);
-    const command = this.commands.get(commandName) || this.aliases.get(commandName);
-
-    if (!command) {
-      return;
-    }
-
-    if (command.config.guildOnly && message.channel.type !== 'text') {
-      return;
-    }
-
-    if (command.config.ownerOnly && message.author.id !== this.client.options.ownerId) {
-      return;
-    }
-
-    if (command.config.permissionLevel > 0) {
-      const isAdmin =
-        message.member.roles.cache.some((roles) => roles.name === guildConf.adminRole) ||
-        message.author.id === this.client.options.ownerId;
-      const isMod =
-        isAdmin || message.member.roles.cache.some((roles) => roles.name === guildConf.modRole);
-
-      if (command.config.permissionLevel === 1 && !isMod) {
-        return;
-      }
-      if (command.config.permissionLevel === 2 && !isAdmin) {
-        return;
-      }
-    }
-
-    await command.run(this.client, message, guildConf, params);
   }
 }

@@ -1,25 +1,26 @@
 import axios from 'axios';
-import Command, { PermissionLevel } from '../types/command';
+import { Message } from 'discord.js';
+import { MelynxCommand, MelynxMessage } from '../types/melynxClient';
 
-export default {
-  config: {
-    enabled: true,
-    permissionLevel: PermissionLevel.Anyone,
-    aliases: ['cf'],
-    guildOnly: true,
-    ownerOnly: false,
-  },
+export default class CatFact extends MelynxCommand {
+  constructor() {
+    super('catfact', {
+      aliases: ['catfact'],
+      description: 'Fetches a random cat fact!',
+    });
 
-  help: {
-    name: 'catfact',
-    description: 'Fetches a random cat fact!',
-    usage: '{prefix} catfact',
-  },
+    this.usage = '{prefix} catfact';
+  }
 
-  run: async (_, message) => {
-    const { data } = await axios.get<{ text: string }>(
+  public async exec(message: MelynxMessage): Promise<Message> {
+    const { data } = await axios.get<{ text: string; _id: string }>(
       'https://cat-fact.herokuapp.com/facts/random'
     );
-    await message.channel.send(`>>> ${data.text}`);
-  },
-} as Command;
+
+    return message.util.send({
+      embed: {
+        description: `[${data.text}](https://cat-fact.herokuapp.com/#/cat/facts/${data._id})`,
+      },
+    });
+  }
+}

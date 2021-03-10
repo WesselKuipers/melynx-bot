@@ -1,22 +1,23 @@
-import { Command, PermissionLevel } from '../types/command';
+import axios from 'axios';
+import { Message } from 'discord.js';
+import { getGuildSettings } from '../bot/utils';
+import { MelynxCommand, MelynxMessage } from '../types/melynxClient';
 
-export default {
-  config: {
-    enabled: true,
-    permissionLevel: PermissionLevel.Admin,
-    aliases: ['getconfig'],
-    guildOnly: true,
-    ownerOnly: false,
-  },
+export default class GetConf extends MelynxCommand {
+  constructor() {
+    super('getconf', {
+      aliases: ['getconf'],
+      userPermissions: ['ADMINISTRATOR'],
+      description: 'Get the config for this server.',
+      channel: 'guild',
+      editable: false,
+    });
 
-  help: {
-    name: 'getconf',
-    description: 'Lists server-specific config settings',
-    usage: '{prefix} getconf',
-  },
+    this.usage = '{prefix}getconf';
+  }
 
-  run: async (client, message, conf) => {
-    const config = { ...client.defaultSettings, ...conf };
-    await message.channel.send(`\`\`\`${JSON.stringify(config, null, 2)}\`\`\``);
-  },
-} as Command;
+  public async exec(message: MelynxMessage): Promise<Message> {
+    const config = await getGuildSettings(message.client, message.guild.id);
+    return message.util.send(`\`\`\`${JSON.stringify(config, null, 2)}\`\`\``);
+  }
+}
