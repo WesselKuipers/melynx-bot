@@ -4,7 +4,15 @@ import { Sequelize, DataTypes, Model } from 'sequelize';
 import { AkairoClient, CommandHandler, SequelizeProvider } from 'discord-akairo';
 
 import Command from '../types/command';
-import { MelynxClient, DbSettings, MelynxMessage, Tag, Role, Session } from '../types/melynxClient';
+import {
+  MelynxClient,
+  DbSettings,
+  MelynxMessage,
+  Tag,
+  Role,
+  Session,
+  FriendCode,
+} from '../types/melynxClient';
 import path from 'path';
 import { getGuildSettings } from './utils';
 import SessionManager from './sessionManager';
@@ -133,9 +141,26 @@ export class MelynxBot {
       { createdAt: 'date' }
     );
 
+    const friendCodeModel = db.define<FriendCode>(
+      'friendcode',
+      {
+        id: {
+          type: DataTypes.STRING,
+          primaryKey: true,
+        },
+        fc: { type: DataTypes.STRING, allowNull: false },
+      },
+      { createdAt: 'date' }
+    );
+
     this.client.db = db;
     this.client.settings = { model: guildSettings, cache: {} };
-    this.client.models = { tag: tagModel, role: roleModel, session: sessionModel };
+    this.client.models = {
+      tag: tagModel,
+      role: roleModel,
+      session: sessionModel,
+      friendCode: friendCodeModel,
+    };
 
     this.client.defaultSettings = {
       guildId: '0',
@@ -156,6 +181,7 @@ export class MelynxBot {
     guildSettings.sync();
     tagModel.sync();
     roleModel.sync();
+    friendCodeModel.sync();
 
     const handler = new CommandHandler(this.client, {
       directory: path.join(__dirname, '..', 'commands'),

@@ -37,6 +37,11 @@ export interface Session extends Model {
   timer?: NodeJS.Timeout;
 }
 
+export interface FriendCode extends Model {
+  id: string;
+  fc: string;
+}
+
 export interface MelynxClient extends AkairoClient {
   commandHandler: CommandHandler;
   defaultSettings: GuildConfig;
@@ -50,6 +55,7 @@ export interface MelynxClient extends AkairoClient {
     tag: ModelCtor<Tag>;
     role: ModelCtor<Role>;
     session: ModelCtor<Session>;
+    friendCode: ModelCtor<FriendCode>;
   };
   log: (message: string) => void;
   warn: (warning: string) => void;
