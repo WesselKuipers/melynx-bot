@@ -17,7 +17,7 @@ const stickers = files.map((file) => {
 export default class Sticker extends MelynxCommand {
   constructor() {
     super('sticker', {
-      aliases: ['sticker', 'stamp', 'emote'],
+      aliases: ['sticker', 'stamp'],
       description: 'Sends a sticker',
       args: [
         {
