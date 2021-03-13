@@ -1,4 +1,3 @@
-import { TextChannel } from 'discord.js';
 import moment from 'moment';
 import { GuildConfig } from '../../types/command';
 import { MelynxClient, Session } from '../../types/melynxClient';

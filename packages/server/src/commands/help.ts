@@ -17,7 +17,7 @@ export async function generateHelp(message: MelynxMessage, command: string): Pro
   const aliases = com.aliases.filter((a) => a !== com.id);
 
   if (aliases.length) {
-    embed.addField('Aliases', `\`${aliases.join('`, ')}\``);
+    embed.addField('Aliases', `\`${aliases.join('`, `')}\``);
   }
 
   if (com.usage) {
