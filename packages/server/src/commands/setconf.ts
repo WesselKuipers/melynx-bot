@@ -7,7 +7,6 @@ export default class SetConf extends MelynxCommand {
   constructor() {
     super('setconf', {
       aliases: ['setconf'],
-      userPermissions: ['ADMINISTRATOR'],
       args: [
         { id: 'prop', type: 'string' },
         { id: 'values', match: 'separate', type: 'string' },
@@ -15,6 +14,20 @@ export default class SetConf extends MelynxCommand {
       description: 'Sets server-specific config settings.',
       channel: 'guild',
       editable: false,
+      async userPermissions(message: MelynxMessage): Promise<string | void> {
+        const permissions = await getGuildSettings(message.client, message.guild.id);
+        if (
+          message.client.isOwner(message.author) ||
+          message.member.hasPermission('ADMINISTRATOR') ||
+          message.member.roles.cache.some(
+            (role) => role.id === permissions.adminRole || role.name === permissions.adminRole
+          )
+        ) {
+          return null;
+        }
+
+        return 'Administrator privileges';
+      },
     });
 
     this.usage = '{prefix}setconf [prop] [value]';

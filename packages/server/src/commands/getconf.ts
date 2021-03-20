@@ -6,10 +6,23 @@ export default class GetConf extends MelynxCommand {
   constructor() {
     super('getconf', {
       aliases: ['getconf'],
-      userPermissions: ['ADMINISTRATOR'],
       description: 'Get the config for this server.',
       channel: 'guild',
       editable: false,
+      async userPermissions(message: MelynxMessage): Promise<string | void> {
+        const permissions = await getGuildSettings(message.client, message.guild.id);
+        if (
+          message.client.isOwner(message.author) ||
+          message.member.hasPermission('ADMINISTRATOR') ||
+          message.member.roles.cache.some(
+            (role) => role.id === permissions.adminRole || role.name === permissions.adminRole
+          )
+        ) {
+          return null;
+        }
+
+        return 'Administrator privileges';
+      },
     });
 
     this.usage = '{prefix}getconf';
