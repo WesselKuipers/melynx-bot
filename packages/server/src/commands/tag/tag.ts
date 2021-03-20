@@ -18,7 +18,7 @@ export default class Tag extends MelynxCommand {
   }
 
   *args() {
-    const name = yield {
+    const name: string = yield {
       type: Argument.union(
         [
           ['tag-list', 'list', 'l'],

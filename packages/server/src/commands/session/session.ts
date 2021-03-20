@@ -29,7 +29,7 @@ export default class SessionComand extends MelynxCommand {
   }
 
   *args() {
-    const name = yield {
+    const name: string = yield {
       type: Argument.union(
         [
           ['session-remove', 'remove', 'r'],
@@ -44,7 +44,7 @@ export default class SessionComand extends MelynxCommand {
       return Flag.continue('session-list');
     }
 
-    const rest = yield {
+    const rest: string[] = yield {
       type: 'string',
       match: 'rest',
     };

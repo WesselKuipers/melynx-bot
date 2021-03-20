@@ -22,7 +22,7 @@ export default class Tag extends MelynxCommand {
   }
 
   *args(message: MelynxMessage) {
-    const name = yield {
+    const name: string = yield {
       type: Argument.union(
         [
           ['role-list', 'list', 'l'],

@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "license": "MIT",
   "dependencies": {
-    "@sentry/node": "^5.29.2",
-    "axios": "^0.21.0",
+    "@sentry/node": "^6.2.3",
+    "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "btoa": "^1.2.1",
     "connect-history-api-fallback": "^1.6.0",
@@ -18,8 +18,8 @@
     "mysql2": "^2.2.5",
     "pg": "^8.5.1",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^6.3.5",
-    "webpack": "^5.11.0",
-    "webpack-dev-middleware": "^4.0.2"
+    "sequelize": "^6.5.1",
+    "webpack": "^5.27.0",
+    "webpack-dev-middleware": "^4.1.0"
   }
 }
