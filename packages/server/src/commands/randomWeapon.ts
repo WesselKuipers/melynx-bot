@@ -20,6 +20,8 @@ const weapons = [
   'sns',
 ];
 
+const weaponPath = join(__dirname, '..', 'assets', 'weapons');
+
 export default class RandomWeapon extends MelynxCommand {
   constructor() {
     super('randomWeapon', {
@@ -32,7 +34,7 @@ export default class RandomWeapon extends MelynxCommand {
 
   public async exec(message: MelynxMessage): Promise<Message> {
     const weapon = weapons[Math.floor(Math.random() * weapons.length)];
-    const attachment = new MessageAttachment(join(__dirname, 'weapons', `${weapon}.png`));
+    const attachment = new MessageAttachment(join(weaponPath, `${weapon}.png`));
     attachment.height = 160;
     return message.util.send(attachment);
   }

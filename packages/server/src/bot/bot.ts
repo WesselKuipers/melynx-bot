@@ -80,7 +80,6 @@ export class MelynxBot {
       { ownerID: settings.ownerId },
       { disableMentions: 'everyone' }
     ) as MelynxClient;
-    log(`Bot Owner ID is ${this.client.ownerID}`);
     this.client.options.ownerId = settings.ownerId;
     this.client.options.host = settings.host;
 

@@ -74,7 +74,7 @@ if (isDevelopment) {
   app.use(webpackDevMiddleware(compiler, { publicPath: '/' }));
 }
 
-app.use('/assets/stickers', express.static(path.resolve(__dirname, 'commands', 'stickers')));
+app.use('/assets/stickers', express.static(path.resolve(__dirname, 'assets', 'stickers')));
 
 // Front end
 app.use(express.static(path.resolve(__dirname, '..', '..', 'client', 'dist')));

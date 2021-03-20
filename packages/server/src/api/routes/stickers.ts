@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { Request, Response, Router } from 'express';
 
-const stickers = fs.readdirSync(path.resolve(__dirname, '../..', 'commands', 'stickers'));
+const stickers = fs.readdirSync(path.resolve(__dirname, '..', '..', 'assets', 'stickers'));
 
 function getStickers(req: Request, res: Response) {
   return res.send(stickers);

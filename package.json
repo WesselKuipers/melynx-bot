@@ -15,7 +15,7 @@
     "start": "node packages/server/dist/index.js",
     "start:dev": "ts-node -TP packages/server/tsconfig.json ./packages/server/src/index.ts",
     "watch": "nodemon --exec ts-node packages/server/src/index.ts",
-    "build": "yarn workspace melynx-bot run tsc && yarn copyfiles packages/server/src/commands/weapons/*.png  packages/server/dist/commands/weapons -f  && yarn copyfiles packages/server/src/commands/stickers/*.png packages/server/dist/commands/stickers -f && yarn webpack --config packages/client/webpack.config.js --mode production"
+    "build": "yarn workspace melynx-bot run tsc && yarn copyfiles \"packages/server/src/assets/**\" packages/server/dist -u 3 && yarn webpack --config packages/client/webpack.config.js --mode production"
   },
   "cacheDirectories": [
     "node_modules",

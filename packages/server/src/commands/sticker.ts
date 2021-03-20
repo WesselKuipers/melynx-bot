@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { MelynxCommand, MelynxMessage } from '../types/melynxClient';
 
-const stickerPath = path.join(__dirname, 'stickers');
+const stickerPath = path.join(__dirname, '..', 'assets', 'stickers');
 const files = fs.readdirSync(stickerPath);
 const stickers = files.map((file) => {
   return {
