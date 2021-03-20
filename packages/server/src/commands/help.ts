@@ -49,10 +49,10 @@ export default class Help extends MelynxCommand {
         (c) => !c.ownerOnly && c.aliases.length
       ) as MelynxCommand[];
       return message.util.send(
-        `Available commands: \`${commands.join('`, `')}\`\nType \`${this.usage.replace(
+        `Available commands: \`${commands.join('`, `')}\`\nType ${this.usage.replace(
           /{prefix}/g,
           prefix
-        )}\` for more info!`
+        )} for more info!`
       );
     }
 
