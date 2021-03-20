@@ -17,7 +17,7 @@ export default class SetConf extends MelynxCommand {
       editable: false,
     });
 
-    this.usage = '{prefix} setconf [prop] [value]';
+    this.usage = '{prefix}setconf [prop] [value]';
   }
 
   public async exec(
@@ -28,7 +28,6 @@ export default class SetConf extends MelynxCommand {
 
     // replaces any mentions with regular IDs
     const cleanedProp = prop.replace(/<[@|#|&](\d+)>/, '$1');
-
     const settings = dotProp.set(config, cleanedProp, values.join(' '));
     const [update] = await message.client.settings.model.update(
       {

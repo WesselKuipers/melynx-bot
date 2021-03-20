@@ -34,7 +34,6 @@ export default class FC extends MelynxCommand {
     message: MelynxMessage,
     { argument }: { argument: GuildMember | string | { match: string[] } }
   ): Promise<Message> {
-    message.client.log(JSON.stringify(argument));
     if (!argument) {
       return this.handleList(message, message.member);
     }

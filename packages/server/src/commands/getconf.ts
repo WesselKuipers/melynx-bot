@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { Message } from 'discord.js';
 import { getGuildSettings } from '../bot/utils';
 import { MelynxCommand, MelynxMessage } from '../types/melynxClient';
