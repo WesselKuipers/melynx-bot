@@ -29,7 +29,7 @@ export interface Session extends Model {
   userId: string;
   avatar: string;
   creator: string;
-  platform: 'Switch' | 'PC' | 'PS4' | 'XB1' | 'Unknown';
+  platform: 'Switch' | 'PC' | 'PS4' | 'XB1' | 'Rise' | 'Unknown';
   description: string;
   sessionId: string;
   channelId: string;
