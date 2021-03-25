@@ -10,6 +10,7 @@ import { MelynxCommand, MelynxMessage, Session } from '../../types/melynxClient'
 const iceborneRegex = /[a-zA-Z0-9#]{4} [a-zA-Z0-9]{4} [a-zA-Z0-9]{4}/;
 const pcRegex = /[a-zA-Z0-9#+?@$#&!=-]{12}/;
 const mhguRegex = /\b\d{2}-\d{4}-\d{4}-\d{4}\b/;
+const riseRegex = /^\w{6}$/;
 
 export default class SessionComand extends MelynxCommand {
   sessionDb: ModelCtor<Session>;
@@ -17,7 +18,7 @@ export default class SessionComand extends MelynxCommand {
   constructor() {
     super('session', {
       channel: 'guild',
-      aliases: ['session', 's'],
+      aliases: ['session', 'sessions', 's'],
       description:
         'Lists all current sessions or adds one. By default sessions expire automatically after 8 hours.',
     });
@@ -58,13 +59,14 @@ export default class SessionComand extends MelynxCommand {
     const foundIceborne = iceborneRegex.exec(id);
     const foundPC = pcRegex.exec(id);
     const foundMHGU = mhguRegex.exec(id);
+    const foundRise = riseRegex.exec(id.split(' ')?.[0]);
 
-    if (!foundMHGU && !foundPC && !foundIceborne) {
+    if (!foundMHGU && !foundPC && !foundIceborne && !foundRise) {
       return message.util.send('Could not find any sessions, nya...');
     }
 
     const config = await getGuildSettings(message.client, message.guild.id);
-    const sessionId = foundMHGU?.[0] ?? foundPC?.[0] ?? foundIceborne[0];
+    const sessionId = foundMHGU?.[0] ?? foundPC?.[0] ?? foundIceborne?.[0] ?? foundRise[0];
 
     if (args.startsWith('session-remove')) {
       const session = this.client.sessionManager.sessions.find((s) => s.sessionId === sessionId);
@@ -99,6 +101,7 @@ export default class SessionComand extends MelynxCommand {
         ((message.channel as TextChannel).name.toUpperCase().includes('PC') && 'PC') ||
         ((message.channel as TextChannel).name.toUpperCase().includes('XB1') && 'XB1') ||
         (!!foundPC && 'PC') ||
+        (foundRise && 'Rise') ||
         'Unknown';
     }
 

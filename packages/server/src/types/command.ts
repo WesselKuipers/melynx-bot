@@ -18,7 +18,7 @@ export interface GuildConfig {
   sessionChannelMessage: string;
   channelSettings: {
     [channelId: string]: {
-      platform: 'PS4' | 'PC' | 'Switch' | 'XB1';
+      platform: 'PS4' | 'PC' | 'Switch' | 'XB1' | 'Rise';
     };
   };
 }
