@@ -30,14 +30,19 @@ export function buildSessionMessage(guildId: string, sessions: Session[]): strin
     .filter((s) => s.guildId === guildId)
     .map((s) => {
       const diff = (Date.now() - s.date.getTime()) / 1000 / 60;
-      const hours = Math.floor(diff / 60) + 1;
+      const hours = Math.floor(diff / 60);
       const minutes = Math.floor(diff % 60);
 
       sessionMessage.push(
-        `(${hours ? `${hours} hours and ` : ' '}${minutes} minutes ago by ${s.creator}) [${
-          s.platform
-        }]: \`${s.sessionId}\`\n> ${s.description}\n`
+        `(${hours ? `${hours}h ` : ''}${minutes}m ago by ${s.creator}) [${s.platform}]: \`${
+          s.sessionId
+        }\``
       );
+
+      if (s.description) {
+        sessionMessage.push(`> ${s.description}\n`);
+      }
+
       return null;
     });
 
