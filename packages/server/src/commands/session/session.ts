@@ -123,6 +123,6 @@ export default class SessionComand extends MelynxCommand {
 
     await this.client.sessionManager.addSession(session as Session);
     await this.client.sessionManager.updateSessionMessage(message.client, message.guild.id);
-    return message.util.send(`Added ${session.platform} session ${session.sessionId}!`);
+    return message.util.send(`Added ${session.platform} session \`${session.sessionId}\`!`);
   }
 }

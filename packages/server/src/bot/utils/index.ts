@@ -1,4 +1,3 @@
-import moment from 'moment';
 import { GuildConfig } from '../../types/command';
 import { MelynxClient, Session } from '../../types/melynxClient';
 
@@ -30,10 +29,14 @@ export function buildSessionMessage(guildId: string, sessions: Session[]): strin
   sessions
     .filter((s) => s.guildId === guildId)
     .map((s) => {
+      const diff = (Date.now() - s.date.getTime()) / 1000 / 60;
+      const hours = Math.floor(diff / 60) + 1;
+      const minutes = Math.floor(diff % 60);
+
       sessionMessage.push(
-        `(${Math.floor(moment.duration(moment().diff(s.date)).asMinutes())}m ago by ${
-          s.creator
-        }) [${s.platform}]: ${s.sessionId} ${s.description}`
+        `(${hours ? `${hours} hours and ` : ' '}${minutes} minutes ago by ${s.creator}) [${
+          s.platform
+        }]: \`${s.sessionId}\`\n> ${s.description}\n`
       );
       return null;
     });
