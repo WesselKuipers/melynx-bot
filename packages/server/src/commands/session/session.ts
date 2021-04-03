@@ -55,7 +55,10 @@ export default class SessionComand extends MelynxCommand {
   }
 
   public async exec(message: MelynxMessage, { args }: { args: string }): Promise<Message> {
-    const id = args.startsWith('session-remove') ? args.replace('session-remove ', '') : args;
+    const id = (args.startsWith('session-remove') ? args.replace('session-remove ', '') : args)
+      .replace(/\[|\]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     const foundIceborne = iceborneRegex.exec(id);
     const foundPC = pcRegex.exec(id);
     const foundMHGU = mhguRegex.exec(id);
@@ -66,7 +69,7 @@ export default class SessionComand extends MelynxCommand {
     }
 
     const config = await getGuildSettings(message.client, message.guild.id);
-    const sessionId = foundMHGU?.[0] ?? foundPC?.[0] ?? foundIceborne?.[0] ?? foundRise[0];
+    const sessionId = foundRise?.[0] ?? foundMHGU?.[0] ?? foundPC?.[0] ?? foundIceborne?.[0];
 
     if (args.startsWith('session-remove')) {
       const session = this.client.sessionManager.sessions.find((s) => s.sessionId === sessionId);

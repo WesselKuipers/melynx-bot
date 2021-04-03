@@ -31,6 +31,7 @@ export default class Tag extends MelynxCommand {
         ],
         'string'
       ),
+      match: 'rest',
       otherwise: generateHelp(message, 'role'),
     };
 
