@@ -36,6 +36,12 @@ export default class Sticker extends MelynxCommand {
   }
 
   public async exec(message: MelynxMessage, { sticker }: { sticker: string }): Promise<Message> {
+    if (sticker === 'list') {
+      return message.util.send(
+        `You can view a list of stickers at https://${message.client.options.host}/stickers`
+      );
+    }
+
     return message.util.send({
       embed: new MessageEmbed()
         .attachFiles([stickers.find((s) => s.name.toLowerCase() === sticker.toLowerCase()).path])
