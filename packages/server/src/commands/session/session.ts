@@ -108,9 +108,10 @@ export default class SessionComand extends MelynxCommand {
         'Unknown';
     }
 
+    
     if (
       this.client.sessionManager.sessions.some(
-        (s) => s.sessionId === session.sessionId && s.guildId === message.guild.id
+        (s) => s.sessionId === session.sessionId && s.guildId === message.guild.id && s.userId !== message.author.id
       )
     ) {
       return message.util.send('A lobby with this ID already exists!');

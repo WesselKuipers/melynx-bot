@@ -44,7 +44,6 @@ export interface FriendCode extends Model {
 
 export interface MelynxClient extends AkairoClient {
   commandHandler: CommandHandler;
-  defaultSettings: GuildConfig;
   commands: Collection<string, Command>;
   aliases: Collection<string, Command>;
   db: Sequelize;

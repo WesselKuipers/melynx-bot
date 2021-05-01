@@ -162,18 +162,6 @@ export class MelynxBot {
       friendCode: friendCodeModel,
     };
 
-    this.client.defaultSettings = {
-      guildId: '0',
-      prefix: settings.prefix,
-      modRole: 'Moderator',
-      adminRole: 'Administrator',
-      sessionTimeout: 28800000, // 8 hours
-      sessionRefreshTimeout: 300000, // 5 minutes
-      sessionChannel: undefined,
-      sessionChannelMessage: undefined,
-      channelSettings: {},
-    };
-
     this.client.log = log;
     this.client.warn = warn;
     this.client.error = error;
