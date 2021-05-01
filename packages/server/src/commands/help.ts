@@ -11,7 +11,7 @@ export async function generateHelp(message: MelynxMessage, command: string): Pro
 
   const prefix = message.guild
     ? (await getGuildSettings(message.client, message.guild.id)).prefix
-    : message.client.defaultSettings.prefix;
+    : process.env.PREFIX;
 
   const embed = new MessageEmbed({ title: com.id, description: com.description });
   const aliases = com.aliases.filter((a) => a !== com.id);
@@ -41,7 +41,7 @@ export default class Help extends MelynxCommand {
   public async exec(message: MelynxMessage, { command }: { command: string }): Promise<Message> {
     const prefix = message.guild
       ? (await getGuildSettings(message.client, message.guild.id)).prefix
-      : message.client.defaultSettings.prefix;
+      : process.env.PREFIX;
     if (!command) {
       const commands = [...message.client.commandHandler.modules.values()].filter(
         // Filter out owner-only messages.

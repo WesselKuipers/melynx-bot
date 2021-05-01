@@ -13,8 +13,8 @@ export default class Tag extends MelynxCommand {
     this.usage = `\n${dedent(`
     {prefix} tag [tagname] (Gets a tag matching this name)
     {prefix} tag list (Shows a list of all available tags)
-    {prefix} tag add [tagname] (Creates or edits a new tag)
-    {prefix} tag remove [tagname] (Removes an existing tag)`)}`;
+    {prefix} tag add [tagname] (Creates or edits a new tag) (Mod only)
+    {prefix} tag remove [tagname] (Removes an existing tag) (Mod only)`)}`;
   }
 
   *args() {

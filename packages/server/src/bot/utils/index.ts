@@ -1,6 +1,18 @@
 import { GuildConfig } from '../../types/command';
 import { MelynxClient, Session } from '../../types/melynxClient';
 
+export const defaultSettings: GuildConfig = {
+  guildId: '0',
+  prefix: process.env.PREFIX,
+  modRole: 'Moderator',
+  adminRole: 'Administrator',
+  sessionTimeout: 28800000, // 8 hours
+  sessionRefreshTimeout: 300000, // 5 minutes
+  sessionChannel: undefined,
+  sessionChannelMessage: undefined,
+  channelSettings: {},
+};
+
 export async function getGuildSettings(
   client: MelynxClient,
   guildId: string
@@ -11,13 +23,15 @@ export async function getGuildSettings(
     return settings;
   }
 
-  ({ settings } = await client.settings.model.findByPk(guildId));
-  if (!settings) {
-    settings = this.client.defaultSettings;
+  const dbSettings = await client.settings.model.findByPk(guildId);
+  if (!dbSettings) {
+    settings = defaultSettings;
     await client.settings.model.create({
       guildId,
       settings,
     });
+  } else {
+    settings = dbSettings.settings;
   }
 
   client.settings.cache[guildId] = settings;
