@@ -1,23 +1,23 @@
-import React from 'react';
 import Axios from 'axios';
 import { Card, Typography, Popover, Alert, Input } from 'antd';
 import styles from './Stickers.css';
 import copy from 'copy-to-clipboard';
+import { useState, useCallback, ChangeEvent, useEffect } from 'react';
 
 const { Title } = Typography;
 const { Search } = Input;
 
 export default function Stickers() {
-  const [stickers, setStickers] = React.useState<string[]>([]);
-  const [activePopover, setActivePopover] = React.useState('');
-  const [filter, setFilter] = React.useState('');
+  const [stickers, setStickers] = useState<string[]>([]);
+  const [activePopover, setActivePopover] = useState('');
+  const [filter, setFilter] = useState('');
   let currentTimer: number;
 
-  const onSearchChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
+  const onSearchChange = useCallback((event: ChangeEvent<HTMLInputElement>): void => {
     setFilter(event.target.value);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const getStickers = async () => {
       const { data } = await Axios.get('/api/stickers');
       setStickers(data);

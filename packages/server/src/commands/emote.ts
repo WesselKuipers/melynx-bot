@@ -1,33 +1,35 @@
-import { Message } from 'discord.js';
-import { MelynxCommand, MelynxMessage } from '../types/melynxClient';
-import { MessageAttachment } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { MelynxCommand } from '../types';
 
 const emojiRegex = /<(a)?:\w+:\d+>/;
 
-export default class Emote extends MelynxCommand {
-  constructor() {
-    super('emote', {
-      aliases: ['emote', 'emoji', 'hugemoji', 'hugemote', 'bigemote', 'bigemoji'],
-      description:
-        'Display a bigger version of an emote. Currently does not support default emojis.',
-      args: [{ id: 'emoji', type: 'string' }],
-    });
-
-    this.usage = '{prefix}emote {emoji}';
-  }
-
-  public async exec(message: MelynxMessage, { emoji }: { emoji: string }): Promise<Message> {
+export const bigemote: MelynxCommand = {
+  data: new SlashCommandBuilder()
+    .setName('bigemote')
+    .setDescription(
+      'Display a bigger version of an emote. Currently does not support default emojis.'
+    )
+    .addStringOption((option) =>
+      option
+        .setName('emoji')
+        .setDescription('The emoji you want to display a bigger version of.')
+        .setRequired(true)
+    ) as SlashCommandBuilder,
+  async execute(interaction) {
+    const emoji = interaction.options.getString('emoji');
     if (!emoji.match(emojiRegex)) {
-      return null;
+      await interaction.reply({
+        ephemeral: true,
+        content: 'It looks like this emoji is either a default emoji or not valid.',
+      });
+      return;
     }
 
     const id = emoji.split(':').pop().slice(0, -1);
     const animated = emoji.startsWith('<a:');
 
-    return message.util.send(
-      new MessageAttachment(
-        `https://cdn.discordapp.com/emojis/${id}.${animated ? 'gif' : 'png'}?v=1`
-      )
-    );
-  }
-}
+    await interaction.reply({
+      files: [`https://cdn.discordapp.com/emojis/${id}.${animated ? 'gif' : 'png'}?v=1`],
+    });
+  },
+};

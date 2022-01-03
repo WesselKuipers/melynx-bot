@@ -1,9 +1,7 @@
-import { FailureData } from 'discord-akairo';
-import { MessageEmbed } from 'discord.js';
-import { Message } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import fs from 'fs';
 import path from 'path';
-import { MelynxCommand, MelynxMessage } from '../types/melynxClient';
+import { MelynxCommand } from '../types';
 
 const stickerPath = path.join(__dirname, '..', 'assets', 'stickers');
 const files = fs.readdirSync(stickerPath);
@@ -14,38 +12,33 @@ const stickers = files.map((file) => {
   };
 });
 
-export default class Sticker extends MelynxCommand {
-  constructor() {
-    super('sticker', {
-      aliases: ['sticker', 'stamp'],
-      description: 'Sends a sticker',
-      args: [
-        {
-          id: 'sticker',
-          type: ['list', ...stickers.map((s) => s.name)],
-          default: 'list',
-          otherwise: (message: MelynxMessage, data: FailureData) =>
-            data.phrase
-              ? 'Could nyot find this sticker..'
-              : `You can view a list of stickers at https://${message.client.options.host}/stickers`,
-        },
-      ],
-    });
+export const sticker: MelynxCommand = {
+  data: new SlashCommandBuilder()
+    .setName('sticker')
+    .setDescription('Sends a sticker. Type `list` to see the list of stickers.')
+    .addStringOption((option) =>
+      option
+        .setName('sticker')
+        .setDescription(
+          'The sticker you want to send. Type `list` to see a list of available stickers.'
+        )
+    ) as SlashCommandBuilder,
+  async execute(interaction, client) {
+    const sticker = interaction.options.getString('sticker');
 
-    this.usage = '{prefix}sticker [sticker name]\n{prefix}sticker list';
-  }
-
-  public async exec(message: MelynxMessage, { sticker }: { sticker: string }): Promise<Message> {
-    if (sticker === 'list') {
-      return message.util.send(
-        `You can view a list of stickers at https://${message.client.options.host}/stickers`
-      );
+    if (
+      !sticker ||
+      !stickers.some((s) => s.name.toLocaleLowerCase() !== sticker.toLocaleLowerCase())
+    ) {
+      await interaction.reply({
+        ephemeral: true,
+        content: `You can view a list of stickers at https://${client.options.host}/stickers`,
+      });
+      return;
     }
 
-    return message.util.send({
-      embed: new MessageEmbed()
-        .attachFiles([stickers.find((s) => s.name.toLowerCase() === sticker.toLowerCase()).path])
-        .setImage(`attachment://${sticker}.png`),
+    await interaction.reply({
+      files: [stickers.find((s) => s.name.toLowerCase() === sticker.toLowerCase()).path],
     });
-  }
-}
+  },
+};

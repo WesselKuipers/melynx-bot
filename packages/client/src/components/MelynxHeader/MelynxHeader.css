@@ -1,11 +1,14 @@
 .brand {
   float: left;
   white-space: nowrap;
+  display: inline;
   width: 180px;
   color: hsla(0, 0%, 100%, 0.65);
 }
 
 .logo {
+  white-space: nowrap;
+  display: inline;
   height: 46px;
   margin-right: 15px;
 }
@@ -13,10 +16,6 @@
 .header {
   padding-left: 10px !important;
   padding-right: 10px !important;
-}
-
-.menu {
-  width: calc(100% - 80px - 93px);
 }
 
 .rightMenu {

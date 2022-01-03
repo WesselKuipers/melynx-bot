@@ -2,8 +2,7 @@ import 'antd/dist/antd.css';
 import 'antd/dist/antd.dark.min.css';
 
 import { Layout } from 'antd';
-import React from 'react';
-import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 
 import Header from '../MelynxHeader';
 import SessionList from '../SessionList';
@@ -18,15 +17,11 @@ export default function App() {
         <Layout>
           <Header />
           <Layout.Content className={styles.content}>
-            <Switch>
-              <Route exact path="/sessions">
-                <SessionList />
-              </Route>
-              <Route exact path="/stickers">
-                <Stickers />
-              </Route>
-              <Redirect to="/sessions" />
-            </Switch>
+            <Routes>
+              <Route path="/sessions" element={<SessionList />} />
+              <Route path="/stickers" element={<Stickers />} />
+              <Route path="/" element={<Navigate replace to="/sessions" />} />
+            </Routes>
           </Layout.Content>
         </Layout>
       </UserProvider>

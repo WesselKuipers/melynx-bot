@@ -1,104 +1,108 @@
-import dedent from 'dedent';
-import { Argument } from 'discord-akairo';
-import { GuildMember } from 'discord.js';
-import { Message } from 'discord.js';
-import { MelynxCommand, MelynxMessage } from '../types/melynxClient';
-import { generateHelp } from './help';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { CommandInteraction } from 'discord.js';
+import { MelynxClient, MelynxCommand } from '../types';
 
 const fcRegex = /((SW[- ]?)?)(\d{4}[- ]?){2}\d{4}/i;
-const removeOptions = ['remove', 'r', 'delete', 'd'];
 
-export default class FC extends MelynxCommand {
-  constructor() {
-    super('fc', {
-      aliases: ['fc', 'friend-code', 'friendcode'],
-      description: 'Register and list your own or other people’s Nintendo Switch friend codes',
-      channel: 'guild',
-      args: [
-        {
-          id: 'argument',
-          type: Argument.union('memberMention', removeOptions, fcRegex, 'string'),
-          match: 'rest',
-        },
-      ],
+export const fc: MelynxCommand = {
+  data: new SlashCommandBuilder()
+    .setName('fc')
+    .setDescription('Commands related to Nintendo Switch friend codes')
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('get')
+        .setDescription('Get your or someone else’s friend code')
+        .addUserOption((option) =>
+          option.setName('user').setDescription('The user whose FC you’d like to view')
+        )
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('set')
+        .setDescription('Set your friend code')
+        .addStringOption((option) =>
+          option.setName('fc').setDescription('Your friend code.').setRequired(true)
+        )
+    )
+    .addSubcommand((subcommand) =>
+      subcommand.setName('remove').setDescription('Remove your friend code')
+    ) as SlashCommandBuilder,
+
+  async execute(interaction, client) {
+    const subcommand = interaction.options.getSubcommand();
+    switch (subcommand) {
+      case 'remove':
+        await handleRemove(interaction, client);
+        break;
+      case 'get':
+        await handleGet(interaction, client);
+        break;
+      case 'set':
+        await handleSet(interaction, client);
+        break;
+    }
+  },
+};
+
+async function handleRemove(interaction: CommandInteraction, client: MelynxClient): Promise<void> {
+  const fc = await client.models.friendCode.findByPk(interaction.user.id);
+
+  if (!fc) {
+    return interaction.reply({
+      content:
+        'Looks like you didn’t have a friend code, so I’m just going to take a nap instead, nya!',
+      ephemeral: true,
     });
-
-    this.usage = `\n${dedent(`
-    {prefix}fc (List your FC)
-    {prefix}fc @User (List the FC of another user)
-    {prefix}fc SW-1234-1234-1234 (Register your FC)
-    {prefix}fc remove (Removes your FC registration)`)}`;
   }
 
-  public async exec(
-    message: MelynxMessage,
-    { argument }: { argument: GuildMember | string | { match: string[] } }
-  ): Promise<Message> {
-    if (!argument) {
-      return this.handleList(message, message.member);
-    }
+  await fc.destroy();
+  return interaction.reply(`Successfully remeowved your friend code.`);
+}
 
-    if (typeof argument === 'string') {
-      if (removeOptions.includes(argument)) {
-        return this.handleRemove(message);
-      }
+async function handleGet(interaction: CommandInteraction, client: MelynxClient): Promise<void> {
+  const member = interaction.options.getUser('user') || interaction.user;
+  const fc = await client.models.friendCode.findByPk(member.id);
 
-      return message.util.send(await generateHelp(message, 'fc'));
-    }
-
-    if ('match' in argument) {
-      return this.handleAdd(message, argument.match[0]);
-    }
-
-    return this.handleList(message, argument);
-  }
-
-  async handleList(message: MelynxMessage, member: GuildMember): Promise<Message> {
-    const fc = await message.client.models.friendCode.findByPk(member.id);
-
-    if (member.id === message.author.id) {
-      if (!fc) {
-        return message.util.reply(`it looks like you haven’t set your friend code yet!`);
-      }
-
-      return message.util.reply(`your friend code is **${fc.fc}**`);
-    }
-
+  if (member.id === interaction.user.id) {
     if (!fc) {
-      return message.util.reply(`it looks like this user hasn’t set their friend code yet!`);
+      return interaction.reply(`It looks like you haven’t set your friend code yet!`);
     }
 
-    return message.util.reply(`<@${member.id}>’s friend code is **${fc.fc}**`);
+    return interaction.reply(`${interaction.user}, your friend code is **${fc.fc}**`);
   }
 
-  async handleRemove(message: MelynxMessage): Promise<Message> {
-    const fc = await message.client.models.friendCode.findByPk(message.author.id);
-
-    if (!fc) {
-      return message.util.reply(
-        'looks like you didn’t have a friend code, so I’m just going to take a nap instead, nya!'
-      );
-    }
-
-    await fc.destroy();
-    return message.util.reply(`remeowved your friend code.`);
+  if (!fc) {
+    return interaction.reply(`It looks like ${member.username} hasn’t set their friend code yet!`);
   }
 
-  async handleAdd(message: MelynxMessage, code: string): Promise<Message> {
-    const fc = code.replace(/\D/g, '');
-    const normalizedFc = `SW-${fc.substr(0, 4)}-${fc.substr(4, 4)}-${fc.substr(8, 4)}`;
+  return interaction.reply(`${member}’s friend code is **${fc.fc}**`);
+}
 
-    const dbFC = await message.client.models.friendCode.findOne({ where: { fc: normalizedFc } });
-    if (dbFC && dbFC.id !== message.author.id) {
-      return message.util.reply(`this friend code is already registered to someone else.`);
-    }
+async function handleSet(interaction: CommandInteraction, client: MelynxClient): Promise<void> {
+  const code = interaction.options.getString('fc');
 
-    const [, updated] = await message.client.models.friendCode.upsert({
-      id: message.author.id,
-      fc: normalizedFc,
+  if (!code.match(fcRegex)) {
+    return interaction.reply({ content: 'This FC appears to be invalid.', ephemeral: true });
+  }
+
+  const fc = code.replace(/\D/g, '');
+  const normalizedFc = `SW-${fc.substr(0, 4)}-${fc.substr(4, 4)}-${fc.substr(8, 4)}`;
+
+  const dbFC = await client.models.friendCode.findOne({ where: { fc: normalizedFc } });
+  if (dbFC && dbFC.id !== interaction.user.id) {
+    return interaction.reply({
+      content: 'This friend code is already registered to someone else.',
+      ephemeral: true,
     });
-    return message.util.reply(
-      `successfully ${updated ? 'updated' : 'registered'} your friend code!`
-    );
   }
+
+  const [, updated] = await client.models.friendCode.upsert({
+    id: interaction.user.id,
+    fc: normalizedFc,
+  });
+
+  return interaction.reply({
+    content: `Successfully ${updated ? 'updated' : 'registered'} your friend code!`,
+    ephemeral: true,
+  });
 }

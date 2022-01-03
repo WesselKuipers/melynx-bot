@@ -1,26 +1,18 @@
+import { MelynxCommand } from '../types';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import axios from 'axios';
-import { Message } from 'discord.js';
-import { MelynxCommand, MelynxMessage } from '../types/melynxClient';
 
-export default class CatFact extends MelynxCommand {
-  constructor() {
-    super('catfact', {
-      aliases: ['catfact'],
-      description: 'Fetches a random cat fact!',
+export const catfact: MelynxCommand = {
+  data: new SlashCommandBuilder().setName('catfact').setDescription('Fetches a random cat fact'),
+  async execute(interaction) {
+    const { data } = await axios.get<{ fact: string }>('https://catfact.ninja/fact');
+
+    await interaction.reply({
+      embeds: [
+        {
+          description: data.fact,
+        },
+      ],
     });
-
-    this.usage = '{prefix} catfact';
-  }
-
-  public async exec(message: MelynxMessage): Promise<Message> {
-    const { data } = await axios.get<{ text: string; _id: string }>(
-      'https://cat-fact.herokuapp.com/facts/random'
-    );
-
-    return message.util.send({
-      embed: {
-        description: `[${data.text}](https://cat-fact.herokuapp.com/#/cat/facts/${data._id})`,
-      },
-    });
-  }
-}
+  },
+};

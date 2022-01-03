@@ -29,9 +29,6 @@ module.exports = (env, { mode }) => {
               use: [
                 {
                   loader: MiniCssExtractPlugin.loader,
-                  // options: {
-                  //   hmr: !production,
-                  // },
                 },
                 { loader: 'css-loader', options: { modules: true } },
               ],

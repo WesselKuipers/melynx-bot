@@ -9,6 +9,7 @@
     "outDir": "./build/",
     "removeComments": true,
     "target": "ES6",
-    "noEmit": true
+    "noEmit": true,
+    "skipLibCheck": true
   }
 }
