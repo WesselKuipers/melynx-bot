@@ -1,21 +1,11 @@
-import { Collection, ActivityOptions } from 'discord.js';
+import { Collection, ActivityOptions, Client, Interaction, Intents } from 'discord.js';
 import moment from 'moment';
-import { Sequelize, DataTypes, Model } from 'sequelize';
-import { AkairoClient, CommandHandler, SequelizeProvider } from 'discord-akairo';
-
-import Command from '../types/command';
-import {
-  MelynxClient,
-  DbSettings,
-  MelynxMessage,
-  Tag,
-  Role,
-  Session,
-  FriendCode,
-} from '../types/melynxClient';
-import path from 'path';
-import { getGuildSettings } from './utils';
+import { Sequelize, DataTypes } from 'sequelize';
+import * as commands from '../commands';
+import { MelynxClient, DbSettings, Tag, Role, Session, FriendCode, MelynxCommand } from '../types';
 import SessionManager from './sessionManager';
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v9';
 
 export interface ApplicationSettings {
   prefix: string;
@@ -29,10 +19,10 @@ export interface ApplicationSettings {
   sentryDsn: string;
   ownerId: string;
   port: number;
+  devServer: string;
 }
 
 const regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
-const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const playingLines: ActivityOptions[] = [
   { type: 'PLAYING', name: 'stealing gems from hunters' },
   { type: 'PLAYING', name: 'with a hunter' },
@@ -69,17 +59,15 @@ function warn(warning: string) {
 
 export class MelynxBot {
   client: MelynxClient;
-  commands: Collection<string, Command>;
-  aliases: Collection<string, Command>;
+  commands: Collection<string, MelynxCommand>;
   settings: ApplicationSettings;
 
   constructor(settings: ApplicationSettings) {
     this.settings = settings;
 
-    this.client = new AkairoClient(
-      { ownerID: settings.ownerId },
-      { disableMentions: 'everyone' }
-    ) as MelynxClient;
+    this.client = new Client({
+      intents: [Intents.FLAGS.GUILDS],
+    }) as MelynxClient;
     this.client.options.ownerId = settings.ownerId;
     this.client.options.host = settings.host;
 
@@ -114,6 +102,7 @@ export class MelynxBot {
         id: { type: DataTypes.STRING, primaryKey: true },
         guildId: { type: DataTypes.STRING, allowNull: false },
         name: { type: DataTypes.STRING, allowNull: false },
+        description: { type: DataTypes.STRING, allowNull: true },
       },
       { createdAt: 'date' }
     );
@@ -168,41 +157,89 @@ export class MelynxBot {
 
     guildSettings.sync();
     tagModel.sync();
-    roleModel.sync();
+    roleModel.sync({ alter: true });
     friendCodeModel.sync();
 
-    const handler = new CommandHandler(this.client, {
-      directory: path.join(__dirname, '..', 'commands'),
-      allowMention: true,
-      handleEdits: true,
-      blockBots: true,
-      blockClient: true,
-      commandUtil: true,
-      prefix: async (message) =>
-        message.guild
-          ? (await getGuildSettings(this.client, message.guild.id)).prefix
-          : this.settings.prefix,
-    });
+    this.client.commands = new Collection();
+    for (const command of Object.values(commands)) {
+      this.client.commands.set(command.data.name, command);
+    }
 
     this.client.sessionManager = new SessionManager();
-    this.client.commandHandler = handler;
-    this.client.commandHandler.loadAll();
+    this.client.on('interactionCreate', (interaction) => {
+      this.onCommandInteraction(this.client, interaction);
+      this.onMessageComponentInteraction(this.client, interaction);
+    });
+  }
+
+  async registerCommands() {
+    log('Refreshing application commands.');
+    const isDev = process.env.NODE_ENV !== 'production';
+    const rest = new REST({ version: '9' }).setToken(this.settings.token);
+    const body = this.client.commands.map((command) => command.data.toJSON());
+
+    if (isDev) {
+      await rest.put(
+        Routes.applicationGuildCommands(this.settings.clientId, this.settings.devServer),
+        { body }
+      );
+    } else {
+      await rest.put(Routes.applicationCommands(this.settings.clientId), { body });
+    }
+    await rest.put(
+      Routes.applicationGuildCommands(this.settings.clientId, this.settings.devServer),
+      { body: this.client.commands.map((command) => command.data.toJSON()) }
+    );
+
+    this.client.log('Finished refreshing application commands.');
+  }
+
+  async onCommandInteraction(client: MelynxClient, interaction: Interaction) {
+    if (!interaction.isCommand()) {
+      return;
+    }
+
+    if (!this.client.commands.has(interaction.commandName)) {
+      return;
+    }
+
+    try {
+      await this.client.commands.get(interaction.commandName).execute(interaction, client);
+    } catch (error) {
+      this.client.error(error);
+      await interaction.reply({
+        content: 'There was an error while executing this command!',
+        ephemeral: true,
+      });
+    }
+  }
+
+  async onMessageComponentInteraction(client: MelynxClient, interaction: Interaction) {
+    if (!interaction.isMessageComponent()) {
+      return;
+    }
+
+    // The format for message component interactions is commandName/any other data, /-separated.
+    const id = interaction.customId;
+    const [commandName] = id.split('/');
+
+    const command = client.commands.get(commandName);
+    console.log({ id, commandName, command });
+    if (!command) {
+      return;
+    }
+
+    await command?.componentExecute(interaction, client);
   }
 
   run() {
     this.client.login(this.settings.token);
 
     this.client.on('ready', async () => {
-      this.client.log(
-        `Connected to ${this.client.guilds.cache.reduce((a, g) => a + g.memberCount, 0)} users on ${
-          this.client.guilds.cache.size
-        } servers.`
-      );
+      this.client.log(`Connected to ${this.client.guilds.cache.size} servers.`);
+      this.client.user.setActivity(playingLines[Math.floor(Math.random() * playingLines.length)]);
 
-      await this.client.user.setActivity(
-        playingLines[Math.floor(Math.random() * playingLines.length)]
-      );
-
+      await this.registerCommands();
       await this.client.sessionManager.init(this.client);
     });
 

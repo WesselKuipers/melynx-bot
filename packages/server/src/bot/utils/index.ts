@@ -1,5 +1,5 @@
-import { GuildConfig } from '../../types/command';
-import { MelynxClient, Session } from '../../types/melynxClient';
+import { GuildConfig } from '../../types';
+import { MelynxClient, Session } from '../../types';
 
 export const defaultSettings: GuildConfig = {
   guildId: '0',
@@ -38,7 +38,7 @@ export async function getGuildSettings(
   return settings;
 }
 
-export function buildSessionMessage(guildId: string, sessions: Session[]): string[] {
+export function buildSessionMessage(guildId: string, sessions: Session[]): string {
   const sessionMessage = [];
   sessions
     .filter((s) => s.guildId === guildId)
@@ -64,5 +64,5 @@ export function buildSessionMessage(guildId: string, sessions: Session[]): strin
     sessionMessage.push('There are no active sessions! Feel free to create one yourself!');
   }
 
-  return sessionMessage;
+  return sessionMessage.join('\n');
 }

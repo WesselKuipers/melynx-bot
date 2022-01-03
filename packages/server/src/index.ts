@@ -22,6 +22,7 @@ try {
   process.env.CLIENT_SECRET = settings.clientSecret;
   process.env.SENTRY_DSN = settings.sentryDsn;
   process.env.OWNER_ID = settings.ownerId;
+  process.env.DEV_SERVER = settings.devServer;
 } catch (e) {
   // eslint-disable-next-line no-console
   console.log('Could not find settings.json, falling back to ENV');
@@ -40,10 +41,11 @@ const options: ApplicationSettings = {
   clientId: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
   protocol: process.env.PROTOCOL || isDevelopment ? 'http' : 'https',
-  host: process.env.HOST || 'localhost',
+  host: process.env.HOST || 'http://localhost:8080',
   sentryDsn: process.env.SENTRY_DSN,
   ownerId: process.env.OWNER_ID || '86708235888783360',
   port: Number(process.env.PORT) || 8080,
+  devServer: process.env.DEV_SERVER,
 };
 
 const bot = new MelynxBot(options);
@@ -57,8 +59,8 @@ if (options.sentryDsn) {
   app.use(Sentry.Handlers.errorHandler());
 }
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use('/api/*', cors());
 // eslint-disable-next-line new-cap
 app.use('/api', API({ options, db: bot.client.db }));

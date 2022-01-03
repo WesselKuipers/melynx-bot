@@ -1,4 +1,3 @@
-import React from 'react';
 import logo from '../../assets/logo.png';
 import discordLogo from '../../assets/discord.svg';
 import styles from './MelynxHeader.css';
@@ -8,28 +7,20 @@ import { Layout, Menu, Button, Avatar, Popover } from 'antd';
 import { HeartFilled, SnippetsFilled, CaretDownFilled, LogoutOutlined } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
 
-const { Header } = Layout;
-
 export function MelynxHeader() {
   const { user, logout } = useUser();
   const location = useLocation();
   const current = location.pathname.split('/')[1];
 
   return (
-    <Header className={styles.header}>
+    <Layout.Header className={styles.header}>
       <div className={styles.brand}>
         <Link to="/">
           <img className={styles.logo} alt="Logo" src={logo} />
           <span>Melynx Bot</span>
         </Link>
       </div>
-      <Menu
-        theme="dark"
-        className={styles.menu}
-        mode="horizontal"
-        defaultSelectedKeys={['1']}
-        selectedKeys={[current]}
-      >
+      <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']} selectedKeys={[current]}>
         <Menu.Item key="sessions">
           <Link to="/sessions">
             <HeartFilled />
@@ -75,8 +66,8 @@ export function MelynxHeader() {
           </Popover>
         )}
       </div>
-    </Header>
+    </Layout.Header>
   );
-};
+}
 
 export default MelynxHeader;

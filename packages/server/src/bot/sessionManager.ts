@@ -1,12 +1,11 @@
 import { TextChannel } from 'discord.js';
-import { ModelCtor } from 'sequelize/types';
-import { MelynxClient, Session } from '../types/melynxClient';
+import { MelynxClient, Session, Models } from '../types';
 import { buildSessionMessage, getGuildSettings } from './utils';
 
 export default class SessionManager {
   client: MelynxClient;
   sessions: Session[] = [];
-  sessionDb: ModelCtor<Session>;
+  sessionDb: Models['session'];
   sessionChannelTimers: { [guildId: string]: NodeJS.Timeout } = {};
 
   async init(client: MelynxClient) {
@@ -64,13 +63,11 @@ export default class SessionManager {
     };
 
     try {
-      const collected = await sentMessage.awaitReactions(
-        (r, user) => r.emoji.name === '♻' && user.id !== this.client.user.id,
-        {
-          max: 1,
-          time: config.sessionRefreshTimeout,
-        }
-      );
+      const collected = await sentMessage.awaitReactions({
+        filter: (reaction, user) => reaction.emoji.name === '♻' && user.id !== this.client.user.id,
+        max: 1,
+        time: config.sessionRefreshTimeout,
+      });
 
       const reactions = collected.first();
 
@@ -153,7 +150,7 @@ export default class SessionManager {
       } else {
         try {
           const sessionChannelMessage = await channel.messages.fetch(config.sessionChannelMessage);
-          await sessionChannelMessage.edit(buildSessionMessage(guildId, this.sessions).join('\n'));
+          await sessionChannelMessage.edit(buildSessionMessage(guildId, this.sessions));
         } catch (e) {
           client.error(e);
           client.log(
