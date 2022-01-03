@@ -1,19 +1,19 @@
 import axios from 'axios';
-import * as React from 'react';
 
 import { UserContext } from '../../hooks/useUser';
 import { User } from '../../types';
 import useQuery from '../../hooks/useQuery';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export default function UserProvider({
   children,
 }: {
   children?: React.ReactNode;
 }): React.ReactElement {
-  const [user, setUser] = React.useState<User>(null);
+  const [user, setUser] = useState<User>(null);
   const query = useQuery();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (localStorage.user) {
       const { token } = JSON.parse(localStorage.user);
       axios.defaults.headers.common.Authorization = `Bearer ${token}`;
@@ -22,7 +22,7 @@ export default function UserProvider({
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const getUser = async () => {
       const token = query.get('token');
       const refreshToken = query.get('refreshToken');
@@ -54,7 +54,7 @@ export default function UserProvider({
     }
   }, [query]);
 
-  const refreshUser = React.useCallback(async () => {
+  const refreshUser = useCallback(async () => {
     const { data: discordUser } = await axios.get('https://discordapp.com/api/users/@me');
     setUser({
       ...user,
@@ -65,13 +65,13 @@ export default function UserProvider({
     });
   }, [user]);
 
-  const logout = React.useCallback(() => {
+  const logout = useCallback(() => {
     setUser(null);
     delete axios.defaults.headers.common.Authorization;
     delete localStorage.user;
   }, []);
 
-  const value = React.useMemo(
+  const value = useMemo(
     () => ({
       logout,
       user,

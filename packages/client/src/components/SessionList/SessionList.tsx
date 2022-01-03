@@ -1,4 +1,3 @@
-import React from 'react';
 import axios from 'axios';
 import { Spin, Card, Tag, Popover, Empty, Alert, Avatar } from 'antd';
 import copy from 'copy-to-clipboard';
@@ -7,6 +6,7 @@ import useUser from '../../hooks/useUser';
 import kutku from '../../assets/kutku.png';
 import garuga from '../../assets/garuga.png';
 import { LoadingOutlined, FrownFilled, CopyFilled } from '@ant-design/icons';
+import { useState, useEffect } from 'react';
 
 interface Session {
   id: number;
@@ -21,13 +21,13 @@ interface Session {
 }
 
 export default function SessionList() {
-  const [loading, setLoading] = React.useState(true);
-  const [sessions, setSessions] = React.useState<Session[]>(undefined);
-  const [copiedMessage, setCopiedMessage] = React.useState(0);
+  const [loading, setLoading] = useState(true);
+  const [sessions, setSessions] = useState<Session[]>(undefined);
+  const [copiedMessage, setCopiedMessage] = useState(0);
 
   const { user } = useUser();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const getSessions = async () => {
       const { data } = await axios.get<Session[]>('/api/sessions');
       setSessions(data);

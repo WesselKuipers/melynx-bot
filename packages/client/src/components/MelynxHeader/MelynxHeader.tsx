@@ -17,7 +17,7 @@ export function MelynxHeader() {
       <div className={styles.brand}>
         <Link to="/">
           <img className={styles.logo} alt="Logo" src={logo} />
-          <span>Melynx Bot</span>
+          <span className="ant-typography">Melynx Bot</span>
         </Link>
       </div>
       <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']} selectedKeys={[current]}>
