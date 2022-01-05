@@ -179,17 +179,15 @@ export class MelynxBot {
     const body = this.client.commands.map((command) => command.data.toJSON());
 
     if (isDev) {
+      this.client.log(`Refreshing ${this.client.commands.size} commands for devServer`);
       await rest.put(
         Routes.applicationGuildCommands(this.settings.clientId, this.settings.devServer),
         { body }
       );
     } else {
+      this.client.log(`Refreshing ${this.client.commands.size} commands globally`);
       await rest.put(Routes.applicationCommands(this.settings.clientId), { body });
     }
-    await rest.put(
-      Routes.applicationGuildCommands(this.settings.clientId, this.settings.devServer),
-      { body: this.client.commands.map((command) => command.data.toJSON()) }
-    );
 
     this.client.log('Finished refreshing application commands.');
   }
