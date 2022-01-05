@@ -20,6 +20,12 @@ export const role: MelynxCommand = {
         .addRoleOption((option) =>
           option.setName('role').setDescription('The role to add.').setRequired(true)
         )
+        .addRoleOption((option) =>
+          option
+            .setName('description')
+            .setDescription('The description for the role.')
+            .setRequired(true)
+        )
     )
     .addSubcommand((subcommand) =>
       subcommand

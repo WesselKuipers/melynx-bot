@@ -221,7 +221,7 @@ export class MelynxBot {
     const [commandName] = id.split('/');
 
     const command = client.commands.get(commandName);
-    console.log({ id, commandName, command });
+    console.log(`Executing command ${id} on server ${interaction.guildId}`);
     if (!command) {
       return;
     }
