@@ -158,20 +158,31 @@ async function handleAdd(
       new MessageActionRow().addComponents([
         new MessageButton()
           .setCustomId(`session/${sessionId}/Rise (Switch)`)
-          .setLabel('Rise (Switch)'),
-        new MessageButton().setCustomId(`session/${sessionId}/Rise (PC)`).setLabel('Rise (PC)'),
+          .setLabel('Rise (Switch)')
+          .setStyle('PRIMARY'),
+        new MessageButton()
+          .setCustomId(`session/${sessionId}/Rise (PC)`)
+          .setLabel('Rise (PC)')
+          .setStyle('PRIMARY'),
+
         new MessageButton()
           .setCustomId(`session/${sessionId}/MHGU (Switch)`)
-          .setLabel('MHGU (Switch)'),
+          .setLabel('MHGU (Switch)')
+          .setStyle('PRIMARY'),
         new MessageButton()
           .setCustomId(`session/${sessionId}/World (Playstation)`)
-          .setLabel('World (Playstation)'),
-        new MessageButton().setCustomId(`session/${sessionId}/World (PC)`).setLabel('World (PC)'),
+          .setLabel('World (Playstation)')
+          .setStyle('PRIMARY'),
+        new MessageButton()
+          .setCustomId(`session/${sessionId}/World (PC)`)
+          .setLabel('World (PC)')
+          .setStyle('PRIMARY'),
       ]),
       new MessageActionRow().addComponents([
         new MessageButton()
           .setCustomId(`session/${sessionId}/World (Xbox)`)
-          .setLabel('World (Xbox)'),
+          .setLabel('World (Xbox)')
+          .setStyle('PRIMARY'),
       ]),
     ],
   });
@@ -184,7 +195,6 @@ async function handleAdd(
     time: 15e3,
   });
 
-  let collected = false;
   collector.once('collect', async (i) => {
     session.platform = i.customId.split('/').pop();
     await client.sessionManager.addSession(session as Session);
@@ -194,7 +204,6 @@ async function handleAdd(
       components: [],
     });
     await interaction.followUp(`Added ${session.platform} session \`${session.sessionId}\``);
-    collected = true;
   });
 
   collector.on('end', async (i) => {
