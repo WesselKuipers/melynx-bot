@@ -136,7 +136,13 @@ export default class SessionManager {
 
     if (config.sessionChannel) {
       const channelId = config.sessionChannel.replace(/<|#|>/g, '');
-      const channel = (await client.channels.fetch(channelId)) as TextChannel;
+      let channel: TextChannel;
+
+      try {
+        channel = (await client.channels.fetch(channelId)) as TextChannel;
+      } catch (e) {
+        client.log(`Error when fetching channel`);
+      }
 
       if (!channel) {
         client.log(`Unable to find channel ${config.sessionChannel}, removing it.`);
