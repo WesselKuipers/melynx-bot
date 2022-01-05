@@ -8,8 +8,6 @@ const pcRegex = /[a-zA-Z0-9#+?@$#&!=-]{12}/;
 const mhguRegex = /\b\d{2}-\d{4}-\d{4}-\d{4}\b/;
 const riseRegex = /^\w{6}$/;
 
-const sessionsInProgress: Map<string, Partial<Session>> = new Map();
-
 export const session: MelynxCommand = {
   data: new SlashCommandBuilder()
     .setName('session')
@@ -131,7 +129,6 @@ async function handleAdd(
   client: MelynxClient,
   sessionId: string
 ): Promise<void> {
-  const sessionDb = client.models.session;
   const session: Partial<Session> = {
     userId: interaction.user.id,
     avatar: interaction.user.avatarURL(),
@@ -162,6 +159,7 @@ async function handleAdd(
         new MessageButton()
           .setCustomId(`session/${sessionId}/Rise (Switch)`)
           .setLabel('Rise (Switch)'),
+        new MessageButton().setCustomId(`session/${sessionId}/Rise (PC)`).setLabel('Rise (PC)'),
         new MessageButton()
           .setCustomId(`session/${sessionId}/MHGU (Switch)`)
           .setLabel('MHGU (Switch)'),
@@ -169,6 +167,8 @@ async function handleAdd(
           .setCustomId(`session/${sessionId}/World (Playstation)`)
           .setLabel('World (Playstation)'),
         new MessageButton().setCustomId(`session/${sessionId}/World (PC)`).setLabel('World (PC)'),
+      ]),
+      new MessageActionRow().addComponents([
         new MessageButton()
           .setCustomId(`session/${sessionId}/World (Xbox)`)
           .setLabel('World (Xbox)'),
