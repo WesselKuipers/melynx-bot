@@ -123,7 +123,7 @@ export class MelynxBot {
           allowNull: false,
         },
         description: DataTypes.STRING,
-        sessionId: { type: DataTypes.STRING, unique: true, allowNull: false },
+        sessionId: { type: DataTypes.STRING, allowNull: false },
         channelId: { type: DataTypes.STRING, allowNull: false },
       },
       { createdAt: 'date' }
@@ -221,8 +221,9 @@ export class MelynxBot {
     const [commandName] = id.split('/');
 
     const command = client.commands.get(commandName);
-    console.log(`Executing command ${id} on server ${interaction.guildId}`);
-    if (!command) {
+    this.client.log(`Executing command component ${id} on server ${interaction.guildId}`);
+
+    if (!command || !command.componentExecute) {
       return;
     }
 

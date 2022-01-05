@@ -73,17 +73,15 @@ export const session: MelynxCommand = {
       return interaction.reply({ content: 'Could not find any sessions, nya...', ephemeral: true });
     }
 
-    const sessionId = foundRise?.[0] ?? foundMHGU?.[0] ?? foundPC?.[0] ?? foundIceborne?.[0];
-
     switch (subcommand) {
       case 'remove':
-        await handleRemove(interaction, client, sessionId);
+        await handleRemove(interaction, client, id);
         break;
       case 'add':
-        await handleAdd(interaction, client, sessionId);
+        await handleAdd(interaction, client, id);
         break;
       case 'edit':
-        await handleEdit(interaction, client, sessionId);
+        await handleEdit(interaction, client, id);
         break;
     }
   },
@@ -142,10 +140,7 @@ async function handleAdd(
 
   if (
     client.sessionManager.sessions.some(
-      (s) =>
-        s.sessionId === session.sessionId &&
-        s.guildId === session.guildId &&
-        s.userId !== interaction.user.id
+      (s) => s.sessionId === session.sessionId && s.guildId === session.guildId
     )
   ) {
     return interaction.reply({ content: 'A lobby with this ID already exists!', ephemeral: true });
@@ -164,7 +159,6 @@ async function handleAdd(
           .setCustomId(`session/${sessionId}/Rise (PC)`)
           .setLabel('Rise (PC)')
           .setStyle('PRIMARY'),
-
         new MessageButton()
           .setCustomId(`session/${sessionId}/MHGU (Switch)`)
           .setLabel('MHGU (Switch)')
@@ -187,11 +181,10 @@ async function handleAdd(
     ],
   });
 
+  console.log({ userId: interaction.user.id, sessionId: session.sessionId });
   const collector = interaction.channel.createMessageComponentCollector({
     filter: (i) =>
-      i.user.id === interaction.user.id &&
-      i.isButton() &&
-      i.customId.startsWith(`session/${session.id}`),
+      i.user.id === interaction.user.id && i.customId.startsWith(`session/${session.sessionId}`),
     time: 15e3,
   });
 

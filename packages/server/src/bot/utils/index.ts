@@ -38,6 +38,26 @@ export async function getGuildSettings(
   return settings;
 }
 
+export async function updateGuildSettings(
+  client: MelynxClient,
+  guildId: string,
+  settings: GuildConfig
+) {
+  const [update] = await client.settings.model.update(
+    {
+      settings,
+    },
+    { where: { guildId } }
+  );
+
+  if (update > 0) {
+    // Update the cached settings
+    client.settings.cache[guildId] = settings;
+  }
+
+  return update > 0;
+}
+
 export function buildSessionMessage(guildId: string, sessions: Session[]): string {
   const sessionMessage = [];
   sessions

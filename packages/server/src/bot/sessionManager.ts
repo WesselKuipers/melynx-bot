@@ -1,6 +1,6 @@
 import { TextChannel } from 'discord.js';
 import { MelynxClient, Session, Models } from '../types';
-import { buildSessionMessage, getGuildSettings } from './utils';
+import { buildSessionMessage, getGuildSettings, updateGuildSettings } from './utils';
 
 export default class SessionManager {
   client: MelynxClient;
@@ -38,6 +38,7 @@ export default class SessionManager {
         );
         this.sessionChannelTimers[guildId] = timer;
         this.updateSessionMessage(client, guildId);
+        this.client.log(`Initialized session message timer for guild ${guildId}`);
       }
 
       return null;
@@ -174,16 +175,10 @@ export default class SessionManager {
       buildSessionMessage(channel.guild.id, this.sessions)
     );
     client.log(`Created ${sessionChannelMessage.id}`);
-    await client.settings.model.update(
-      {
-        settings: {
-          ...config,
-          sessionChannelMessage: sessionChannelMessage.id,
-        },
-      },
-      { where: { guildId: channel.guild.id } }
-    );
-    client.settings.cache[config.guildId].sessionChannelMessage = sessionChannelMessage.id;
+    await updateGuildSettings(client, channel.guild.id, {
+      ...config,
+      sessionChannelMessage: sessionChannelMessage.id,
+    });
 
     return sessionChannelMessage;
   }
@@ -192,19 +187,10 @@ export default class SessionManager {
     const config = await getGuildSettings(client, guildId);
 
     client.log(`Removing session channel on guild: ${config.guildId}`);
-    await client.settings.model.update(
-      {
-        settings: {
-          ...config,
-          sessionChannel: '',
-          sessionChannelMessage: null,
-        },
-      },
-      { where: { guildId: config.guildId } }
-    );
-
-    // Update the cache too
-    client.settings.cache[config.guildId].sessionChannel = '';
-    client.settings.cache[config.guildId].sessionChannelMessage = null;
+    await updateGuildSettings(client, guildId, {
+      ...config,
+      sessionChannel: '',
+      sessionChannelMessage: null,
+    });
   }
 }

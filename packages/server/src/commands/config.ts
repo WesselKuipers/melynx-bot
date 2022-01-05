@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, codeBlock } from '@discordjs/builders';
 import { GuildMember } from 'discord.js';
-import { getGuildSettings } from '../bot/utils';
+import { getGuildSettings, updateGuildSettings } from '../bot/utils';
 import { MelynxCommand } from '../types';
 
 export const getconf: MelynxCommand = {
@@ -117,21 +117,13 @@ export const getconf: MelynxCommand = {
       settings.sessionChannel = updatedValue;
     }
 
-    const [update] = await client.settings.model.update(
-      {
-        settings,
-      },
-      { where: { guildId: interaction.guildId } }
-    );
-
-    if (update > 0) {
-      // Update the cached settings
-      client.settings.cache[interaction.guildId] = settings;
-
-      return interaction.reply({
-        content: `Guild configuration item \`${subcommand}\` has been changed to:\n\`${updatedValue}\``,
-        ephemeral: true,
-      });
+    const updated = updateGuildSettings(client, interaction.guildId, settings);
+    if (!updated) {
+      return;
     }
+    return interaction.reply({
+      content: `Guild configuration item \`${subcommand}\` has been changed to:\n\`${updatedValue}\``,
+      ephemeral: true,
+    });
   },
 };
