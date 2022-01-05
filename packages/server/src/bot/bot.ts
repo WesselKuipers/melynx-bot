@@ -72,12 +72,13 @@ export class MelynxBot {
     this.client.options.host = settings.host;
 
     const isDev = process.env.NODE_ENV !== 'production';
+    log(`Starting bot in ${isDev ? 'dev' : 'production'} mode`);
     const db = new Sequelize(
       isDev ? settings.databaseUrl : `${settings.databaseUrl}?sslmode=require`,
       {
         logging: false,
         dialect: isDev ? 'mysql' : 'postgres',
-        dialectOptions: isDev ? {} : { ssl: { rejectUnauthorized: false } },
+        dialectOptions: isDev ? {} : { ssl: { require: true, rejectUnauthorized: false } },
       }
     );
     const guildSettings = db.define<DbSettings>('settings', {
