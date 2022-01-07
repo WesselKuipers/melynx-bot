@@ -66,7 +66,8 @@ export class MelynxBot {
     this.settings = settings;
 
     this.client = new Client({
-      intents: [Intents.FLAGS.GUILDS],
+      intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
+      partials: ['CHANNEL', 'REACTION'],
     }) as MelynxClient;
     this.client.options.ownerId = settings.ownerId;
     this.client.options.host = settings.host;

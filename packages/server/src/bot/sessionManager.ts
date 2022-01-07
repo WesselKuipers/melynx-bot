@@ -60,7 +60,11 @@ export default class SessionManager {
     const reaction = await sentMessage.react('♻');
     const removeReactions = async () => {
       await sentMessage.edit(expireMessage);
-      await reaction.remove();
+      try {
+        await reaction.remove();
+      } catch {
+        this.client.log(`Unable to remove reactions.`);
+      }
     };
 
     try {
