@@ -8,6 +8,16 @@ const pcRegex = /[a-zA-Z0-9#+?@$#&!=-]{12}/;
 const mhguRegex = /\b\d{2}-\d{4}-\d{4}-\d{4}\b/;
 const riseRegex = /^\w{6}$/;
 
+function validateSession(session: string): string {
+  const id = session.replace(/\[|\]/g, ' ').replace(/\s+/g, ' ').trim();
+  const foundIceborne = iceborneRegex.test(id);
+  const foundPC = pcRegex.test(id);
+  const foundMHGU = mhguRegex.test(id);
+  const foundRise = riseRegex.test(id.split(' ')?.[0]);
+
+  return foundMHGU || foundPC || foundIceborne || foundRise ? id : null;
+}
+
 export const session: MelynxCommand = {
   data: new SlashCommandBuilder()
     .setName('session')
@@ -59,17 +69,9 @@ export const session: MelynxCommand = {
       return;
     }
 
-    const id = interaction.options
-      .getString('session')
-      .replace(/\[|\]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    const foundIceborne = iceborneRegex.exec(id);
-    const foundPC = pcRegex.exec(id);
-    const foundMHGU = mhguRegex.exec(id);
-    const foundRise = riseRegex.exec(id.split(' ')?.[0]);
+    const id = validateSession(interaction.options.getString('session'));
 
-    if (!foundMHGU && !foundPC && !foundIceborne && !foundRise) {
+    if (!id) {
       return interaction.reply({ content: 'Could not find any sessions, nya...', ephemeral: true });
     }
 
@@ -116,10 +118,41 @@ async function handleEdit(
   client: MelynxClient,
   sessionId: string
 ): Promise<void> {
-  const sessionDb = client.models.session;
-  const sessions = await sessionDb.findAll({ where: { guildId: interaction.guildId } });
+  const session = client.sessionManager.sessions.find(
+    (s) => s.sessionId === sessionId && s.guildId === interaction.guildId
+  );
+  const description = interaction.options.getString('description');
+  const newId = interaction.options.getString('new-session');
 
-  return interaction.reply(buildSessionMessage(interaction.guildId, sessions));
+  if (!session) {
+    return interaction.reply({
+      content: 'A session with that ID does not exist, nya...',
+      ephemeral: true,
+    });
+  }
+
+  if (newId) {
+    const id = validateSession(interaction.options.getString('session'));
+    if (!id) {
+      return interaction.reply({
+        content: `The new session ID does not seem to be valid.`,
+        ephemeral: true,
+      });
+    }
+
+    session.sessionId = id;
+  }
+
+  if (description) {
+    session.description = description;
+  }
+
+  await client.sessionManager.removeSession(session);
+  await client.sessionManager.addSession(session);
+
+  return description || newId
+    ? interaction.reply(`Updated and refreshed session ${sessionId}`)
+    : interaction.reply(`Refreshed session ${sessionId}`);
 }
 
 async function handleAdd(
