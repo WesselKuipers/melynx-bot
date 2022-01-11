@@ -28,6 +28,7 @@ export const sticker: MelynxCommand = {
 
     if (
       !sticker ||
+      sticker === 'list' ||
       !stickers.some((s) => s.name.toLocaleLowerCase() !== sticker.toLocaleLowerCase())
     ) {
       await interaction.reply({
