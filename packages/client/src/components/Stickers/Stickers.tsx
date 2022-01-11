@@ -28,7 +28,7 @@ export default function Stickers() {
 
   const copySticker = (sticker: string) => {
     clearTimeout(currentTimer);
-    copy(`<@489555694211694602> sticker ${sticker.split('.')[0]}`);
+    copy(`/sticker ${sticker.split('.')[0]}`);
     setActivePopover(sticker);
     currentTimer = setTimeout(() => setActivePopover(''), 2e3);
   };
