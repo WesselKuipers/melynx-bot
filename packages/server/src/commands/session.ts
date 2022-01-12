@@ -10,12 +10,13 @@ const riseRegex = /^\w{6}$/;
 
 function validateSession(session: string): string {
   const id = session.replace(/\[|\]/g, ' ').replace(/\s+/g, ' ').trim();
-  const foundIceborne = iceborneRegex.test(id);
-  const foundPC = pcRegex.test(id);
-  const foundMHGU = mhguRegex.test(id);
-  const foundRise = riseRegex.test(id.split(' ')?.[0]);
+  // Temporarily disabled until proper Rise PC update.
+  // const foundIceborne = iceborneRegex.test(id);
+  // const foundPC = pcRegex.test(id);
+  // const foundMHGU = mhguRegex.test(id);
+  // const foundRise = riseRegex.test(id.split(' ')?.[0]);
 
-  return foundMHGU || foundPC || foundIceborne || foundRise ? id : null;
+  return id;
 }
 
 export const session: MelynxCommand = {
