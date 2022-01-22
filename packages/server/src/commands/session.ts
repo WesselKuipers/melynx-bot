@@ -145,15 +145,19 @@ async function handleEdit(
   }
 
   if (description) {
+    console.log(`Setting description to: ${description}`);
     session.description = description;
   }
 
   await client.sessionManager.removeSession(session);
   await client.sessionManager.addSession(session);
 
-  return description || newId
-    ? interaction.reply(`Updated and refreshed session ${sessionId}`)
-    : interaction.reply(`Refreshed session ${sessionId}`);
+  const message =
+    description || newId
+      ? `Updated and refreshed session ${sessionId}`
+      : `Refreshed session ${sessionId}`;
+
+  return interaction.reply(description ? `${message}\nDescription: ${description}` : message);
 }
 
 async function handleAdd(
@@ -215,7 +219,6 @@ async function handleAdd(
     ],
   });
 
-  console.log({ userId: interaction.user.id, sessionId: session.sessionId });
   const collector = interaction.channel.createMessageComponentCollector({
     filter: (i) =>
       i.user.id === interaction.user.id && i.customId.startsWith(`session/${session.sessionId}`),

@@ -110,12 +110,14 @@ export default class SessionManager {
     } catch {
       await removeReactions();
     }
+    this.updateSessionMessage(this.client, session.guildId);
   }
 
   public async removeSession(session: Session): Promise<void> {
     await this.sessionDb.destroy({ where: { id: session.id } });
     this.sessions = this.sessions.filter((item) => item.id !== session.id);
     clearTimeout(session.timer);
+    this.updateSessionMessage(this.client, session.guildId);
   }
 
   public async addSession(session: Session): Promise<void> {
@@ -134,6 +136,7 @@ export default class SessionManager {
     // auto clear after (default) 8 hours;
     dbSes.timer = setTimeout(() => this.handleExpiredSession(dbSes), config.sessionTimeout);
     this.sessions.push(dbSes);
+    this.updateSessionMessage(this.client, session.guildId);
   }
 
   async updateSessionMessage(client: MelynxClient, guildId: string) {
