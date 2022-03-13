@@ -1,6 +1,6 @@
 import logo from '../../assets/logo.png';
 import discordLogo from '../../assets/discord.svg';
-import styles from './MelynxHeader.css';
+import styles from './MelynxHeader.module.css';
 
 import useUser from '../../hooks/useUser';
 import { Layout, Menu, Button, Avatar, Popover } from 'antd';

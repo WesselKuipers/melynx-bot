@@ -8,7 +8,7 @@ import Header from '../MelynxHeader';
 import SessionList from '../SessionList';
 import Stickers from '../Stickers';
 import UserProvider from '../UserProvider';
-import styles from './App.css';
+import styles from './App.module.css';
 
 export default function App() {
   return (

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Spin, Card, Tag, Popover, Empty, Alert, Avatar } from 'antd';
 import copy from 'copy-to-clipboard';
-import styles from './SessionList.css';
+import styles from './SessionList.module.css';
 import useUser from '../../hooks/useUser';
 import kutku from '../../assets/kutku.png';
 import garuga from '../../assets/garuga.png';

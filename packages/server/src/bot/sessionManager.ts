@@ -1,11 +1,15 @@
 import { TextChannel } from 'discord.js';
-import { MelynxClient, Session, Models } from '../types';
+
+import { MelynxClient, Models, Session } from '../types';
 import { buildSessionMessage, getGuildSettings, updateGuildSettings } from './utils';
 
 export default class SessionManager {
   client: MelynxClient;
+
   sessions: Session[] = [];
+
   sessionDb: Models['session'];
+
   sessionChannelTimers: { [guildId: string]: NodeJS.Timeout } = {};
 
   async init(client: MelynxClient) {
