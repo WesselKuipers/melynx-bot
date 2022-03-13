@@ -1,6 +1,6 @@
 import Axios from 'axios';
 import { Card, Typography, Popover, Alert, Input } from 'antd';
-import styles from './Stickers.css';
+import styles from './Stickers.module.css';
 import copy from 'copy-to-clipboard';
 import { useState, useCallback, ChangeEvent, useEffect } from 'react';
 
@@ -30,12 +30,12 @@ export default function Stickers() {
     clearTimeout(currentTimer);
     copy(`/sticker ${sticker.split('.')[0]}`);
     setActivePopover(sticker);
-    currentTimer = setTimeout(() => setActivePopover(''), 2e3);
+    currentTimer = window.setTimeout(() => setActivePopover(''), 2e3);
   };
 
   return (
     <div className={styles.container}>
-      <Title level={3}>List of stickers</Title>
+      <Title level={3}>List of stickerss</Title>
       <Title level={4}>Click on one of the cards to copy the command!</Title>
       <Search
         style={{ width: 300 }}

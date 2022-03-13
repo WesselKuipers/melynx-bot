@@ -1,9 +1,5 @@
 {
   "token": "[YOUR BOT TOKEN]",
-  "prefix": "??",
-  "disabledEvents": [
-    "TYPING_START",
-    "VOICE_STATE_UPDATE"
-  ],
+  "disabledEvents": ["TYPING_START", "VOICE_STATE_UPDATE"],
   "databaseUrl": "postgresql://user:secret@localhost/dbname"
 }

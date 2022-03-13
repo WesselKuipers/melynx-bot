@@ -3,7 +3,6 @@ import { MelynxClient, Session } from '../../types';
 
 export const defaultSettings: GuildConfig = {
   guildId: '0',
-  prefix: process.env.PREFIX,
   modRole: 'Moderator',
   adminRole: 'Administrator',
   sessionTimeout: 28800000, // 8 hours

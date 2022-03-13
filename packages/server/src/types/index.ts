@@ -1,14 +1,15 @@
-import {
-  Collection,
-  ClientOptions,
-  Client,
-  MessageComponentInteraction,
-  CommandInteraction,
-} from 'discord.js';
-import { Sequelize, ModelCtor, Model } from 'sequelize';
-import { Message } from 'discord.js';
-import SessionManager from '../bot/sessionManager';
 import { SlashCommandBuilder } from '@discordjs/builders';
+import {
+  Client,
+  ClientOptions,
+  Collection,
+  CommandInteraction,
+  Message,
+  MessageComponentInteraction,
+} from 'discord.js';
+import { Model, ModelCtor, Sequelize } from 'sequelize';
+
+import SessionManager from '../bot/sessionManager';
 
 export enum PermissionLevel {
   Anyone = 0,
@@ -43,7 +44,6 @@ export interface Command {
 
 export interface GuildConfig {
   guildId: string;
-  prefix: string;
   modRole: string;
   adminRole: string;
   sessionTimeout: number;
