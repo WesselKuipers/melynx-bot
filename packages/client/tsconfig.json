@@ -3,6 +3,7 @@
   "compilerOptions": {
     "noEmit": false,
     "isolatedModules": true,
+    "module": "ES2020",
     "lib": ["dom", "esnext"],
     "types": ["vite/client"]
   }

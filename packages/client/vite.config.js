@@ -4,6 +4,7 @@ import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  envPrefix: ['API_URL'],
   resolve: {
     alias: [
       {

@@ -23,6 +23,10 @@ export default function UserProvider({
   }, []);
 
   useEffect(() => {
+    axios.defaults.baseURL = String(import.meta.env.API_URL || '');
+  }, []);
+
+  useEffect(() => {
     const getUser = async () => {
       const token = query.get('token');
       const refreshToken = query.get('refreshToken');
