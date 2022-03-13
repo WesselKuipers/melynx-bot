@@ -1,5 +1,0 @@
-{
-  "token": "[YOUR BOT TOKEN]",
-  "disabledEvents": ["TYPING_START", "VOICE_STATE_UPDATE"],
-  "databaseUrl": "postgresql://user:secret@localhost/dbname"
-}
