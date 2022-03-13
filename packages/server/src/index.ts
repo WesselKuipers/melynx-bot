@@ -10,9 +10,9 @@ import { ApplicationSettings, MelynxBot } from './bot';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
-if (!process.env.TOKEN || !process.env.PREFIX || !process.env.DATABASE_URL) {
+if (!process.env.TOKEN || !process.env.DATABASE_URL) {
   // eslint-disable-next-line no-console
-  console.log('TOKEN, PREFIX and DATABASE_URL environment variables must be present');
+  console.log('TOKEN and DATABASE_URL environment variables must be present');
 }
 
 const options: ApplicationSettings = {

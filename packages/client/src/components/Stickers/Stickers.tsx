@@ -35,7 +35,7 @@ export default function Stickers() {
 
   return (
     <div className={styles.container}>
-      <Title level={3}>List of stickerss</Title>
+      <Title level={3}>List of stickers</Title>
       <Title level={4}>Click on one of the cards to copy the command!</Title>
       <Search
         style={{ width: 300 }}
@@ -56,7 +56,7 @@ export default function Stickers() {
               onVisibleChange={() => copySticker(sticker)}
             >
               <Card bodyStyle={{ paddingBottom: 10 }} className={styles.sticker} hoverable>
-                <img src={`/assets/stickers/${sticker}`} />
+                <img src={`${import.meta.env.API_URL}/assets/stickers/${sticker}`} />
                 <p>{sticker.split('.')[0]}</p>
               </Card>
             </Popover>
