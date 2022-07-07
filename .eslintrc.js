@@ -1,49 +1,45 @@
 module.exports = {
   env: {
-    es6: true,
+    browser: true,
+    es2021: true,
     node: true,
   },
-  extends: ['airbnb', 'plugin:prettier/recommended', 'prettier/react'],
-  globals: {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly',
-  },
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 2018,
+    project: './tsconfig.json',
+    ecmaFeatures: {
+      jsx: true,
+    },
+    ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['simple-import-sort'],
-  settings: {
-    'import/resolver': {
-      node: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
-      },
-    },
-  },
-  rules: {
-    'no-param-reassign': ['error', { props: true, ignorePropertyModificationsFor: ['client'] }],
-    'new-cap': ['error', { newIsCap: false }],
-    'prettier/prettier': 'off',
-    'react/state-in-constructor': 'off',
-    'react/prop-types': 'off',
-    'simple-import-sort/sort': 'error',
-    'import/no-unresolved': 'off',
-    'import/extensions': [
-      'error',
-      'ignorePackages',
-      {
-        js: 'never',
-        jsx: 'never',
-        ts: 'never',
-        tsx: 'never',
-      },
-    ],
-  },
-  overrides: [
-    {
-      files: ['*.ts', '*.tsx'],
-      parser: '@typescript-eslint/parser',
-      presets: ['plugin:@typescript-eslint'],
-    },
+  extends: [
+    'prettier',
+    'prettier/react',
+    'react-app',
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'prettier/@typescript-eslint',
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
   ],
+  plugins: ['@typescript-eslint', 'simple-import-sort'],
+  rules: {
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-member-accessibility': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
+    '@typescript-eslint/no-submodule-imports': 'off',
+    '@typescript-eslint/no-unused-expressions': 'warn',
+    '@typescript-eslint/no-use-before-define': 'off',
+    '@typescript-eslint/jsx-no-lambda': 'off',
+    '@typescript-eslint/prefer-interface': 'off',
+    '@typescript-eslint/interface-name-prefix': 'off',
+    '@typescript-eslint/camelcase': 'off',
+    'simple-import-sort/sort': 'warn',
+    'no-console': 'off',
+    'sort-keys': 'off',
+    'sort-imports': 'off',
+  },
+  ignorePatterns: ['dist'],
 };
