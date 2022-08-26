@@ -1,16 +1,16 @@
 import { MelynxCommand } from '../types';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import axios from 'axios';
+import { getCatFact } from '../utils';
 
 export const catfact: MelynxCommand = {
   data: new SlashCommandBuilder().setName('catfact').setDescription('Fetches a random cat fact'),
   async execute(interaction) {
-    const { data } = await axios.get<{ fact: string }>('https://catfact.ninja/fact');
+    const catfact = await getCatFact();
 
     await interaction.reply({
       embeds: [
         {
-          description: data.fact,
+          description: catfact.fact,
         },
       ],
     });

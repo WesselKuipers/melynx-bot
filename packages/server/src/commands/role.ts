@@ -1,5 +1,11 @@
 import { inlineCode, SlashCommandBuilder } from '@discordjs/builders';
-import { MessageActionRow, MessageSelectMenu, Role, SelectMenuInteraction } from 'discord.js';
+import {
+  ActionRowBuilder,
+  SelectMenuBuilder,
+  Role,
+  SelectMenuInteraction,
+  PermissionFlagsBits,
+} from 'discord.js';
 import { getGuildSettings } from '../bot/utils';
 import { MelynxCommand } from '../types';
 
@@ -38,7 +44,12 @@ export const role: MelynxCommand = {
           option.setName('description').setDescription('The description of the role.')
         )
     ) as SlashCommandBuilder,
+
   async execute(interaction, client) {
+    if (!interaction.isChatInputCommand()) {
+      return;
+    }
+
     const subcommand = interaction.options.getSubcommand();
     const roleDb = client.models.role;
     const roles = await roleDb.findAll({
@@ -51,10 +62,11 @@ export const role: MelynxCommand = {
 
     if (subcommand === 'assign' || subcommand === 'unassign') {
       if (!roles.length) {
-        return interaction.reply({
+        await interaction.reply({
           ephemeral: true,
           content: 'Looks like there aren’t any self-assignable roles, nya...',
         });
+        return;
       }
 
       const items = roles
@@ -70,31 +82,34 @@ export const role: MelynxCommand = {
         }));
 
       if (!items.length) {
-        return interaction.reply({
+        await interaction.reply({
           ephemeral: true,
           content:
             'Looks like there aren’t any self-assignable roles that you don’t already have, nya...',
         });
+        return;
       }
-      const row = new MessageActionRow().addComponents(
-        new MessageSelectMenu()
+      const row = new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+        new SelectMenuBuilder()
           .setCustomId(`role/${subcommand}`)
           .setPlaceholder('Nothing selected')
           .setMinValues(1)
           .addOptions(items)
       );
 
-      return interaction.reply({
+      await interaction.reply({
         content: `Select one or multiple roles you’d like to ${subcommand}`,
         ephemeral: true,
         components: [row],
       });
+
+      return;
     }
 
     const config = await getGuildSettings(client, interaction.guildId);
     const isAllowed =
       client.options.ownerId === interaction.user.id ||
-      member.permissions.has('MANAGE_ROLES') ||
+      member.permissions.has(PermissionFlagsBits.ManageRoles) ||
       member.roles.cache.some(
         (role) =>
           role.id === config.adminRole ||
@@ -104,19 +119,21 @@ export const role: MelynxCommand = {
       );
 
     if (!isAllowed) {
-      return interaction.reply({
+      await interaction.reply({
         ephemeral: true,
         content: 'You do not have the correct permissions to run this command.',
       });
+      return;
     }
 
     const role = interaction.options.getRole('role') as Role;
 
     if (!role.editable) {
-      return interaction.reply({
+      await interaction.reply({
         ephemeral: true,
         content: 'I’m not allowed to assign this role.',
       });
+      return;
     }
 
     if (subcommand === 'add') {
@@ -126,20 +143,23 @@ export const role: MelynxCommand = {
       });
 
       if (!created) {
-        return interaction.reply(`Self-assignable role ${role.name} already exists`);
+        await interaction.reply(`Self-assignable role ${role.name} already exists`);
       } else {
-        return interaction.reply(`Added self-assignable role ${role.name}`);
+        await interaction.reply(`Added self-assignable role ${role.name}`);
       }
+
+      return;
     }
 
     if (subcommand === 'remove') {
       const result = await roleDb.destroy({ where: { id: role.id } });
 
       if (result) {
-        return interaction.reply('Remeowved role.');
+        await interaction.reply('Remeowved role.');
+        return;
       }
 
-      return interaction.reply('This role was already not self-assignyable.');
+      await interaction.reply('This role was already not self-assignyable.');
     }
   },
   async componentExecute(interaction: SelectMenuInteraction, client) {

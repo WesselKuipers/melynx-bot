@@ -1,5 +1,10 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, MessageActionRow, MessageButton } from 'discord.js';
+import {
+  ChatInputCommandInteraction,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+} from 'discord.js';
 import { buildSessionMessage } from '../bot/utils';
 import { MelynxClient, MelynxCommand, Session } from '../types';
 
@@ -62,7 +67,12 @@ export const session: MelynxCommand = {
           option.setName('new-session').setDescription('The new session code')
         )
     ) as SlashCommandBuilder,
+
   async execute(interaction, client) {
+    if (!interaction.isChatInputCommand()) {
+      return;
+    }
+
     const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === 'list') {
@@ -73,7 +83,8 @@ export const session: MelynxCommand = {
     const id = validateSession(interaction.options.getString('session'));
 
     if (!id) {
-      return interaction.reply({ content: 'Could not find any sessions, nya...', ephemeral: true });
+      await interaction.reply({ content: 'Could not find any sessions, nya...', ephemeral: true });
+      return;
     }
 
     switch (subcommand) {
@@ -90,32 +101,36 @@ export const session: MelynxCommand = {
   },
 };
 
-async function handleList(interaction: CommandInteraction, client: MelynxClient): Promise<void> {
+async function handleList(
+  interaction: ChatInputCommandInteraction,
+  client: MelynxClient
+): Promise<void> {
   const sessionDb = client.models.session;
   const sessions = await sessionDb.findAll({ where: { guildId: interaction.guildId } });
 
-  return interaction.reply(buildSessionMessage(interaction.guildId, sessions));
+  await interaction.reply(buildSessionMessage(interaction.guildId, sessions));
 }
 
 async function handleRemove(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   client: MelynxClient,
   sessionId: string
 ): Promise<void> {
   const session = client.sessionManager.sessions.find((s) => s.sessionId === sessionId);
   if (!session) {
-    return interaction.reply({
+    await interaction.reply({
       content: 'A session with that ID does not exist, nya...',
     });
+    return;
   }
 
   await client.sessionManager.removeSession(session);
   await client.sessionManager.updateSessionMessage(client, interaction.guildId);
-  return interaction.reply(`Remeowved session ${session.sessionId}!`);
+  await interaction.reply(`Remeowved session ${session.sessionId}!`);
 }
 
 async function handleEdit(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   client: MelynxClient,
   sessionId: string
 ): Promise<void> {
@@ -126,19 +141,21 @@ async function handleEdit(
   const newId = interaction.options.getString('new-session');
 
   if (!session) {
-    return interaction.reply({
+    await interaction.reply({
       content: 'A session with that ID does not exist, nya...',
       ephemeral: true,
     });
+    return;
   }
 
   if (newId) {
     const id = validateSession(interaction.options.getString('session'));
     if (!id) {
-      return interaction.reply({
+      await interaction.reply({
         content: `The new session ID does not seem to be valid.`,
         ephemeral: true,
       });
+      return;
     }
 
     session.sessionId = id;
@@ -157,11 +174,11 @@ async function handleEdit(
       ? `Updated and refreshed session ${sessionId}`
       : `Refreshed session ${sessionId}`;
 
-  return interaction.reply(description ? `${message}\nDescription: ${description}` : message);
+  await interaction.reply(description ? `${message}\nDescription: ${description}` : message);
 }
 
 async function handleAdd(
-  interaction: CommandInteraction,
+  interaction: ChatInputCommandInteraction,
   client: MelynxClient,
   sessionId: string
 ): Promise<void> {
@@ -181,40 +198,41 @@ async function handleAdd(
       (s) => s.sessionId === session.sessionId && s.guildId === session.guildId
     )
   ) {
-    return interaction.reply({ content: 'A lobby with this ID already exists!', ephemeral: true });
+    await interaction.reply({ content: 'A lobby with this ID already exists!', ephemeral: true });
+    return;
   }
 
   await interaction.reply({
     ephemeral: true,
     content: `What game is this session for?`,
     components: [
-      new MessageActionRow().addComponents([
-        new MessageButton()
+      new ActionRowBuilder<ButtonBuilder>().addComponents([
+        new ButtonBuilder()
           .setCustomId(`session/${sessionId}/Rise (Switch)`)
           .setLabel('Rise (Switch)')
-          .setStyle('PRIMARY'),
-        new MessageButton()
+          .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
           .setCustomId(`session/${sessionId}/Rise (PC)`)
           .setLabel('Rise (PC)')
-          .setStyle('PRIMARY'),
-        new MessageButton()
+          .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
           .setCustomId(`session/${sessionId}/MHGU (Switch)`)
           .setLabel('MHGU (Switch)')
-          .setStyle('PRIMARY'),
-        new MessageButton()
+          .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
           .setCustomId(`session/${sessionId}/World (Playstation)`)
           .setLabel('World (Playstation)')
-          .setStyle('PRIMARY'),
-        new MessageButton()
+          .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
           .setCustomId(`session/${sessionId}/World (PC)`)
           .setLabel('World (PC)')
-          .setStyle('PRIMARY'),
+          .setStyle(ButtonStyle.Primary),
       ]),
-      new MessageActionRow().addComponents([
-        new MessageButton()
+      new ActionRowBuilder<ButtonBuilder>().addComponents([
+        new ButtonBuilder()
           .setCustomId(`session/${sessionId}/World (Xbox)`)
           .setLabel('World (Xbox)')
-          .setStyle('PRIMARY'),
+          .setStyle(ButtonStyle.Primary),
       ]),
     ],
   });

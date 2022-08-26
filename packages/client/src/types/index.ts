@@ -16,11 +16,11 @@ export interface TokenResponse {
 }
 
 export interface User {
-  token: string,
-  refreshToken: string,
-  date: Date,
-  id: number,
-  name: string,
-  discriminator: number,
-  avatar: string,
+  token: string;
+  refreshToken: string;
+  date: Date;
+  id: number;
+  name: string;
+  discriminator: number;
+  avatar: string;
 }

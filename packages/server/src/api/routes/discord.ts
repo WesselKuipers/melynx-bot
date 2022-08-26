@@ -5,7 +5,9 @@ import { Router, Request, Response } from 'express';
 import { ApplicationSettings } from '../../bot';
 
 const getRedirect = (options: ApplicationSettings) =>
-  `${options.protocol}://${options.host}/api/discord/callback`;
+  process.env.NODE_ENV === 'production'
+    ? `${options.protocol}://${options.host}/api/discord/callback`
+    : `http://localhost:${options.port}/api/discord/callback`;
 
 function login(options: ApplicationSettings) {
   const redirect = getRedirect(options);

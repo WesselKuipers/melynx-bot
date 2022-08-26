@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, CommandInteraction } from 'discord.js';
 import { MelynxClient, MelynxCommand } from '../types';
 
 const fcRegex = /((SW[- ]?)?)(\d{4}[- ]?){2}\d{4}/i;
@@ -29,6 +29,10 @@ export const fc: MelynxCommand = {
     ) as SlashCommandBuilder,
 
   async execute(interaction, client) {
+    if (!interaction.isChatInputCommand()) {
+      return;
+    }
+
     const subcommand = interaction.options.getSubcommand();
     switch (subcommand) {
       case 'remove':
@@ -48,15 +52,18 @@ async function handleRemove(interaction: CommandInteraction, client: MelynxClien
   const fc = await client.models.friendCode.findByPk(interaction.user.id);
 
   if (!fc) {
-    return interaction.reply({
+    await interaction.reply({
       content:
         'Looks like you didn’t have a friend code, so I’m just going to take a nap instead, nya!',
       ephemeral: true,
     });
+
+    return;
   }
 
   await fc.destroy();
-  return interaction.reply(`Successfully remeowved your friend code.`);
+  await interaction.reply(`Successfully remeowved your friend code.`);
+  return;
 }
 
 async function handleGet(interaction: CommandInteraction, client: MelynxClient): Promise<void> {
@@ -65,24 +72,31 @@ async function handleGet(interaction: CommandInteraction, client: MelynxClient):
 
   if (member.id === interaction.user.id) {
     if (!fc) {
-      return interaction.reply(`It looks like you haven’t set your friend code yet!`);
+      await interaction.reply(`It looks like you haven’t set your friend code yet!`);
+      return;
     }
 
-    return interaction.reply(`${interaction.user}, your friend code is **${fc.fc}**`);
+    await interaction.reply(`${interaction.user}, your friend code is **${fc.fc}**`);
+    return;
   }
 
   if (!fc) {
-    return interaction.reply(`It looks like ${member.username} hasn’t set their friend code yet!`);
+    await interaction.reply(`It looks like ${member.username} hasn’t set their friend code yet!`);
+    return;
   }
 
-  return interaction.reply(`${member}’s friend code is **${fc.fc}**`);
+  await interaction.reply(`${member}’s friend code is **${fc.fc}**`);
 }
 
-async function handleSet(interaction: CommandInteraction, client: MelynxClient): Promise<void> {
+async function handleSet(
+  interaction: ChatInputCommandInteraction,
+  client: MelynxClient
+): Promise<void> {
   const code = interaction.options.getString('fc');
 
   if (!code.match(fcRegex)) {
-    return interaction.reply({ content: 'This FC appears to be invalid.', ephemeral: true });
+    await interaction.reply({ content: 'This FC appears to be invalid.', ephemeral: true });
+    return;
   }
 
   const fc = code.replace(/\D/g, '');
@@ -90,10 +104,12 @@ async function handleSet(interaction: CommandInteraction, client: MelynxClient):
 
   const dbFC = await client.models.friendCode.findOne({ where: { fc: normalizedFc } });
   if (dbFC && dbFC.id !== interaction.user.id) {
-    return interaction.reply({
+    await interaction.reply({
       content: 'This friend code is already registered to someone else.',
       ephemeral: true,
     });
+
+    return;
   }
 
   const [, updated] = await client.models.friendCode.upsert({
@@ -101,7 +117,7 @@ async function handleSet(interaction: CommandInteraction, client: MelynxClient):
     fc: normalizedFc,
   });
 
-  return interaction.reply({
+  await interaction.reply({
     content: `Successfully ${updated ? 'updated' : 'registered'} your friend code!`,
     ephemeral: true,
   });

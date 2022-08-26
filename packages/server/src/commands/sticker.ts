@@ -23,7 +23,12 @@ export const sticker: MelynxCommand = {
           'The sticker you want to send. Type `list` to see a list of available stickers.'
         )
     ) as SlashCommandBuilder,
+
   async execute(interaction, client) {
+    if (!interaction.isChatInputCommand()) {
+      return;
+    }
+
     const sticker = interaction.options.getString('sticker');
 
     if (

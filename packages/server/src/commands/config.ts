@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, codeBlock } from '@discordjs/builders';
-import { GuildMember } from 'discord.js';
+import { GuildMember, PermissionFlagsBits } from 'discord.js';
 import { getGuildSettings, updateGuildSettings } from '../bot/utils';
-import { MelynxCommand } from '../types';
+import { MelynxCommand, PermissionLevel } from '../types';
 
 export const getconf: MelynxCommand = {
   data: new SlashCommandBuilder()
@@ -62,32 +62,41 @@ export const getconf: MelynxCommand = {
             )
         )
     ) as SlashCommandBuilder,
+
   async execute(interaction, client) {
+    if (!interaction.isChatInputCommand()) {
+      return;
+    }
+
     const member = interaction.member as GuildMember;
     const settings = await getGuildSettings(client, interaction.guildId);
 
     const isAllowed =
       client.options.ownerId === interaction.user.id ||
-      member.permissions.has('ADMINISTRATOR') ||
+      member.permissions.has(PermissionFlagsBits.Administrator) ||
       member.roles.cache.some(
         (role) => role.id === settings.adminRole || role.name === settings.adminRole
       );
 
     if (!isAllowed) {
-      return interaction.reply({
+      await interaction.reply({
         ephemeral: true,
         content: 'You do not have the correct permissions to run this command.',
       });
+
+      return;
     }
 
     const subcommand = interaction.options.getSubcommand();
     const group = interaction.options.getSubcommandGroup();
 
     if (group === 'get') {
-      return interaction.reply({
+      await interaction.reply({
         content: codeBlock(JSON.stringify(settings, null, 2)),
         ephemeral: true,
       });
+
+      return;
     }
 
     let updatedValue;
@@ -121,7 +130,7 @@ export const getconf: MelynxCommand = {
     if (!updated) {
       return;
     }
-    return interaction.reply({
+    await interaction.reply({
       content: `Guild configuration item \`${subcommand}\` has been changed to:\n\`${updatedValue}\``,
       ephemeral: true,
     });

@@ -7,7 +7,7 @@ import {
   Message,
   MessageComponentInteraction,
 } from 'discord.js';
-import { Model, ModelCtor, Sequelize } from 'sequelize';
+import { Model, ModelCtor, ModelStatic, Sequelize } from 'sequelize';
 
 import SessionManager from '../bot/sessionManager';
 
@@ -108,10 +108,10 @@ export interface MelynxClient extends Client {
 }
 
 export interface Models {
-  tag: ModelCtor<Tag>;
-  role: ModelCtor<Role>;
-  session: ModelCtor<Session>;
-  friendCode: ModelCtor<FriendCode>;
+  tag: ModelStatic<Tag>;
+  role: ModelStatic<Role>;
+  session: ModelStatic<Session>;
+  friendCode: ModelStatic<FriendCode>;
 }
 
 export interface MelynxCommand {

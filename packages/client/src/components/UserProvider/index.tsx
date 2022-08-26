@@ -1,15 +1,10 @@
-import axios from 'axios';
-
 import { UserContext } from '../../hooks/useUser';
 import { User } from '../../types';
 import useQuery from '../../hooks/useQuery';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import axios from '../../utils/axios';
 
-export default function UserProvider({
-  children,
-}: {
-  children?: React.ReactNode;
-}): React.ReactElement {
+export function UserProvider({ children }: { children?: React.ReactNode }): React.ReactElement {
   const [user, setUser] = useState<User>(null);
   const query = useQuery();
 
@@ -20,10 +15,6 @@ export default function UserProvider({
 
       refreshUser();
     }
-  }, []);
-
-  useEffect(() => {
-    axios.defaults.baseURL = String(import.meta.env.API_URL || '');
   }, []);
 
   useEffect(() => {

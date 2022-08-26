@@ -1,4 +1,4 @@
-version: "2"
+version: '2'
 services:
   mysql:
     image: mysql:8
@@ -8,4 +8,4 @@ services:
       MYSQL_DATABASE: melynx-bot
       MYSQL_ROOT_PASSWORD: password
     ports:
-      - "3306:3306"
+      - '3306:3306'
