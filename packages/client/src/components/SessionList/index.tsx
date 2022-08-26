@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { Spin, Card, Tag, Popover, Empty, Alert, Avatar } from 'antd';
 import copy from 'copy-to-clipboard';
 import styles from './index.module.css';
@@ -7,6 +6,7 @@ import kutku from '../../assets/kutku.png';
 import garuga from '../../assets/garuga.png';
 import { LoadingOutlined, FrownFilled, CopyFilled } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
+import axios from '../../utils/axios';
 
 interface Session {
   id: number;
@@ -20,7 +20,7 @@ interface Session {
   description: string;
 }
 
-export default function SessionList() {
+export function SessionList() {
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState<Session[]>(undefined);
   const [copiedMessage, setCopiedMessage] = useState(0);

@@ -1,13 +1,13 @@
-import Axios from 'axios';
 import { Card, Typography, Popover, Alert, Input } from 'antd';
 import styles from './index.module.css';
 import copy from 'copy-to-clipboard';
 import { useState, useCallback, ChangeEvent, useEffect } from 'react';
+import axios, { apiUrl } from '../../utils/axios';
 
 const { Title } = Typography;
 const { Search } = Input;
 
-export default function Stickers() {
+export function Stickers() {
   const [stickers, setStickers] = useState<string[]>([]);
   const [activePopover, setActivePopover] = useState('');
   const [filter, setFilter] = useState('');
@@ -19,7 +19,7 @@ export default function Stickers() {
 
   useEffect(() => {
     const getStickers = async () => {
-      const { data } = await Axios.get('/api/stickers');
+      const { data } = await axios.get('/api/stickers');
       setStickers(data);
     };
 
@@ -56,7 +56,7 @@ export default function Stickers() {
               onVisibleChange={() => copySticker(sticker)}
             >
               <Card bodyStyle={{ paddingBottom: 10 }} className={styles.sticker} hoverable>
-                <img src={`${import.meta.env.API_URL}/assets/stickers/${sticker}`} />
+                <img src={`${apiUrl}/assets/stickers/${sticker}`} />
                 <p>{sticker.split('.')[0]}</p>
               </Card>
             </Popover>

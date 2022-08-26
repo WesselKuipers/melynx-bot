@@ -7,5 +7,5 @@ async function catfact(_: Request, res: Response) {
 }
 
 export default (router: Router) => {
-  router.get('/catfact', catfact);
+  router.route('/catfact').get(catfact);
 };

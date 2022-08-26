@@ -4,18 +4,15 @@ import 'antd/dist/antd.dark.min.css';
 import { Layout } from 'antd';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 
-import Header from '../MelynxHeader';
-import SessionList from '../SessionList';
-import Stickers from '../Stickers';
-import UserProvider from '../UserProvider';
 import styles from './index.module.css';
+import { SessionList, Stickers, UserProvider, MelynxHeader } from '..';
 
-export default function App() {
+export function App() {
   return (
     <Router>
       <UserProvider>
         <Layout>
-          <Header />
+          <MelynxHeader />
           <Layout.Content className={styles.content}>
             <Routes>
               <Route path="/sessions" element={<SessionList />} />

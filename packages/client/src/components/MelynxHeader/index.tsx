@@ -7,7 +7,7 @@ import { Layout, Menu, Button, Avatar, Popover } from 'antd';
 import { HeartFilled, SnippetsFilled, CaretDownFilled, LogoutOutlined } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
 
-export default function MelynxHeader() {
+export function MelynxHeader() {
   const { user, logout } = useUser();
   const location = useLocation();
   const current = location.pathname.split('/')[1];
@@ -20,20 +20,32 @@ export default function MelynxHeader() {
           <span className="ant-typography">Melynx Bot</span>
         </Link>
       </div>
-      <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']} selectedKeys={[current]}>
-        <Menu.Item key="sessions">
-          <Link to="/sessions">
-            <HeartFilled />
-            <span>Sessions</span>
-          </Link>
-        </Menu.Item>
-        <Menu.Item key="stickers">
-          <Link to="/stickers">
-            <SnippetsFilled />
-            <span>Stickers</span>
-          </Link>
-        </Menu.Item>
-      </Menu>
+      <Menu
+        theme="dark"
+        mode="horizontal"
+        defaultSelectedKeys={['1']}
+        selectedKeys={[current]}
+        items={[
+          {
+            key: 'sessions',
+            label: (
+              <Link to="/sessions">
+                <HeartFilled />
+                <span>Sessions</span>
+              </Link>
+            ),
+          },
+          {
+            key: 'stickers',
+            label: (
+              <Link to="/stickers">
+                <SnippetsFilled />
+                <span>Stickers</span>
+              </Link>
+            ),
+          },
+        ]}
+      />
       <div className={styles.rightMenu}>
         {!user ? (
           <Button

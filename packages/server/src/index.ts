@@ -41,7 +41,6 @@ if (options.sentryDsn) {
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(history());
 
 app.use('/api/*', cors());
 app.use('/api', API({ options, db: bot.client.db }));
@@ -53,6 +52,7 @@ app.use(express.static(path.resolve(__dirname, '..', '..', 'client', 'dist')));
 app.get('*', (_, res) => {
   res.sendFile(path.resolve(__dirname, '..', '..', 'client', 'dist', 'index.html'));
 });
+app.use(history());
 
 bot.run();
 
