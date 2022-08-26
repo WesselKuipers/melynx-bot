@@ -6,6 +6,7 @@ import useUser from '../../hooks/useUser';
 import { Layout, Menu, Button, Avatar, Popover } from 'antd';
 import { HeartFilled, SnippetsFilled, CaretDownFilled, LogoutOutlined } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
+import { apiUrl } from '../../utils/axios';
 
 export function MelynxHeader() {
   const { user, logout } = useUser();
@@ -50,7 +51,7 @@ export function MelynxHeader() {
         {!user ? (
           <Button
             className={styles.discordButton}
-            href="/api/discord/login"
+            href={`${apiUrl}/api/discord/login`}
             icon={<img className={styles.discordLogo} src={discordLogo} alt="Discord Logo" />}
           >
             Login

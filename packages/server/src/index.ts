@@ -22,7 +22,7 @@ const options: ApplicationSettings = {
   clientId: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
   protocol: process.env.PROTOCOL || isDevelopment ? 'http' : 'https',
-  host: process.env.HOST || 'http://localhost',
+  host: process.env.HOST || 'localhost',
   sentryDsn: process.env.SENTRY_DSN,
   ownerId: process.env.OWNER_ID || '86708235888783360',
   port: Number(process.env.PORT) || 8080,
