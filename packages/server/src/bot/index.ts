@@ -1,4 +1,12 @@
-import { Collection, ActivityOptions, Client, Interaction, Intents } from 'discord.js';
+import {
+  Collection,
+  ActivityOptions,
+  Client,
+  Interaction,
+  ActivityType,
+  Partials,
+  GatewayIntentBits,
+} from 'discord.js';
 import moment from 'moment';
 import { Sequelize, DataTypes } from 'sequelize';
 import * as commands from '../commands';
@@ -23,22 +31,22 @@ export interface ApplicationSettings {
 
 const regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
 const playingLines: ActivityOptions[] = [
-  { type: 'PLAYING', name: 'stealing gems from hunters' },
-  { type: 'PLAYING', name: 'with a hunter' },
-  { type: 'STREAMING', name: 'smoking felvine' },
-  { type: 'PLAYING', name: 'the hunting horn' },
-  { type: 'PLAYING', name: 'the fungasax' },
-  { type: 'PLAYING', name: 'with your palico' },
-  { type: 'PLAYING', name: 'with the Meowstress' },
-  { type: 'PLAYING', name: 'with the Mewstress' },
-  { type: 'PLAYING', name: 'Monster Hunter World' },
-  { type: 'PLAYING', name: 'Monster Hunter Generations Ultimate' },
-  { type: 'PLAYING', name: 'Monster Hunter World: Iceborne' },
-  { type: 'PLAYING', name: 'Monster Hunter 4 Ultimate' },
-  { type: 'PLAYING', name: 'Monster Hunter Frontier' },
-  { type: 'PLAYING', name: 'with a Khezu' },
-  { type: 'LISTENING', name: "Khezu's theme" },
-  { type: 'WATCHING', name: 'hunters carrying eggs' },
+  { type: ActivityType.Playing, name: 'stealing gems from hunters' },
+  { type: ActivityType.Playing, name: 'with a hunter' },
+  { type: ActivityType.Streaming, name: 'smoking felvine' },
+  { type: ActivityType.Playing, name: 'the hunting horn' },
+  { type: ActivityType.Playing, name: 'the fungasax' },
+  { type: ActivityType.Playing, name: 'with your palico' },
+  { type: ActivityType.Playing, name: 'with the Meowstress' },
+  { type: ActivityType.Playing, name: 'with the Mewstress' },
+  { type: ActivityType.Playing, name: 'Monster Hunter World' },
+  { type: ActivityType.Playing, name: 'Monster Hunter Generations Ultimate' },
+  { type: ActivityType.Playing, name: 'Monster Hunter World: Iceborne' },
+  { type: ActivityType.Playing, name: 'Monster Hunter 4 Ultimate' },
+  { type: ActivityType.Playing, name: 'Monster Hunter Frontier' },
+  { type: ActivityType.Playing, name: 'with a Khezu' },
+  { type: ActivityType.Listening, name: "Khezu's theme" },
+  { type: ActivityType.Watching, name: 'hunters carrying eggs' },
 ];
 
 function log(message: string) {
@@ -65,8 +73,12 @@ export class MelynxBot {
     this.settings = settings;
 
     this.client = new Client({
-      intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
-      partials: ['CHANNEL', 'REACTION'],
+      intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildMessages,
+      ],
+      partials: [Partials.Channel, Partials.Message, Partials.Reaction],
     }) as MelynxClient;
     this.client.options.ownerId = settings.ownerId;
     this.client.options.host = settings.host;

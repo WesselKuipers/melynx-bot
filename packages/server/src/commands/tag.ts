@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { GuildMember } from 'discord.js';
+import { GuildMember, PermissionFlagsBits } from 'discord.js';
 import { getGuildSettings } from '../bot/utils';
 import { MelynxCommand } from '../types';
 
@@ -38,7 +38,12 @@ export const tag: MelynxCommand = {
             .setRequired(true)
         )
     ) as SlashCommandBuilder,
+
   async execute(interaction, client) {
+    if (!interaction.isChatInputCommand()) {
+      return;
+    }
+
     const subcommand = interaction.options.getSubcommand();
     const tagDb = client.models.tag;
 
@@ -46,10 +51,12 @@ export const tag: MelynxCommand = {
       const tags = await tagDb.findAll({ where: { guildId: interaction.guildId } });
 
       if (!tags.length) {
-        return interaction.reply('This server currently has no tags.');
+        await interaction.reply('This server currently has no tags.');
+        return;
       }
 
-      return interaction.reply(`List of tags: \`${tags.map((tag) => tag.name).join('`, `')}\``);
+      await interaction.reply(`List of tags: \`${tags.map((tag) => tag.name).join('`, `')}\``);
+      return;
     }
 
     const name = interaction.options.getString('tag');
@@ -61,14 +68,15 @@ export const tag: MelynxCommand = {
         return;
       }
 
-      return interaction.reply(`>>> ${tag.content}`);
+      await interaction.reply(`>>> ${tag.content}`);
+      return;
     }
 
     const config = await getGuildSettings(client, interaction.guildId);
     const member = interaction.member as GuildMember;
     const isAllowed =
       client.options.ownerId === interaction.user.id ||
-      member.permissions.has('MANAGE_MESSAGES') ||
+      member.permissions.has(PermissionFlagsBits.ManageMessages) ||
       member.roles.cache.some(
         (role) =>
           role.id === config.adminRole ||
@@ -78,10 +86,11 @@ export const tag: MelynxCommand = {
       );
 
     if (!isAllowed) {
-      return interaction.reply({
+      await interaction.reply({
         ephemeral: true,
         content: 'You do not have the correct permissions to run this command.',
       });
+      return;
     }
 
     const tag = await tagDb.findOne({ where: { guildId: interaction.guildId, name } });
@@ -90,19 +99,21 @@ export const tag: MelynxCommand = {
 
       if (!tag) {
         await tagDb.create({ guildId: interaction.guildId, name, content });
-        return interaction.reply(`Created tag \`${name}\`.`);
+        await interaction.reply(`Created tag \`${name}\`.`);
       } else {
         await tag.update({ content });
-        return interaction.reply(`Updated tag \`${name}\`.`);
+        await interaction.reply(`Updated tag \`${name}\`.`);
       }
+
+      return;
     }
 
     if (subcommand === 'remove') {
       if (!tag) {
-        return interaction.reply(`Tag \`${name}\` doesn't exist!`);
+        await interaction.reply(`Tag \`${name}\` doesn't exist!`);
       } else {
         await tag.destroy();
-        return interaction.reply(`Deleted tag \`${name}\`.`);
+        await interaction.reply(`Deleted tag \`${name}\`.`);
       }
     }
   },

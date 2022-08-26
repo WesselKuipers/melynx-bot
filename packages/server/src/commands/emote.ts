@@ -15,7 +15,12 @@ export const bigemote: MelynxCommand = {
         .setDescription('The emoji you want to display a bigger version of.')
         .setRequired(true)
     ) as SlashCommandBuilder,
+
   async execute(interaction) {
+    if (!interaction.isChatInputCommand()) {
+      return;
+    }
+
     const emoji = interaction.options.getString('emoji');
     if (!emoji.match(emojiRegex)) {
       await interaction.reply({
