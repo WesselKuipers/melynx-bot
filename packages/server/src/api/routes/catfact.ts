@@ -1,9 +1,8 @@
-import axios from 'axios';
 import { Router, Request, Response } from 'express';
+import { getCatFact } from '../../utils';
 
 async function catfact(_: Request, res: Response) {
-  const { data } = await axios.get('https://cat-fact.herokuapp.com/facts/random');
-  res.send(data);
+  res.send(await getCatFact());
 }
 
 export default (router: Router) => {
