@@ -169,6 +169,7 @@ export class MelynxBot {
     tagModel.sync();
     roleModel.sync({ alter: true });
     friendCodeModel.sync();
+    sessionModel.sync();
 
     this.client.commands = new Collection();
     for (const command of Object.values(commands)) {
