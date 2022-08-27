@@ -88,7 +88,6 @@ export class MelynxBot {
     const db = new Sequelize(settings.databaseUrl, {
       logging: false,
       dialect: isDev ? 'mysql' : 'postgres',
-      dialectOptions: isDev ? {} : { ssl: { require: true, rejectUnauthorized: false } },
     });
 
     const guildSettings = db.define<DbSettings>('settings', {

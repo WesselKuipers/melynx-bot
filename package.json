@@ -1,7 +1,7 @@
 {
   "private": true,
-  "version": "1.0.0",
-  "main": "index.ts",
+  "name": "melynx-bot",
+  "version:": "1.0.0",
   "author": "Wessel Kuipers",
   "license": "MIT",
   "repository": {
