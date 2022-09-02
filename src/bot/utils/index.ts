@@ -105,7 +105,7 @@ export async function getCatFact() {
 export function formatTime(date: Date): string {
   // YYYY-MM-DD HH:mm:ss
   const pad = (input: number) => String(input).padStart(2, '0');
-  return `${pad(date.getUTCFullYear())}-${pad(date.getUTCMonth())}-${pad(date.getUTCDate())}} ${pad(
+  return `${pad(date.getUTCFullYear())}-${pad(date.getUTCMonth())}-${pad(date.getUTCDate())} ${pad(
     date.getUTCHours()
   )}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
 }
