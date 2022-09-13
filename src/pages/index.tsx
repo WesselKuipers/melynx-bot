@@ -1,13 +1,17 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
+import { Container } from '@mantine/core';
+import LoginInstruction from '../components/LoginInstruction';
 
 const Home: NextPage = () => {
   return (
-    <div className="min-h-screen px-16 py-0 flex flex-auto flex-col justify-center items-center">
+    <div>
       <Head>
-        <title>Create Next App</title>
+        <title>Melynx Bot | Home</title>
       </Head>
-      hello
+      <Container>
+        <LoginInstruction />
+      </Container>
     </div>
   );
 };
