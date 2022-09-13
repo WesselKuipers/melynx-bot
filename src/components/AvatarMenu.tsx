@@ -37,7 +37,7 @@ export default function AvatarLayout() {
         <AvatarButton user={session.data.user} />
       </Menu.Target>
       <Menu.Dropdown>
-        <Menu.Item onClick={signOut}>Sign out</Menu.Item>
+        <Menu.Item onClick={() => signOut({ redirect: false })}>Sign out</Menu.Item>
       </Menu.Dropdown>
     </Menu>
   );

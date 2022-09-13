@@ -1,7 +1,7 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { Container } from '@mantine/core';
-import LoginInstruction from '../components/LoginInstruction';
+import LoginInstruction from '../components/LoginInstructions';
 
 const Home: NextPage = () => {
   return (

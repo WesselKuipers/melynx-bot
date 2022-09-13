@@ -12,15 +12,6 @@ module.exports = {
         mhWhite: '#FFFAFF',
         mhPurple: '#E300C7',
       },
-      animation: {
-        wiggle: 'wiggle 1.5s ease-in-out infinite',
-      },
-      keyframes: {
-        wiggle: {
-          '0%, 100%': { transform: 'rotate(-5deg)' },
-          '50%': { transform: 'rotate(5deg)' },
-        },
-      },
     },
   },
   plugins: [],

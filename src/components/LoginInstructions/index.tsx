@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Text, Center, Stack } from '@mantine/core';
 import { ReactElement, useState } from 'react';
+import styles from './index.module.css';
 
 export default function LoginInstruction(): ReactElement {
   const [garuga] = useState(Math.round(Math.random()));
@@ -9,7 +10,7 @@ export default function LoginInstruction(): ReactElement {
     <Center>
       <Stack align="center">
         <Image
-          className="animate-wiggle"
+          className={styles.wiggle}
           width={128}
           height={128}
           alt="Idiot bird"
