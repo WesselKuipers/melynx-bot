@@ -162,3 +162,6 @@ export class MelynxBot {
     this.client.on('warn', (warning) => this.client.warn(warning));
   }
 }
+
+const bot = new MelynxBot();
+export default bot;

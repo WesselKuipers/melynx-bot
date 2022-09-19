@@ -13,7 +13,7 @@ import { FaSearch } from 'react-icons/fa';
 import { HiOutlineCheckCircle } from 'react-icons/hi';
 import { readdirSync } from 'fs';
 import { join } from 'path';
-import Image from 'next/image';
+import Image from 'next/future/image';
 import sizeOf from 'image-size';
 import Head from 'next/head';
 
@@ -87,7 +87,7 @@ export default function Stickers({ stickers }: Props) {
                           src={`/images/stickers/${sticker.name}`}
                           width={sticker.width}
                           height={sticker.height}
-                          style={{ border: '2px solid red' }}
+                          style={{ maxHeight: '215px', maxWidth: '300px', objectFit: 'contain' }}
                           alt={`${sticker.name} sticker`}
                         />
                       </Center>

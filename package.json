@@ -27,9 +27,14 @@
     "@mantine/next": "^5.2.5",
     "@prisma/client": "^4.3.0",
     "@sentry/node": "^7.11.1",
+    "@tanstack/react-query": "^4.3.4",
+    "@trpc/client": "^10.0.0-proxy-alpha.76",
+    "@trpc/next": "^10.0.0-proxy-alpha.76",
+    "@trpc/react": "^10.0.0-proxy-alpha.76",
+    "@trpc/server": "^10.0.0-proxy-alpha.76",
     "axios": "^0.27.2",
     "cookies-next": "^2.1.1",
-    "discord-api-types": "^0.37.5",
+    "discord-api-types": "^0.37.10",
     "discord.js": "^14.3.0",
     "image-size": "^1.0.2",
     "next": "12.2.5",
@@ -37,7 +42,9 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "^4.4.0",
-    "zod": "^3.18.0"
+    "react-query": "^3.39.2",
+    "superjson": "^1.9.1",
+    "zod": "^3.19.1"
   },
   "devDependencies": {
     "@types/node": "18.7.13",

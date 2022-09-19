@@ -1,7 +1,7 @@
 import { createServer } from 'http';
 import { parse } from 'url';
 import next from 'next';
-import { MelynxBot } from '../bot';
+import bot from '../bot';
 
 const port = parseInt(process.env.PORT || '3000');
 const dev = process.env.NODE_ENV !== 'production';
@@ -15,7 +15,6 @@ app.prepare().then(async () => {
     handle(req, res, parsedUrl);
   }).listen(port);
 
-  const bot = new MelynxBot();
   bot.run();
 
   // tslint:disable-next-line:no-console

@@ -1,18 +1,4 @@
-import {
-  AppShell,
-  Burger,
-  Text,
-  Header,
-  MediaQuery,
-  Navbar,
-  useMantineTheme,
-  Aside,
-  Footer,
-  Group,
-  NavLink,
-  Anchor,
-  Button,
-} from '@mantine/core';
+import { AppShell, Header, useMantineTheme, Group, Button } from '@mantine/core';
 import { signIn, useSession } from 'next-auth/react';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -31,11 +17,11 @@ export default function Layout({ children }: Props) {
   const theme = useMantineTheme();
   const router = useRouter();
   const session = useSession();
-  console.log(session);
 
   return (
     <main>
       <Head>
+        <title>Melynx Bot</title>
         <link rel="shortcut icon" href="/favicon.ico" />
         <meta charSet="UTF-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
@@ -65,7 +51,11 @@ export default function Layout({ children }: Props) {
                 </Link>
                 <Link href="/" passHref>
                   <Button
-                    variant={router.pathname === '/' ? 'filled' : 'subtle'}
+                    variant={
+                      router.pathname === '/' || router.pathname === '/dashboard'
+                        ? 'filled'
+                        : 'subtle'
+                    }
                     component="a"
                     leftIcon={<BiHomeHeart />}
                   >
