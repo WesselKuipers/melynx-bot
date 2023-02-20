@@ -59,11 +59,11 @@ export default class SessionManager {
     const sentMessage = await channel.send(
       `${expireMessage} React within 5 minutes ♻ to refresh this session!`
     );
-    const reaction = await sentMessage.react('♻');
+    await sentMessage.react('♻');
     const removeReactions = async () => {
       await sentMessage.edit(expireMessage);
       try {
-        await reaction.remove();
+        await sentMessage.reactions.cache.get('♻')?.users.remove();
       } catch {
         this.client.log(`Unable to remove reactions.`);
       }
@@ -83,12 +83,12 @@ export default class SessionManager {
         return;
       }
 
-      if (reactions?.count === 0 || (reactions?.count === 1 && reactions.me)) {
+      if (!reactions?.count) {
         await removeReactions();
         return;
       }
 
-      const refreshMessage = `Refreshed session ${session.sessionId}!`;
+      const refreshMessage = `Refreshed session \`${session.sessionId}\`!`;
       await channel.send(refreshMessage);
 
       const dbSes = await prisma.session.create({
@@ -122,6 +122,33 @@ export default class SessionManager {
     this.sessions = this.sessions.filter((item) => item.id !== session.id);
     clearTimeout(session.timer);
     this.updateSessionMessage(this.client, session.guildId);
+  }
+
+  public async updateSession(
+    session: Pick<Session, 'id' | 'sessionId' | 'description'>
+  ): Promise<void> {
+    const cached = this.sessions.find((s) => s.id === session.id);
+    if (!cached) {
+      return;
+    }
+
+    if (session.description) {
+      cached.description = session.description;
+    }
+
+    if (session.sessionId) {
+      cached.sessionId = session.sessionId;
+    }
+
+    await prisma.session.update({
+      where: { id: cached.id },
+      data: {
+        description: cached.description,
+        sessionId: cached.sessionId,
+      },
+    });
+
+    this.updateSessionMessage(this.client, cached.guildId);
   }
 
   public async addSession(session: Session): Promise<void> {

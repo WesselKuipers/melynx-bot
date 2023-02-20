@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { MelynxCommand } from '../types';
 
-const stickerPath = path.join(__dirname, '..', '..', '..', 'public', 'images', 'stickers');
+const stickerPath = path.join(process.cwd(), 'public', 'images', 'stickers');
 const files = fs.readdirSync(stickerPath);
 const stickers = files.map((file) => {
   return {

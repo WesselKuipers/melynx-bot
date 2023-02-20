@@ -26,7 +26,7 @@ function hoursAgo(date: Date): string {
   const hoursAgo = Math.floor(minutesAgo / 60);
 
   if (hoursAgo >= 2) {
-    return `${hoursAgo} ago`;
+    return `${hoursAgo}m ago`;
   }
 
   if (hoursAgo === 1) {
@@ -123,11 +123,7 @@ export default function SessionCard({
             <Button leftIcon={<FaTrashAlt />} color="red" onClick={() => onDelete(session)}>
               Delete
             </Button>
-            <Button
-              leftIcon={<HiX />}
-              variant="outline"
-              onClick={() => toggleDeleting(false)}
-            >
+            <Button leftIcon={<HiX />} variant="outline" onClick={() => toggleDeleting(false)}>
               Nevermind!
             </Button>
           </Group>
