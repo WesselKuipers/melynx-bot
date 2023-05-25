@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model FriendCode {
+  id        String   @id
+  fc        String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("friendcodes")
+}
+
+model Role {
+  id          String   @id
+  guildId     String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("roles")
+}
+
+model Session {
+  id          Int      @id @default(autoincrement())
+  guildId     String
+  userId      String
+  avatar      String?
+  creator     String
+  platform    String
+  description String?
+  sessionId   String
+  channelId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("sessions")
+}
+
+model Settings {
+  guildId   String   @id
+  settings  Json?    @db.Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  guildId   String
+  name      String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tags")
+}
