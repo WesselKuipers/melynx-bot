@@ -1,27 +1,16 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
-  ChatInputCommandInteraction,
+  type ChatInputCommandInteraction,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
 } from 'discord.js';
 import { buildSessionMessage } from '../utils';
-import { MelynxClient, MelynxCommand, Session } from '../types';
-import { prisma } from '../../server/db/client';
+import { type MelynxClient, type MelynxCommand, type Session } from '../types';
+import { prisma } from '../../server/db';
 
-const iceborneRegex = /[a-zA-Z0-9#]{4} [a-zA-Z0-9]{4} [a-zA-Z0-9]{4}/;
-const pcRegex = /[a-zA-Z0-9#+?@$#&!=-]{12}/;
-const mhguRegex = /\b\d{2}-\d{4}-\d{4}-\d{4}\b/;
-const riseRegex = /^\w{6}$/;
-
-function validateSession(session: string): string {
+function normalizeSession(session: string): string {
   const id = session.replace(/\[|\]/g, ' ').replace(/\s+/g, ' ').trim();
-  // Temporarily disabled until proper Rise PC update.
-  // const foundIceborne = iceborneRegex.test(id);
-  // const foundPC = pcRegex.test(id);
-  // const foundMHGU = mhguRegex.test(id);
-  // const foundRise = riseRegex.test(id.split(' ')?.[0]);
-
   return id;
 }
 
@@ -81,7 +70,7 @@ export const session: MelynxCommand = {
       return;
     }
 
-    const id = validateSession(interaction.options.getString('session') || '');
+    const id = normalizeSession(interaction.options.getString('session') || '');
 
     if (!id) {
       await interaction.reply({ content: 'Could not find any sessions, nya...', ephemeral: true });
@@ -106,7 +95,7 @@ async function handleList(
   interaction: ChatInputCommandInteraction,
   client: MelynxClient
 ): Promise<void> {
-  const sessions = await prisma.session.findMany({ where: { guildId: interaction.guildId! } });
+  const sessions = await prisma.mhSession.findMany({ where: { guildId: interaction.guildId! } });
 
   await interaction.reply(buildSessionMessage(interaction.guildId!, sessions));
 }
@@ -149,7 +138,7 @@ async function handleEdit(
   }
 
   if (newId) {
-    const id = validateSession(interaction.options.getString('session') || '');
+    const id = normalizeSession(interaction.options.getString('session') || '');
     if (!id) {
       await interaction.reply({
         content: `The new session ID does not seem to be valid.`,
@@ -238,7 +227,7 @@ async function handleAdd(
 
   const collector = interaction.channel!.createMessageComponentCollector({
     filter: (i) =>
-      i.user.id === interaction.user.id && i.customId.startsWith(`session/${session.sessionId}`),
+      i.user.id === interaction.user.id && i.customId.startsWith(`session/${session.sessionId!}`),
     time: 15e3,
   });
 
@@ -250,7 +239,7 @@ async function handleAdd(
       content: 'Successfully created session.',
       components: [],
     });
-    await interaction.followUp(`Added ${session.platform} session \`${session.sessionId}\``);
+    await interaction.followUp(`Added ${session.platform!} session \`${session.sessionId!}\``);
   });
 
   collector.on('end', async (i) => {

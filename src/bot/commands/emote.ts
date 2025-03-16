@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { MelynxCommand } from '../types';
+import { type MelynxCommand } from '../types';
 
 const emojiRegex = /<(a)?:\w+:\d+>/;
 
@@ -34,7 +34,7 @@ export const bigemote: MelynxCommand = {
     const animated = emoji.startsWith('<a:');
 
     await interaction.reply({
-      files: [`https://cdn.discordapp.com/emojis/${id}.${animated ? 'gif' : 'png'}?v=1`],
+      files: [`https://cdn.discordapp.com/emojis/${id!}.${animated ? 'gif' : 'png'}?v=1`],
     });
   },
 };

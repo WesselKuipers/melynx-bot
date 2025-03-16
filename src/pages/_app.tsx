@@ -1,22 +1,24 @@
-import { type AppProps } from 'next/app';
-import Layout from '../components/Layout';
-import { MantineProvider } from '@mantine/core';
-import { cssCache } from '../server/emotionCache';
+import { type AppType } from 'next/app';
+import { type Session } from 'next-auth';
 import { SessionProvider } from 'next-auth/react';
-import { colors } from '../styles/theme';
-import { trpc } from '../utils/trpc';
+import { MantineProvider } from '@mantine/core';
 
-function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
+import { api } from '~/utils/api';
+
+import Layout from '~/components/Layout';
+
+const App: AppType<{ session: Session | null }> = ({
+  Component,
+  pageProps: { session, ...pageProps },
+}) => {
   return (
-    <SessionProvider>
+    <SessionProvider session={session}>
       <MantineProvider
-        theme={{
-          colorScheme: 'dark',
-          colors,
-        }}
         withGlobalStyles
         withNormalizeCSS
-        emotionCache={cssCache}
+        theme={{
+          colorScheme: 'dark',
+        }}
       >
         <Layout>
           <Component {...pageProps} />
@@ -24,6 +26,6 @@ function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
       </MantineProvider>
     </SessionProvider>
   );
-}
+};
 
-export default trpc.withTRPC(App);
+export default api.withTRPC(App);

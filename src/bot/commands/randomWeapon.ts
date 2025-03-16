@@ -20,7 +20,7 @@ const weapons = [
 const weaponPath = join(__dirname, '..', '..', '..', 'public', 'images', 'weapons');
 
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { MelynxCommand } from '../types';
+import { type MelynxCommand } from '../types';
 import { AttachmentBuilder } from 'discord.js';
 
 export const randomWeapon: MelynxCommand = {
@@ -30,7 +30,7 @@ export const randomWeapon: MelynxCommand = {
 
   async execute(interaction) {
     const weapon = weapons[Math.floor(Math.random() * weapons.length)];
-    const attachment = new AttachmentBuilder(join(weaponPath, `${weapon}.png`));
+    const attachment = new AttachmentBuilder(join(weaponPath, `${weapon!}.png`));
     await interaction.reply({
       files: [attachment],
     });

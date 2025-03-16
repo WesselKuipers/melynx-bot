@@ -1,8 +1,8 @@
-import { TextChannel } from 'discord.js';
+import { type TextChannel } from 'discord.js';
 
-import { GuildConfig, MelynxClient, Session, Settings } from './types';
+import { type GuildConfig, type MelynxClient, type Session, Settings } from './types';
 import { buildSessionMessage, getGuildSettings, updateGuildSettings } from './utils';
-import { prisma } from '../server/db/client';
+import { prisma } from '../server/db';
 
 export default class SessionManager {
   client!: MelynxClient;
@@ -13,7 +13,7 @@ export default class SessionManager {
   async init(client: MelynxClient) {
     this.client = client;
 
-    const dbSessions = await prisma.session.findMany();
+    const dbSessions = await prisma.mhSession.findMany();
     this.sessions = await Promise.all(
       dbSessions.map(async (session) => {
         const { sessionTimeout } = await getGuildSettings(this.client, session.guildId);
@@ -23,6 +23,7 @@ export default class SessionManager {
         const remaining = posted - now + Number(sessionTimeout);
 
         Object.assign(session, {
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
           timer: setTimeout(() => this.handleExpiredSession(session), remaining),
         });
 
@@ -34,13 +35,23 @@ export default class SessionManager {
     guilds.map(({ guildId, settings }) => {
       const castedSettings = settings as unknown as GuildConfig; // JSON fields in Prisma doesn’t allow for typing its JSON fields.
       if (castedSettings.sessionChannel && !this.sessionChannelTimers[guildId]) {
-        const timer = setInterval(
-          async () => this.updateSessionMessage(client, guildId),
-          5 * 60 * 1000
-        );
+        const timer = setInterval(() => {
+          this.updateSessionMessage(client, guildId)
+            .then(() => {
+              this.client.log(`Initialized session message timer for guild ${guildId}`);
+            })
+            .catch(() => {
+              this.client.log(`Failed to initialize session message timer for guild ${guildId}`);
+            });
+        }, 5 * 60 * 1000);
         this.sessionChannelTimers[guildId] = timer;
-        this.updateSessionMessage(client, guildId);
-        this.client.log(`Initialized session message timer for guild ${guildId}`);
+        this.updateSessionMessage(client, guildId)
+          .then(() => {
+            this.client.log(`Initialized session message timer for guild ${guildId}`);
+          })
+          .catch(() => {
+            this.client.log(`Failed to initialize session message timer for guild ${guildId}`);
+          });
       }
 
       return null;
@@ -50,7 +61,7 @@ export default class SessionManager {
   public async handleExpiredSession(session: Session) {
     const expireMessage = `Session ${session.sessionId} expired!`;
 
-    this.removeSession(session);
+    await this.removeSession(session);
     this.client.log(expireMessage);
 
     const channel = (await this.client.channels.fetch(session.channelId)) as TextChannel;
@@ -91,7 +102,7 @@ export default class SessionManager {
       const refreshMessage = `Refreshed session \`${session.sessionId}\`!`;
       await channel.send(refreshMessage);
 
-      const dbSes = await prisma.session.create({
+      const dbSes = await prisma.mhSession.create({
         data: {
           guildId: session.guildId,
           userId: session.userId,
@@ -105,6 +116,7 @@ export default class SessionManager {
       });
 
       Object.assign(dbSes, {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         timer: setTimeout(() => this.handleExpiredSession(dbSes), config.sessionTimeout),
       });
       this.sessions.push(dbSes);
@@ -114,14 +126,14 @@ export default class SessionManager {
     } catch {
       await removeReactions();
     }
-    this.updateSessionMessage(this.client, session.guildId);
+    await this.updateSessionMessage(this.client, session.guildId);
   }
 
   public async removeSession(session: Session): Promise<void> {
-    await prisma.session.delete({ where: { id: session.id } });
+    await prisma.mhSession.delete({ where: { id: session.id } });
     this.sessions = this.sessions.filter((item) => item.id !== session.id);
     clearTimeout(session.timer);
-    this.updateSessionMessage(this.client, session.guildId);
+    await this.updateSessionMessage(this.client, session.guildId);
   }
 
   public async updateSession(
@@ -140,7 +152,7 @@ export default class SessionManager {
       cached.sessionId = session.sessionId;
     }
 
-    await prisma.session.update({
+    await prisma.mhSession.update({
       where: { id: cached.id },
       data: {
         description: cached.description,
@@ -148,12 +160,12 @@ export default class SessionManager {
       },
     });
 
-    this.updateSessionMessage(this.client, cached.guildId);
+    await this.updateSessionMessage(this.client, cached.guildId);
   }
 
   public async addSession(session: Session): Promise<void> {
     const config = await getGuildSettings(this.client, session.guildId);
-    const dbSes = await prisma.session.create({
+    const dbSes = await prisma.mhSession.create({
       data: {
         guildId: session.guildId,
         userId: session.userId,
@@ -168,11 +180,12 @@ export default class SessionManager {
 
     // auto clear after (default) 8 hours;
     (dbSes as Session).timer = setTimeout(
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       () => this.handleExpiredSession(dbSes),
       config.sessionTimeout
     );
     this.sessions.push(dbSes);
-    this.updateSessionMessage(this.client, session.guildId);
+    await this.updateSessionMessage(this.client, session.guildId);
   }
 
   async updateSessionMessage(client: MelynxClient, guildId: string) {

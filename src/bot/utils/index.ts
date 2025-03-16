@@ -1,12 +1,12 @@
-import { GuildConfig } from '../types';
-import { MelynxClient, Session } from '../types';
+import { type GuildConfig } from '../types';
+import { type MelynxClient, type Session } from '../types';
 import axios from 'axios';
-import { prisma } from '../../server/db/client';
+import { prisma } from '../../server/db';
 
 // These types are exported in @prisma/client, but there seem to be some issues when trying to import these.
 type InputJsonValue = string | number | boolean | InputJsonObject | InputJsonArray;
 type InputJsonObject = { readonly [Key in string]?: InputJsonValue | null };
-interface InputJsonArray extends ReadonlyArray<InputJsonValue | null> {}
+type InputJsonArray = ReadonlyArray<InputJsonValue | null>;
 
 export const defaultSettings: GuildConfig = {
   guildId: '0',

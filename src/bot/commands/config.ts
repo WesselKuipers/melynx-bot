@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, codeBlock } from '@discordjs/builders';
-import { GuildMember, PermissionFlagsBits } from 'discord.js';
+import { type GuildMember, PermissionFlagsBits } from 'discord.js';
 import { getGuildSettings, updateGuildSettings } from '../utils';
-import { MelynxCommand, PermissionLevel } from '../types';
+import { type MelynxCommand, PermissionLevel } from '../types';
 
 export const getconf: MelynxCommand = {
   data: new SlashCommandBuilder()
@@ -126,12 +126,11 @@ export const getconf: MelynxCommand = {
       settings.sessionChannel = updatedValue;
     }
 
-    const updated = updateGuildSettings(client, interaction.guildId, settings);
-    if (!updated) {
-      return;
-    }
+    await updateGuildSettings(client, interaction.guildId, settings);
     await interaction.reply({
-      content: `Guild configuration item \`${subcommand}\` has been changed to:\n\`${updatedValue}\``,
+      content: `Guild configuration item \`${subcommand}\` has been changed to:\n\`${JSON.stringify(
+        updatedValue
+      )}\``,
       ephemeral: true,
     });
   },

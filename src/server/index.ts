@@ -9,10 +9,11 @@ const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev, port });
 const handle = app.getRequestHandler();
 
-app.prepare().then(async () => {
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+app.prepare().then(() => {
   createServer((req, res) => {
     const parsedUrl = parse(req.url!, true);
-    handle(req, res, parsedUrl);
+    void handle(req, res, parsedUrl);
   }).listen(port);
 
   bot.run();

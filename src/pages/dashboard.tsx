@@ -4,12 +4,12 @@ import { unstable_getServerSession } from 'next-auth';
 import { authOptions } from './api/auth/[...nextauth]';
 import { FaPlusCircle } from 'react-icons/fa';
 import SessionCard from '../components/SessionCard';
-import { trpc } from '../utils/trpc';
+import { api } from '~/utils/api';
 import CreateSessionModal from '../components/CreateSessionModal';
 import { useToggle } from '@mantine/hooks';
 
 export default function Dashboard() {
-  const sessions = trpc.session.getSessions.useQuery();
+  const sessions = api.session.getSessions.useQuery();
   const [creating, setCreating] = useToggle();
   if (!sessions.data) {
     return (

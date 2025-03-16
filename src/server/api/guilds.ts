@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { RESTGetAPICurrentUserGuildsResult, RouteBases, Routes } from 'discord.js';
+import { type RESTGetAPICurrentUserGuildsResult, RouteBases, Routes } from 'discord.js';
 import bot from '../../bot';
 
 // A cache is kept to prevent hitting Discord’s APIs too often.

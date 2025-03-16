@@ -1,19 +1,19 @@
 import {
   Collection,
-  ActivityOptions,
+  type ActivityOptions,
   Client,
-  Interaction,
+  type Interaction,
   ActivityType,
   Partials,
   GatewayIntentBits,
 } from 'discord.js';
 import * as commands from './commands';
-import { MelynxClient } from './types';
+import { type MelynxClient } from './types';
 import SessionManager from './sessionManager';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
-import env from '../server/env';
-import { prisma } from '../server/db/client';
+import { env } from '~/env.mjs';
+import { prisma } from '../server/db';
 import { formatTime } from './utils';
 
 const regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
@@ -31,6 +31,8 @@ const playingLines: ActivityOptions[] = [
   { type: ActivityType.Playing, name: 'Monster Hunter World: Iceborne' },
   { type: ActivityType.Playing, name: 'Monster Hunter 4 Ultimate' },
   { type: ActivityType.Playing, name: 'Monster Hunter Frontier' },
+  { type: ActivityType.Playing, name: 'Monster Hunter Rise' },
+  { type: ActivityType.Playing, name: 'Monster Hunter 6' },
   { type: ActivityType.Playing, name: 'with a Khezu' },
   { type: ActivityType.Listening, name: "Khezu's theme" },
   { type: ActivityType.Watching, name: 'hunters carrying eggs' },
@@ -79,9 +81,9 @@ export class MelynxBot {
     }
 
     this.client.sessionManager = new SessionManager();
-    this.client.on('interactionCreate', (interaction) => {
-      this.onCommandInteraction(this.client, interaction);
-      this.onMessageComponentInteraction(this.client, interaction);
+    this.client.on('interactionCreate', async (interaction) => {
+      await this.onCommandInteraction(this.client, interaction);
+      await this.onMessageComponentInteraction(this.client, interaction);
     });
   }
 
@@ -93,10 +95,12 @@ export class MelynxBot {
 
     if (isDev) {
       this.client.log(`Refreshing ${this.client.commands.size} commands for devServer`);
-      await rest.put(Routes.applicationGuildCommands(env.CLIENT_ID, env.DEV_SERVER), { body });
+      await rest.put(Routes.applicationGuildCommands(env.DISCORD_CLIENT_ID, env.DEV_SERVER), {
+        body,
+      });
     } else {
       this.client.log(`Refreshing ${this.client.commands.size} commands globally`);
-      await rest.put(Routes.applicationCommands(env.CLIENT_ID), { body });
+      await rest.put(Routes.applicationCommands(env.DISCORD_CLIENT_ID), { body });
     }
 
     this.client.log('Finished refreshing application commands.');
@@ -123,13 +127,17 @@ export class MelynxBot {
   }
 
   async onMessageComponentInteraction(client: MelynxClient, interaction: Interaction) {
-    if (!interaction.isMessageComponent()) {
+    if (!interaction.isMessageComponent() || !interaction.inGuild()) {
       return;
     }
 
     // The format for message component interactions is commandName/any other data, /-separated.
     const id = interaction.customId;
     const [commandName] = id.split('/');
+
+    if (!commandName) {
+      return;
+    }
 
     const command = client.commands.get(commandName);
     this.client.log(`Executing command component ${id} on server ${interaction.guildId}`);
@@ -142,20 +150,21 @@ export class MelynxBot {
   }
 
   run() {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.client.login(env.TOKEN);
 
-    this.client.on('ready', async () => {
+    this.client.on('ready', () => {
       this.client.log(`Connected to ${this.client.guilds.cache.size} servers.`);
       this.client.user!.setActivity(playingLines[Math.floor(Math.random() * playingLines.length)]);
 
-      await this.registerCommands();
-      await this.client.sessionManager.init(this.client);
+      void this.registerCommands();
+      void this.client.sessionManager.init(this.client);
     });
 
-    this.client.on('guildDelete', (guild) => {
+    this.client.on('guildDelete', async (guild) => {
       // When the bot leaves or is kicked, delete settings to prevent stale entries.
       this.client.log(`Left guild ${guild.id} (${guild.name})`);
-      prisma.settings.delete({ where: { guildId: guild.id } });
+      await prisma.settings.delete({ where: { guildId: guild.id } });
     });
 
     this.client.on('error', (error) => this.client.error(error));

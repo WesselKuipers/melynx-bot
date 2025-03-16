@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { GuildMember, PermissionFlagsBits } from 'discord.js';
 import { getGuildSettings } from '../utils';
 import { MelynxCommand } from '../types';
-import { prisma } from '../../server/db/client';
+import { prisma } from '../../server/db';
 
 export const tag: MelynxCommand = {
   data: new SlashCommandBuilder()

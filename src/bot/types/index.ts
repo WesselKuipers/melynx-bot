@@ -1,15 +1,16 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { type SlashCommandBuilder } from '@discordjs/builders';
 import {
-  Client,
-  ClientOptions,
-  Collection,
-  CommandInteraction,
-  Message,
-  MessageComponentInteraction,
+  type Client,
+  type ClientOptions,
+  type Collection,
+  type CommandInteraction,
+  type IntentsBitField,
+  type Message,
+  type MessageComponentInteraction,
 } from 'discord.js';
-import { Session as PrismaSession, Settings as PrismaSettings } from '@prisma/client';
+import { type MhSession, type Settings as PrismaSettings } from '@prisma/client';
 
-import SessionManager from '../sessionManager';
+import type SessionManager from '../sessionManager';
 
 export enum PermissionLevel {
   Anyone = 0,
@@ -61,13 +62,16 @@ export interface Settings extends Omit<PrismaSettings, 'settings'> {
   settings: GuildConfig;
 }
 
-export interface Session extends PrismaSession {
+export interface Session extends MhSession {
   timer?: NodeJS.Timeout;
 }
 
 export interface MelynxClient extends Client {
   commands: Collection<string, MelynxCommand>;
-  options: ClientOptions & { ownerId: string; host: string };
+  options: Omit<ClientOptions, 'intents'> & { intents: IntentsBitField } & {
+    ownerId: string;
+    host: string;
+  };
   settings: { cache: Record<string, GuildConfig> };
   sessionManager: SessionManager;
   log: (message: string) => void;

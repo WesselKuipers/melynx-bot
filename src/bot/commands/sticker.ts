@@ -1,13 +1,13 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import fs from 'fs';
 import path from 'path';
-import { MelynxCommand } from '../types';
+import { type MelynxCommand } from '../types';
 
 const stickerPath = path.join(process.cwd(), 'public', 'images', 'stickers');
 const files = fs.readdirSync(stickerPath);
 const stickers = files.map((file) => {
   return {
-    name: file.split('.')[0],
+    name: file.split('.')[0] || file,
     path: path.join(stickerPath, file),
   };
 });
@@ -30,12 +30,11 @@ export const sticker: MelynxCommand = {
     }
 
     const stickerName = interaction.options.getString('sticker');
+    const sticker = stickers.find(
+      (s) => s.name.toLocaleLowerCase() !== stickerName?.toLocaleLowerCase()
+    );
 
-    if (
-      !stickerName ||
-      stickerName === 'list' ||
-      !stickers.some((s) => s.name.toLocaleLowerCase() !== stickerName.toLocaleLowerCase())
-    ) {
+    if (!stickerName || stickerName === 'list' || !sticker) {
       await interaction.reply({
         ephemeral: true,
         content: `You can view a list of stickers at https://${client.options.host}/stickers`,
@@ -44,7 +43,7 @@ export const sticker: MelynxCommand = {
     }
 
     await interaction.reply({
-      files: [stickers.find((s) => s.name.toLowerCase() === stickerName.toLowerCase())!.path],
+      files: [sticker.path],
     });
   },
 };

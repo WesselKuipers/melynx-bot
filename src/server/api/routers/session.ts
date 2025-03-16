@@ -1,17 +1,15 @@
-import axios from 'axios';
-import { protectedMiddleware } from '../middleware/protected';
-import { t } from '../trpc';
-import { Routes, RouteBases, RESTGetAPICurrentUserGuildsResult } from 'discord-api-types/v10';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { snowflakePattern } from '../../../utils/regex';
-import bot from '../../../bot';
-import { getUserGuilds } from '../../api/guilds';
+import { snowflakePattern } from '~/utils/regex';
+import bot from '~/bot';
+import { getUserGuilds } from '~/server/api/guilds';
 
-export const sessionRouter = t.router({
-  getSessions: t.procedure.use(protectedMiddleware).query(async ({ ctx }) => {
+import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc';
+
+export const sessionRouter = createTRPCRouter({
+  getSessions: protectedProcedure.query(async ({ ctx }) => {
     const guilds = await getUserGuilds(ctx.session.user.id, ctx.session.user.accessToken);
-    const sessions = await ctx.prisma.session.findMany({
+    const sessions = await ctx.prisma.mhSession.findMany({
       where: {
         guildId: { in: guilds },
       },
@@ -19,8 +17,7 @@ export const sessionRouter = t.router({
 
     return sessions;
   }),
-  updateSession: t.procedure
-    .use(protectedMiddleware)
+  updateSession: protectedProcedure
     .input(
       z.object({
         id: z.string().regex(snowflakePattern),
@@ -30,7 +27,7 @@ export const sessionRouter = t.router({
     )
     .mutation(async ({ ctx, input }) => {
       const { prisma, session } = ctx;
-      const dbSession = await prisma.session.findFirst({
+      const dbSession = await prisma.mhSession.findFirst({
         where: {
           sessionId: input.id,
         },
@@ -47,7 +44,7 @@ export const sessionRouter = t.router({
         });
       }
 
-      const updatedSession = await prisma.session.update({
+      const updatedSession = await prisma.mhSession.update({
         where: {
           id: dbSession.id,
         },
@@ -60,12 +57,11 @@ export const sessionRouter = t.router({
       await bot.client.sessionManager.updateSession(updatedSession);
       return updatedSession;
     }),
-  deleteSession: t.procedure
-    .use(protectedMiddleware)
+  deleteSession: protectedProcedure
     .input(z.object({ id: z.string().regex(snowflakePattern) }))
     .mutation(async ({ ctx, input }) => {
       const { prisma, session } = ctx;
-      const dbSession = await prisma.session.findFirst({
+      const dbSession = await prisma.mhSession.findFirst({
         where: {
           sessionId: input.id,
         },
@@ -85,7 +81,7 @@ export const sessionRouter = t.router({
         });
       }
 
-      await prisma.session.delete({
+      await prisma.mhSession.delete({
         where: {
           id: dbSession.id,
         },

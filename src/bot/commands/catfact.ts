@@ -1,4 +1,4 @@
-import { MelynxCommand } from '../types';
+import { type MelynxCommand } from '../types';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { getCatFact } from '../utils';
 

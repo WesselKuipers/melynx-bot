@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ChatInputCommandInteraction, CommandInteraction } from 'discord.js';
-import { MelynxClient, MelynxCommand } from '../types';
-import { prisma } from '../../server/db/client';
+import { type ChatInputCommandInteraction, type CommandInteraction } from 'discord.js';
+import { type MelynxClient, type MelynxCommand } from '../types';
+import { prisma } from '../../server/db';
 
 const fcRegex = /((SW[- ]?)?)(\d{4}[- ]?){2}\d{4}/i;
 
@@ -78,7 +78,7 @@ async function handleGet(interaction: CommandInteraction, client: MelynxClient):
       return;
     }
 
-    await interaction.reply(`${interaction.user}, your friend code is **${fc.fc}**`);
+    await interaction.reply(`@<${interaction.user.id}>, your friend code is **${fc.fc}**`);
     return;
   }
 
@@ -87,7 +87,7 @@ async function handleGet(interaction: CommandInteraction, client: MelynxClient):
     return;
   }
 
-  await interaction.reply(`${member}’s friend code is **${fc.fc}**`);
+  await interaction.reply(`@<${member.id}>’s friend code is **${fc.fc}**`);
 }
 
 async function handleSet(interaction: ChatInputCommandInteraction): Promise<void> {

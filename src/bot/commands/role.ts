@@ -2,13 +2,13 @@ import { inlineCode, SlashCommandBuilder } from '@discordjs/builders';
 import {
   ActionRowBuilder,
   SelectMenuBuilder,
-  Role,
-  SelectMenuInteraction,
+  type Role,
+  type SelectMenuInteraction,
   PermissionFlagsBits,
 } from 'discord.js';
 import { getGuildSettings } from '../utils';
-import { MelynxCommand } from '../types';
-import { prisma } from '../../server/db/client';
+import { type MelynxCommand } from '../types';
+import { prisma } from '../../server/db';
 
 export const role: MelynxCommand = {
   data: new SlashCommandBuilder()
@@ -174,6 +174,10 @@ export const role: MelynxCommand = {
     }
   },
   async componentExecute(interaction: SelectMenuInteraction, client) {
+    if (!interaction.channel) {
+      return;
+    }
+
     const [, subcommand] = interaction.customId.split('/');
     const member = await interaction.guild!.members.fetch(interaction.user.id);
     const readableRoles = interaction.values.map((value) =>
@@ -193,8 +197,8 @@ export const role: MelynxCommand = {
       components: [],
     });
 
-    await interaction.channel!.send(
-      `${interaction.user}, ${
+    await interaction.channel.send(
+      `@<${interaction.user.id}>, ${
         subcommand === 'unassign' ? 'unassigned' : 'assigned'
       } roles: ${readableRoles.join(', ')}`
     );
