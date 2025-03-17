@@ -17,11 +17,15 @@ const weapons = [
   'sns',
 ];
 
-const weaponPath = join(__dirname, '..', '..', '..', 'public', 'images', 'weapons');
+const weaponPath =
+  env.NODE_ENV === 'development'
+    ? join(process.cwd(), '../..', 'assets', 'weapons')
+    : join(process.cwd(), 'assets', 'weapons');
 
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { type MelynxCommand } from '../types';
 import { AttachmentBuilder } from 'discord.js';
+import { env } from '~/types/serverEnvSchema';
 
 export const randomWeapon: MelynxCommand = {
   data: new SlashCommandBuilder()
