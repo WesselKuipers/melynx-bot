@@ -180,10 +180,8 @@ export class MelynxBot {
 }
 
 const healthCheck = express();
-healthCheck.get('/health', (req, res) => {
-  res.status(200).json({
-    health: 'OK',
-  });
+healthCheck.get('*', (req, res) => {
+  res.status(200).send('Healthy');
 });
 
 healthCheck.listen(process.env.PORT || 3000, () => {
