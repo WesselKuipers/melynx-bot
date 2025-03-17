@@ -180,13 +180,15 @@ export class MelynxBot {
 }
 
 const healthCheck = express();
-healthCheck.get('/', (req, res) => {
+healthCheck.get('/health', (req, res) => {
   res.status(200).json({
     health: 'OK',
   });
 });
 
-healthCheck.listen(3000);
+healthCheck.listen(process.env.PORT || 3000, () => {
+  log(`Listening on port ${process.env.PORT || 3000}`);
+});
 
 const bot = new MelynxBot();
 bot.run();
