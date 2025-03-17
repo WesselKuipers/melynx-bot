@@ -12,8 +12,8 @@ export const defaultSettings: GuildConfig = {
   guildId: '0',
   modRole: 'Moderator',
   adminRole: 'Administrator',
-  sessionTimeout: 28800000, // 8 hours
-  sessionRefreshTimeout: 300000, // 5 minutes
+  sessionTimeout: 1000 * 60 * 60 * 8, // 8 hours
+  sessionRefreshTimeout: 1000 * 60 * 5, // 5 minutes
   sessionChannel: '',
   sessionChannelMessage: '',
   channelSettings: {},
