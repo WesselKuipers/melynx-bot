@@ -17,6 +17,7 @@ import { Routes } from 'discord-api-types/v9';
 import { prisma } from './db';
 import { formatTime } from './utils';
 
+import express from 'express';
 import { env } from './types/serverEnvSchema';
 
 const regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
@@ -177,6 +178,15 @@ export class MelynxBot {
     this.client.login(env.TOKEN);
   }
 }
+
+const healthCheck = express();
+healthCheck.get('/', (req, res) => {
+  res.status(200).json({
+    health: 'OK',
+  });
+});
+
+healthCheck.listen(3000);
 
 const bot = new MelynxBot();
 bot.run();
