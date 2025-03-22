@@ -10,10 +10,7 @@ type InputJsonValue = string | number | boolean | InputJsonObject | InputJsonArr
 type InputJsonObject = { readonly [Key in string]?: InputJsonValue | null };
 type InputJsonArray = ReadonlyArray<InputJsonValue | null>;
 
-export const assetPath =
-  env.NODE_ENV === 'development'
-    ? join(process.cwd(), '../..', 'assets')
-    : join(process.cwd(), 'assets');
+export const assetPath = join(process.cwd(), 'assets');
 
 export const defaultSettings: GuildConfig = {
   guildId: '0',

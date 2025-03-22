@@ -3,12 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import { type MelynxCommand } from '../types';
 import { MessageFlags } from 'discord.js';
-import { env } from '~/types/serverEnvSchema';
+import { assetPath } from '~/utils';
 
-const stickerPath =
-  env.NODE_ENV === 'development'
-    ? path.join(process.cwd(), '../..', 'assets', 'stickers')
-    : path.join(process.cwd(), 'assets', 'stickers');
+const stickerPath = path.join(assetPath, 'stickers');
 
 const files = fs.readdirSync(stickerPath);
 const stickers = files.map((file) => {
