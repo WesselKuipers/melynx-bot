@@ -8,3 +8,4 @@ export { role } from './role';
 export { fc } from './fc';
 export { session } from './session';
 export { hunterId } from './hunterId';
+export { randomHunt } from './randomHunt';
