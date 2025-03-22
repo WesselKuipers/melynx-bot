@@ -99,9 +99,9 @@ async function handleGet(
 }
 
 async function handleSet(interaction: ChatInputCommandInteraction): Promise<void> {
-  const code = interaction.options.getString('hunter-id') || '';
+  const id = interaction.options.getString('id') || '';
 
-  if (!code.match(hunterIdRegex)) {
+  if (!id.match(hunterIdRegex)) {
     await interaction.reply({
       content: 'This hunter ID appears to be invalid.',
       flags: MessageFlags.Ephemeral,
@@ -109,7 +109,7 @@ async function handleSet(interaction: ChatInputCommandInteraction): Promise<void
     return;
   }
 
-  const hunterId = code.toUpperCase();
+  const hunterId = id.toUpperCase();
   const dbId = await prisma.hunterId.findFirst({ where: { hunterId } });
 
   if (dbId && dbId.id !== interaction.user.id) {
