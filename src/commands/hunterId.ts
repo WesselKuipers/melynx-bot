@@ -85,7 +85,7 @@ async function handleGet(
     }
 
     await interaction.reply(
-      `@<${interaction.user.id}>, your hunter ID is **${hunterId.hunterId}**`
+      `<@${interaction.user.id}>, your hunter ID is **${hunterId.hunterId}**`
     );
     return;
   }
@@ -95,7 +95,7 @@ async function handleGet(
     return;
   }
 
-  await interaction.reply(`@<${member.id}>’s hunter ID is **${hunterId.hunterId}**`);
+  await interaction.reply(`<@${member.id}>’s hunter ID is **${hunterId.hunterId}**`);
 }
 
 async function handleSet(interaction: ChatInputCommandInteraction): Promise<void> {

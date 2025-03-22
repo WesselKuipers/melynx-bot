@@ -87,7 +87,7 @@ async function handleGet(
       return;
     }
 
-    await interaction.reply(`@<${interaction.user.id}>, your friend code is **${fc.fc}**`);
+    await interaction.reply(`<@${interaction.user.id}>, your friend code is **${fc.fc}**`);
     return;
   }
 
@@ -96,7 +96,7 @@ async function handleGet(
     return;
   }
 
-  await interaction.reply(`@<${member.id}>’s friend code is **${fc.fc}**`);
+  await interaction.reply(`<@${member.id}>’s friend code is **${fc.fc}**`);
 }
 
 async function handleSet(interaction: ChatInputCommandInteraction): Promise<void> {
