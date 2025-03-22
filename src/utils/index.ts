@@ -1,12 +1,19 @@
+import { env } from '~/types/serverEnvSchema';
 import { type GuildConfig } from '../types';
 import { type MelynxClient, type Session } from '../types';
 import axios from 'axios';
 import { prisma } from '~/db';
+import { join } from 'path';
 
 // These types are exported in @prisma/client, but there seem to be some issues when trying to import these.
 type InputJsonValue = string | number | boolean | InputJsonObject | InputJsonArray;
 type InputJsonObject = { readonly [Key in string]?: InputJsonValue | null };
 type InputJsonArray = ReadonlyArray<InputJsonValue | null>;
+
+export const assetPath =
+  env.NODE_ENV === 'development'
+    ? join(process.cwd(), '../..', 'assets')
+    : join(process.cwd(), 'assets');
 
 export const defaultSettings: GuildConfig = {
   guildId: '0',

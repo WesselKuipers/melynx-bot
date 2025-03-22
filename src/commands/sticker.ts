@@ -27,6 +27,7 @@ export const sticker: MelynxCommand = {
       option
         .setName('sticker')
         .setDescription('The sticker you want to send.')
+        .setRequired(true)
         .setAutocomplete(true)
     ) as SlashCommandBuilder,
 

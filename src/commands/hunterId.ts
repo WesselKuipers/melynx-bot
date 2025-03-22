@@ -1,14 +1,10 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import {
-  MessageFlags,
-  type ChatInputCommandInteraction,
-  type CommandInteraction,
-} from 'discord.js';
+import { MessageFlags, type ChatInputCommandInteraction } from 'discord.js';
 import { type MelynxClient, type MelynxCommand } from '../types';
 import { prisma } from '../db';
 
 // Alphanumeric characters except for 0, 1, O, and I
-const hunterIdRegex = /[a-hj-np-z2-9](8)/i;
+const hunterIdRegex = /[a-hj-np-z2-9]{8}/i;
 
 export const hunterId: MelynxCommand = {
   data: new SlashCommandBuilder()
