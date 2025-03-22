@@ -7,3 +7,4 @@ export * from './config';
 export * from './role';
 export * from './fc';
 export * from './session';
+export * from './hunterId';
